@@ -1,0 +1,17 @@
+[
+	{
+		"name": "@anvilkit/plugin-asset-manager",
+		"path": "dist/index.js",
+		"limit": "6 KB",
+		"gzip": true,
+		"ignore": [
+			"react",
+			"react-dom",
+			"@puckeditor/core",
+			"@anvilkit/core",
+			"@anvilkit/ir",
+			"@anvilkit/ui",
+			"@anvilkit/utils"
+		]
+	}
+]

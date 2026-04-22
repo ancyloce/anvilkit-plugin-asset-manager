@@ -1,0 +1,109 @@
+{
+	"name": "@anvilkit/plugin-asset-manager",
+	"version": "0.1.0-alpha.0",
+	"description": "Headless asset manager plugin for Anvilkit Studio with host-provided uploads and optional React UI.",
+	"type": "module",
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/index.d.ts",
+				"default": "./dist/index.js"
+			},
+			"require": {
+				"types": "./dist/index.d.cts",
+				"default": "./dist/index.cjs"
+			}
+		},
+		"./testing": {
+			"import": {
+				"types": "./dist/testing/index.d.ts",
+				"default": "./dist/testing/index.js"
+			},
+			"require": {
+				"types": "./dist/testing/index.d.cts",
+				"default": "./dist/testing/index.cjs"
+			}
+		},
+		"./ui": {
+			"import": {
+				"types": "./dist/ui/index.d.ts",
+				"default": "./dist/ui/index.js"
+			},
+			"require": {
+				"types": "./dist/ui/index.d.cts",
+				"default": "./dist/ui/index.cjs"
+			}
+		},
+		"./*": {
+			"import": {
+				"types": "./dist/*.d.ts",
+				"default": "./dist/*.js"
+			},
+			"require": {
+				"types": "./dist/*.d.cts",
+				"default": "./dist/*.cjs"
+			}
+		}
+	},
+	"files": ["dist"],
+	"license": "MIT",
+	"sideEffects": false,
+	"private": false,
+	"publishConfig": { "access": "public" },
+	"peerDependencies": {
+		"react": "^18.2.0 || ^19.0.0",
+		"react-dom": "^18.2.0 || ^19.0.0",
+		"@puckeditor/core": "^0.19.0"
+	},
+	"peerDependenciesMeta": {
+		"react": { "optional": false },
+		"react-dom": { "optional": false },
+		"@puckeditor/core": { "optional": false }
+	},
+	"dependencies": {
+		"@anvilkit/core": "workspace:*",
+		"@anvilkit/ir": "workspace:*",
+		"@anvilkit/ui": "workspace:*",
+		"@anvilkit/utils": "workspace:*"
+	},
+	"scripts": {
+		"build": "rslib build",
+		"dev": "rslib build --watch",
+		"lint": "pnpm exec biome lint package.json biome.json tsconfig.json rslib.config.ts vitest.config.ts src",
+		"format": "pnpm exec biome check --write package.json biome.json tsconfig.json rslib.config.ts vitest.config.ts src",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"publint": "publint",
+		"check:publint": "publint",
+		"check:circular": "madge --circular --extensions ts src/",
+		"check:peer-deps": "node ./scripts/check-peer-deps.mjs",
+		"check:bundle-budget": "node ./scripts/check-bundle-budget.mjs",
+		"check:api-snapshot": "node ./scripts/check-api-snapshot.mjs",
+		"check:all": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm check:publint && pnpm check:circular && pnpm check:peer-deps && pnpm check:bundle-budget && pnpm check:api-snapshot",
+		"size": "size-limit"
+	},
+	"devDependencies": {
+		"@anvilkit/biome-config": "workspace:*",
+		"@anvilkit/typescript-config": "workspace:*",
+		"@anvilkit/vitest-config": "workspace:*",
+		"@puckeditor/core": "^0.21.1",
+		"@rslib/core": "^0.20.1",
+		"@types/node": "^22.15.3",
+		"@types/react": "19.2.14",
+		"@types/react-dom": "19.2.3",
+		"axe-core": "4.11.3",
+		"esbuild": "^0.25.12",
+		"madge": "^8.0.0",
+		"publint": "^0.3.18",
+		"react": "^19.2.0",
+		"react-dom": "^19.2.0",
+		"typedoc": "^0.28.18",
+		"typescript": "6.0.2",
+		"vitest": "^4.1.4",
+		"vitest-axe": "^0.1.0"
+	}
+}
