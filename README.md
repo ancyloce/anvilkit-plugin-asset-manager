@@ -1,0 +1,1 @@
+# anvilkit-plugin-asset-manager
