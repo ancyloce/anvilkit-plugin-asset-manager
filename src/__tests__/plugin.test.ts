@@ -20,9 +20,11 @@ describe("createAssetManagerPlugin", () => {
 
 		const harness = await registerPlugin(plugin, { ctx });
 		expect(getAssetRegistry(ctx)).toBeUndefined();
+		expect(ctx._mocks.assetResolvers).toEqual([]);
 
 		await harness.runInit();
 		expect(getAssetRegistry(ctx)).toBeDefined();
+		expect(ctx._mocks.assetResolvers).toHaveLength(1);
 
 		await harness.runDestroy();
 		expect(getAssetRegistry(ctx)).toBeUndefined();
