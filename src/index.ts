@@ -6,6 +6,7 @@ export {
 } from "./errors.js";
 export { createAssetManagerPlugin } from "./plugin.js";
 export { createAssetRegistry } from "./registry.js";
+export { createIRAssetResolver, resolveAssets } from "./resolver.js";
 export type { DataUrlUploaderOptions } from "./adapters/data-url.js";
 export type {
 	AssetManagerOptions,

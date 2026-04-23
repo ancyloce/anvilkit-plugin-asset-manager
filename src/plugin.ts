@@ -8,6 +8,7 @@ import type {
 import { AssetValidationError } from "./errors.js";
 import { uploadAssetAction } from "./header-action.js";
 import { createAssetRegistry } from "./registry.js";
+import { createIRAssetResolver } from "./resolver.js";
 import type { AssetManagerOptions, AssetMeta, AssetRegistry, UploadResult } from "./types.js";
 import { validateUploadResult } from "./validate-upload-result.js";
 
@@ -37,6 +38,10 @@ export function createAssetManagerPlugin(options: AssetManagerOptions): StudioPl
 	const token = {};
 	const registry = createAssetRegistry();
 	const normalizedOptions = normalizeOptions(options);
+	const assetResolver = createIRAssetResolver({
+		registry,
+		urlAllowlist: normalizedOptions.urlAllowlist,
+	});
 
 	return {
 		meta: META,
@@ -51,6 +56,7 @@ export function createAssetManagerPlugin(options: AssetManagerOptions): StudioPl
 							registry,
 						});
 						tokenByContext.set(initCtx, token);
+						initCtx.registerAssetResolver(assetResolver);
 					},
 					onDestroy(destroyCtx) {
 						tokenByContext.delete(destroyCtx);
