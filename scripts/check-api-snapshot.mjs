@@ -42,6 +42,7 @@ function main() {
 		"--disableSources",
 		"--entryPoints",
 		"./src/index.ts",
+		"./src/ui/index.ts",
 		"--tsconfig",
 		"./tsconfig.json",
 		"--logLevel",
