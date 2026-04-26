@@ -1,8 +1,8 @@
-/** @vitest-environment jsdom */
+/** @vitest-environment happy-dom */
 
 import { render } from "@testing-library/react";
-import { axe } from "vitest-axe";
 import { describe, expect, it, vi } from "vitest";
+import { axe } from "vitest-axe";
 
 import { createAssetRegistry } from "../../registry.js";
 import { AssetManagerUI } from "../AssetManagerUI.js";

@@ -1,5 +1,11 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@anvilkit/ui/card";
-import { useEffect, useRef, useState } from "react";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@anvilkit/ui/card";
+import * as React from "react";
 
 import type { UploadResult } from "../types.js";
 
@@ -9,10 +15,12 @@ export interface AssetBrowserProps {
 }
 
 export function AssetBrowser({ assets, onInsert }: AssetBrowserProps) {
-	const [activeIndex, setActiveIndex] = useState(assets.length > 0 ? 0 : -1);
-	const buttonRefs = useRef<Array<HTMLButtonElement | null>>([]);
+	const [activeIndex, setActiveIndex] = React.useState(
+		assets.length > 0 ? 0 : -1,
+	);
+	const buttonRefs = React.useRef<Array<HTMLButtonElement | null>>([]);
 
-	useEffect(() => {
+	React.useEffect(() => {
 		if (assets.length === 0) {
 			setActiveIndex(-1);
 			return;
@@ -37,7 +45,9 @@ export function AssetBrowser({ assets, onInsert }: AssetBrowserProps) {
 		<Card>
 			<CardHeader>
 				<CardTitle>Asset browser</CardTitle>
-				<CardDescription>Validated assets currently registered in memory.</CardDescription>
+				<CardDescription>
+					Validated assets currently registered in memory.
+				</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<ul aria-label="Assets" role="list">

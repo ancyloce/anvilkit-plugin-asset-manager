@@ -1,7 +1,17 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@anvilkit/ui/card";
-import { useEffect, useState } from "react";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@anvilkit/ui/card";
+import * as React from "react";
 
-import type { AssetManagerOptions, AssetRegistry, UploadResult } from "../types.js";
+import type {
+	AssetManagerOptions,
+	AssetRegistry,
+	UploadResult,
+} from "../types.js";
 import { AssetBrowser } from "./AssetBrowser.js";
 import { UploadButton } from "./UploadButton.js";
 
@@ -22,9 +32,11 @@ export function AssetManagerUI({
 	uploader,
 	urlAllowlist,
 }: AssetManagerUIProps) {
-	const [assets, setAssets] = useState<readonly UploadResult[]>(() => registry.list());
+	const [assets, setAssets] = React.useState<readonly UploadResult[]>(() =>
+		registry.list(),
+	);
 
-	useEffect(() => {
+	React.useEffect(() => {
 		setAssets(registry.list());
 	}, [registry]);
 
@@ -40,7 +52,8 @@ export function AssetManagerUI({
 			<CardHeader>
 				<CardTitle>Asset manager</CardTitle>
 				<CardDescription>
-					Upload via the configured adapter, then insert a validated asset reference.
+					Upload via the configured adapter, then insert a validated asset
+					reference.
 				</CardDescription>
 			</CardHeader>
 			<CardContent>

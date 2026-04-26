@@ -1,8 +1,7 @@
 import { Button } from "@anvilkit/ui/button";
-import { useRef, useState } from "react";
-
-import type { AssetManagerOptions, UploadResult } from "../types.js";
+import * as React from "react";
 import { validateSelectedFile } from "../plugin.js";
+import type { AssetManagerOptions, UploadResult } from "../types.js";
 import { validateUploadResult } from "../validate-upload-result.js";
 
 export interface UploadButtonProps
@@ -22,9 +21,9 @@ export function UploadButton({
 	uploader,
 	urlAllowlist,
 }: UploadButtonProps) {
-	const inputRef = useRef<HTMLInputElement>(null);
-	const [errorMessage, setErrorMessage] = useState<string | null>(null);
-	const [isUploading, setIsUploading] = useState(false);
+	const inputRef = React.useRef<HTMLInputElement>(null);
+	const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+	const [isUploading, setIsUploading] = React.useState(false);
 
 	async function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
 		const file = event.currentTarget.files?.[0];
@@ -86,7 +85,9 @@ export function UploadButton({
 			{errorMessage ? (
 				<p role="status">{errorMessage}</p>
 			) : (
-				<p role="status">Accepted files upload through the configured adapter.</p>
+				<p role="status">
+					Accepted files upload through the configured adapter.
+				</p>
 			)}
 		</div>
 	);
