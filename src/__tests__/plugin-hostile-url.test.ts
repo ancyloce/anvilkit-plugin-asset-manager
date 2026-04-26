@@ -7,7 +7,11 @@ import type { StudioPluginContext } from "@anvilkit/core/types";
 import { describe, expect, it } from "vitest";
 
 import { AssetValidationError } from "../errors.js";
-import { createAssetManagerPlugin, getAssetRegistry, uploadAsset } from "../plugin.js";
+import {
+	createAssetManagerPlugin,
+	getAssetRegistry,
+	uploadAsset,
+} from "../plugin.js";
 
 describe("createAssetManagerPlugin hostile upload handling", () => {
 	it("emits asset-manager:error and does not touch IR or registry", async () => {

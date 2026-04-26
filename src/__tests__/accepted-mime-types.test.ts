@@ -1,4 +1,7 @@
-import { createFakeStudioContext, registerPlugin } from "@anvilkit/core/testing";
+import {
+	createFakeStudioContext,
+	registerPlugin,
+} from "@anvilkit/core/testing";
 import { describe, expect, it } from "vitest";
 
 import { AssetValidationError } from "../errors.js";

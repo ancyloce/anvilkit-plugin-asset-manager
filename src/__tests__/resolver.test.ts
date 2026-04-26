@@ -98,12 +98,10 @@ describe("resolveAssets", () => {
 		expect(ir.assets[0]?.url).toBe("asset://asset-1");
 		expect(
 			(
-				(
-					ir.root.children?.[0]?.props.posts as ReadonlyArray<
-						Readonly<Record<string, unknown>>
-					>
-				)[0]?.imageSrc
-			),
+				ir.root.children?.[0]?.props.posts as ReadonlyArray<
+					Readonly<Record<string, unknown>>
+				>
+			)[0]?.imageSrc,
 		).toBe("asset://asset-1");
 		expect(nextIr.assets[0]).toMatchObject({
 			url: "https://cdn.example.com/a.png",
@@ -111,15 +109,88 @@ describe("resolveAssets", () => {
 		});
 		expect(
 			(
-				(
-					nextIr.root.children?.[0]?.props.posts as ReadonlyArray<
-						Readonly<Record<string, unknown>>
-					>
-				)[0]?.imageSrc
-			),
+				nextIr.root.children?.[0]?.props.posts as ReadonlyArray<
+					Readonly<Record<string, unknown>>
+				>
+			)[0]?.imageSrc,
 		).toBe("https://cdn.example.com/a.png");
 		expect(Object.isFrozen(nextIr)).toBe(true);
 		expect(Object.isFrozen(nextIr.root)).toBe(true);
 		expect(Object.isFrozen(nextIr.assets)).toBe(true);
+	});
+
+	it("rewrites broader asset props even when the manifest is incomplete", async () => {
+		const registry = createAssetRegistry();
+		registry.register({
+			id: "asset-1",
+			url: "https://cdn.example.com/hero-bg.png",
+			meta: { mimeType: "image/png" },
+		});
+		const resolver = createIRAssetResolver({ registry });
+		const ir: PageIR = {
+			version: "1",
+			root: {
+				id: "root",
+				type: "__root__",
+				props: {},
+				children: [
+					{
+						id: "hero-1",
+						type: "Hero",
+						props: {
+							backgroundSrc: "asset://asset-1",
+						},
+					},
+				],
+			},
+			assets: [],
+			metadata: {},
+		};
+
+		const nextIr = await resolveAssets(ir, resolver);
+
+		expect(nextIr.root.children?.[0]?.props.backgroundSrc).toBe(
+			"https://cdn.example.com/hero-bg.png",
+		);
+	});
+
+	it("uses node-scoped assets when collecting URLs to resolve", async () => {
+		const registry = createAssetRegistry();
+		registry.register({
+			id: "asset-1",
+			url: "https://cdn.example.com/poster.png",
+			meta: { mimeType: "image/png" },
+		});
+		const resolver = createIRAssetResolver({ registry });
+		const ir: PageIR = {
+			version: "1",
+			root: {
+				id: "root",
+				type: "__root__",
+				props: {},
+				children: [
+					{
+						id: "video-1",
+						type: "Video",
+						props: {
+							poster: "asset://asset-1",
+						},
+						assets: [{ id: "asset-1", kind: "image", url: "asset://asset-1" }],
+					},
+				],
+			},
+			assets: [],
+			metadata: {},
+		};
+
+		const nextIr = await resolveAssets(ir, resolver);
+
+		expect(nextIr.root.children?.[0]?.props.poster).toBe(
+			"https://cdn.example.com/poster.png",
+		);
+		expect(nextIr.root.children?.[0]?.assets?.[0]).toMatchObject({
+			url: "https://cdn.example.com/poster.png",
+			meta: { mimeType: "image/png" },
+		});
 	});
 });
