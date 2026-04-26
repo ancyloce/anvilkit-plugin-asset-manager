@@ -9,7 +9,12 @@ import { AssetValidationError } from "./errors.js";
 import { uploadAssetAction } from "./header-action.js";
 import { createAssetRegistry } from "./registry.js";
 import { createIRAssetResolver } from "./resolver.js";
-import type { AssetManagerOptions, AssetMeta, AssetRegistry, UploadResult } from "./types.js";
+import type {
+	AssetManagerOptions,
+	AssetMeta,
+	AssetRegistry,
+	UploadResult,
+} from "./types.js";
 import { validateUploadResult } from "./validate-upload-result.js";
 
 const META = {
@@ -34,7 +39,9 @@ interface NormalizedAssetManagerOptions extends AssetManagerOptions {
 const stateByToken = new WeakMap<object, AssetManagerRuntimeState>();
 const tokenByContext = new WeakMap<StudioPluginContext, object>();
 
-export function createAssetManagerPlugin(options: AssetManagerOptions): StudioPlugin {
+export function createAssetManagerPlugin(
+	options: AssetManagerOptions,
+): StudioPlugin {
 	const token = {};
 	const registry = createAssetRegistry();
 	const normalizedOptions = normalizeOptions(options);
@@ -161,7 +168,9 @@ function getRuntimeState(ctx: StudioPluginContext): AssetManagerRuntimeState {
 	return state;
 }
 
-function normalizeOptions(options: AssetManagerOptions): NormalizedAssetManagerOptions {
+function normalizeOptions(
+	options: AssetManagerOptions,
+): NormalizedAssetManagerOptions {
 	return {
 		...options,
 		...(options.acceptedMimeTypes
@@ -233,7 +242,9 @@ function toIRAsset(asset: UploadResult): PageIRAsset {
 		id: asset.id,
 		kind: inferAssetKind(asset.meta?.mimeType, asset.url),
 		url: createAssetReference(asset.id),
-		...(asset.meta ? { meta: asset.meta as Readonly<Record<string, unknown>> } : {}),
+		...(asset.meta
+			? { meta: asset.meta as Readonly<Record<string, unknown>> }
+			: {}),
 	};
 }
 
@@ -260,10 +271,7 @@ function inferAssetKind(
 		return "style";
 	}
 
-	if (
-		mimeType === "application/javascript" ||
-		mimeType === "text/javascript"
-	) {
+	if (mimeType === "application/javascript" || mimeType === "text/javascript") {
 		return "script";
 	}
 

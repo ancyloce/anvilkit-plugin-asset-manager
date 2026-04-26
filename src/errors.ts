@@ -1,7 +1,11 @@
 export class AssetValidationError extends Error {
 	readonly code: string;
 
-	constructor(code: string, message: string, options?: { readonly cause?: unknown }) {
+	constructor(
+		code: string,
+		message: string,
+		options?: { readonly cause?: unknown },
+	) {
 		super(message);
 		this.name = "AssetValidationError";
 		this.code = code;

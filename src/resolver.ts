@@ -5,7 +5,6 @@ import type {
 	PageIRAsset,
 	PageIRNode,
 } from "@anvilkit/core/types";
-import { collectAssets } from "@anvilkit/ir";
 
 import { AssetResolutionError } from "./errors.js";
 import type { AssetRegistry } from "./types.js";
@@ -82,10 +81,7 @@ export async function resolveAssets(
 	resolver: IRAssetResolver,
 ): Promise<PageIR> {
 	const rewriteMap = new Map<string, AssetResolution>();
-	const assetUrls = new Set([
-		...collectAssets(ir.root).map((asset) => asset.url),
-		...ir.assets.map((asset) => asset.url),
-	]);
+	const assetUrls = collectAssetUrls(ir);
 
 	for (const url of assetUrls) {
 		const resolution = await resolver(url);
@@ -104,6 +100,67 @@ export async function resolveAssets(
 	return deepFreeze(nextIr);
 }
 
+function collectAssetUrls(ir: PageIR): ReadonlySet<string> {
+	const urls = new Set<string>();
+
+	for (const asset of ir.assets) {
+		if (asset.url.trim() !== "") {
+			urls.add(asset.url);
+		}
+	}
+
+	collectNodeAssetUrls(ir.root, urls);
+	return urls;
+}
+
+function collectNodeAssetUrls(node: PageIRNode, urls: Set<string>): void {
+	collectValueAssetUrls(node.props, urls);
+
+	if (node.assets) {
+		for (const asset of node.assets) {
+			if (asset.url.trim() !== "") {
+				urls.add(asset.url);
+			}
+		}
+	}
+
+	if (node.children) {
+		for (const child of node.children) {
+			collectNodeAssetUrls(child, urls);
+		}
+	}
+}
+
+function collectValueAssetUrls(
+	value: unknown,
+	urls: Set<string>,
+	key?: string,
+): void {
+	if (Array.isArray(value)) {
+		for (const item of value) {
+			collectValueAssetUrls(item, urls);
+		}
+		return;
+	}
+
+	if (typeof value === "string") {
+		if (key !== undefined && ASSET_PROP_KEYS.has(key) && value.trim() !== "") {
+			urls.add(value);
+		}
+		return;
+	}
+
+	if (value === null || typeof value !== "object") {
+		return;
+	}
+
+	for (const [entryKey, entryValue] of Object.entries(
+		value as Record<string, unknown>,
+	)) {
+		collectValueAssetUrls(entryValue, urls, entryKey);
+	}
+}
+
 function parseAssetReference(url: string): string | null {
 	if (!url.startsWith(ASSET_REFERENCE_PREFIX)) {
 		return null;
@@ -120,7 +177,9 @@ function cloneNode(
 	return {
 		id: node.id,
 		type: node.type,
-		props: cloneValue(node.props, rewriteMap) as Readonly<Record<string, unknown>>,
+		props: cloneValue(node.props, rewriteMap) as Readonly<
+			Record<string, unknown>
+		>,
 		...(node.children
 			? { children: node.children.map((child) => cloneNode(child, rewriteMap)) }
 			: {}),
