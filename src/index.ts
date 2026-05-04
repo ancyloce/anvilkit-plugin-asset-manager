@@ -14,10 +14,16 @@ export {
 export { createAssetRegistry } from "./registry.js";
 export type { CreateIRAssetResolverOptions } from "./resolver.js";
 export { createIRAssetResolver, resolveAssets } from "./resolver.js";
+export type { CreateStudioAssetSourceOptions } from "./studio-asset-source.js";
+export {
+	createStudioAssetSource,
+	inferStudioAssetKind,
+} from "./studio-asset-source.js";
 export type {
 	AssetManagerOptions,
 	AssetMeta,
 	AssetRegistry,
+	AssetRegistryListener,
 	UploadAdapter,
 	UploadResult,
 } from "./types.js";

@@ -16,9 +16,12 @@ export function validateUploadResult(
 	}
 
 	const normalizedUrl = normalizeAllowedUrl(result.url, options.urlAllowlist);
+	const trimmedName =
+		typeof result.name === "string" ? result.name.trim() : "";
 	const nextResult: UploadResult = {
 		id: result.id.trim(),
 		url: normalizedUrl,
+		...(trimmedName !== "" ? { name: trimmedName } : {}),
 		...(result.meta ? { meta: stripUndefinedMeta(result.meta) } : {}),
 	};
 

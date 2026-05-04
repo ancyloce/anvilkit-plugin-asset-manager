@@ -5,10 +5,12 @@ import type {
 	StudioPluginRegistration,
 } from "@anvilkit/core/types";
 
+import { createAssetReference } from "./asset-reference.js";
 import { AssetValidationError } from "./errors.js";
 import { uploadAssetAction } from "./header-action.js";
 import { createAssetRegistry } from "./registry.js";
 import { createIRAssetResolver } from "./resolver.js";
+import { createStudioAssetSource } from "./studio-asset-source.js";
 import type {
 	AssetManagerOptions,
 	AssetMeta,
@@ -16,6 +18,8 @@ import type {
 	UploadResult,
 } from "./types.js";
 import { validateUploadResult } from "./validate-upload-result.js";
+
+export { createAssetReference };
 
 const META = {
 	id: "anvilkit-plugin-asset-manager",
@@ -29,6 +33,7 @@ const META = {
 interface AssetManagerRuntimeState {
 	readonly options: NormalizedAssetManagerOptions;
 	readonly registry: AssetRegistry;
+	readonly cleanups: Array<() => void>;
 }
 
 interface NormalizedAssetManagerOptions extends AssetManagerOptions {
@@ -58,14 +63,32 @@ export function createAssetManagerPlugin(
 				headerActions: [uploadAssetAction],
 				hooks: {
 					onInit(initCtx) {
+						const cleanups: Array<() => void> = [];
 						stateByToken.set(token, {
 							options: normalizedOptions,
 							registry,
+							cleanups,
 						});
 						tokenByContext.set(initCtx, token);
 						initCtx.registerAssetResolver(assetResolver);
+
+						const studioAssetSource = createStudioAssetSource({
+							registry,
+							upload: (file) => uploadAsset(initCtx, file),
+						});
+						const unregisterAssetSource =
+							initCtx.registerAssetSource?.(studioAssetSource);
+						if (unregisterAssetSource !== undefined) {
+							cleanups.push(unregisterAssetSource);
+						}
 					},
 					onDestroy(destroyCtx) {
+						const state = stateByToken.get(token);
+						if (state !== undefined) {
+							for (const cleanup of state.cleanups) {
+								cleanup();
+							}
+						}
 						tokenByContext.delete(destroyCtx);
 						stateByToken.delete(token);
 					},
@@ -152,10 +175,6 @@ export function validateSelectedFile(
 	}
 }
 
-export function createAssetReference(id: string): string {
-	return `asset://${id}`;
-}
-
 function getRuntimeState(ctx: StudioPluginContext): AssetManagerRuntimeState {
 	const token = tokenByContext.get(ctx);
 	const state = token ? stateByToken.get(token) : undefined;
@@ -191,6 +210,7 @@ function mergeUploadMeta(result: UploadResult, file: File): UploadResult {
 
 	return {
 		...result,
+		...(result.name === undefined && file.name ? { name: file.name } : {}),
 		meta,
 	};
 }
