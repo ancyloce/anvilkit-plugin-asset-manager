@@ -4,6 +4,11 @@ import { validateSelectedFile } from "../plugin.js";
 import type { AssetManagerOptions, UploadResult } from "../types.js";
 import { validateUploadResult } from "../validate-upload-result.js";
 
+export interface UploadProgressSnapshot {
+	readonly completed: number;
+	readonly total: number;
+}
+
 export interface UploadButtonProps
 	extends Pick<
 		AssetManagerOptions,
@@ -11,59 +16,150 @@ export interface UploadButtonProps
 	> {
 	readonly onUploaded?: (asset: UploadResult) => void;
 	readonly onError?: (error: unknown) => void;
+	/**
+	 * Fires whenever the in-flight batch advances. Emitted as
+	 * `{ completed, total }` while a batch is running and `null` once the
+	 * batch settles. Used by `AssetManagerUI` to surface an aggregate bar.
+	 */
+	readonly onProgress?: (snapshot: UploadProgressSnapshot | null) => void;
 }
 
 export function UploadButton({
 	acceptedMimeTypes,
 	maxFileSize,
 	onError,
+	onProgress,
 	onUploaded,
 	uploader,
 	urlAllowlist,
 }: UploadButtonProps) {
 	const inputRef = React.useRef<HTMLInputElement>(null);
 	const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
-	const [isUploading, setIsUploading] = React.useState(false);
+	const [batch, setBatch] = React.useState<UploadProgressSnapshot | null>(null);
+	const [isDragOver, setIsDragOver] = React.useState(false);
+	const isUploading = batch !== null;
 
-	async function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
-		const file = event.currentTarget.files?.[0];
-		if (!file) {
+	const acceptAttr = React.useMemo(
+		() => acceptedMimeTypes?.join(","),
+		[acceptedMimeTypes],
+	);
+
+	async function processFiles(files: readonly File[]) {
+		if (files.length === 0) {
 			return;
 		}
 
-		setIsUploading(true);
+		const total = files.length;
 		setErrorMessage(null);
+		const initial: UploadProgressSnapshot = { completed: 0, total };
+		setBatch(initial);
+		onProgress?.(initial);
 
-		try {
-			validateSelectedFile(file, { acceptedMimeTypes, maxFileSize });
-			const uploaded = await uploader(file);
-			const validated = validateUploadResult(
-				{
-					...uploaded,
-					meta: {
-						size: file.size,
-						...(file.type ? { mimeType: file.type } : {}),
-						...(uploaded.meta ?? {}),
+		let lastError: string | null = null;
+
+		for (let index = 0; index < files.length; index += 1) {
+			const file = files[index];
+			if (!file) continue;
+			try {
+				validateSelectedFile(file, { acceptedMimeTypes, maxFileSize });
+				const uploaded = await uploader(file);
+				const validated = validateUploadResult(
+					{
+						...uploaded,
+						meta: {
+							size: file.size,
+							...(file.type ? { mimeType: file.type } : {}),
+							...(uploaded.meta ?? {}),
+						},
 					},
-				},
-				{ urlAllowlist },
-			);
-			onUploaded?.(validated);
-		} catch (error) {
-			setErrorMessage(error instanceof Error ? error.message : String(error));
-			onError?.(error);
+					{ urlAllowlist },
+				);
+				onUploaded?.(validated);
+			} catch (error) {
+				lastError = error instanceof Error ? error.message : String(error);
+				onError?.(error);
+			} finally {
+				const next: UploadProgressSnapshot = {
+					completed: index + 1,
+					total,
+				};
+				setBatch(next);
+				onProgress?.(next);
+			}
+		}
+
+		if (lastError !== null) {
+			setErrorMessage(lastError);
+		}
+		setBatch(null);
+		onProgress?.(null);
+	}
+
+	async function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+		const list = event.currentTarget.files;
+		const picked = list ? Array.from(list) : [];
+		try {
+			await processFiles(picked);
 		} finally {
 			if (inputRef.current) {
 				inputRef.current.value = "";
 			}
-			setIsUploading(false);
 		}
 	}
 
+	function handleDragEnter(event: React.DragEvent<HTMLDivElement>) {
+		event.preventDefault();
+		event.stopPropagation();
+		if (event.dataTransfer?.types?.includes("Files")) {
+			setIsDragOver(true);
+		}
+	}
+
+	function handleDragOver(event: React.DragEvent<HTMLDivElement>) {
+		event.preventDefault();
+		event.stopPropagation();
+		if (event.dataTransfer) {
+			event.dataTransfer.dropEffect = "copy";
+		}
+	}
+
+	function handleDragLeave(event: React.DragEvent<HTMLDivElement>) {
+		event.preventDefault();
+		event.stopPropagation();
+		setIsDragOver(false);
+	}
+
+	async function handleDrop(event: React.DragEvent<HTMLDivElement>) {
+		event.preventDefault();
+		event.stopPropagation();
+		setIsDragOver(false);
+		const files = event.dataTransfer?.files
+			? Array.from(event.dataTransfer.files)
+			: [];
+		await processFiles(files);
+	}
+
+	const statusMessage =
+		errorMessage ??
+		(batch !== null
+			? `Uploading ${Math.min(batch.completed + 1, batch.total)} of ${batch.total}…`
+			: "Accepted files upload through the configured adapter.");
+
 	return (
-		<div>
+		<div
+			data-asset-manager-drop-zone
+			data-drag-over={isDragOver ? "true" : undefined}
+			onDragEnter={handleDragEnter}
+			onDragLeave={handleDragLeave}
+			onDragOver={handleDragOver}
+			onDrop={(event) => {
+				void handleDrop(event);
+			}}
+			tabIndex={-1}
+		>
 			<input
-				accept={acceptedMimeTypes?.join(",")}
+				accept={acceptAttr}
+				multiple
 				onChange={(event) => {
 					void handleChange(event);
 				}}
@@ -80,15 +176,44 @@ export function UploadButton({
 				type="button"
 				variant="outline"
 			>
-				{isUploading ? "Uploading..." : "Upload asset"}
+				{isUploading ? <UploadSpinner /> : null}
+				<span>{isUploading ? "Uploading…" : "Upload asset"}</span>
 			</Button>
-			{errorMessage ? (
-				<p role="status">{errorMessage}</p>
-			) : (
-				<p role="status">
-					Accepted files upload through the configured adapter.
-				</p>
-			)}
+			<p aria-live="polite" role="status">
+				{statusMessage}
+			</p>
 		</div>
+	);
+}
+
+function UploadSpinner() {
+	return (
+		<svg
+			aria-hidden
+			fill="none"
+			height={14}
+			style={{
+				display: "inline-block",
+				marginRight: 6,
+				animation: "spin 1s linear infinite",
+			}}
+			viewBox="0 0 24 24"
+			width={14}
+		>
+			<circle
+				cx="12"
+				cy="12"
+				opacity="0.25"
+				r="10"
+				stroke="currentColor"
+				strokeWidth="4"
+			/>
+			<path
+				d="M4 12a8 8 0 0 1 8-8"
+				stroke="currentColor"
+				strokeLinecap="round"
+				strokeWidth="4"
+			/>
+		</svg>
 	);
 }
