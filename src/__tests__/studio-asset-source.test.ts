@@ -1,7 +1,4 @@
-import type {
-	StudioAsset,
-	StudioAssetUploadEvent,
-} from "@anvilkit/core/types";
+import type { StudioAsset, StudioAssetUploadEvent } from "@anvilkit/core/types";
 import { describe, expect, it } from "vitest";
 
 import { createAssetRegistry } from "../registry.js";
@@ -48,6 +45,7 @@ describe("createStudioAssetSource", () => {
 				kind: "image",
 				name: "photo.png",
 				url: "asset://png-1",
+				thumbnailUrl: "https://cdn.example.com/photo.png",
 				mimeType: "image/png",
 				size: 1024,
 			},
@@ -120,7 +118,7 @@ describe("createStudioAssetSource", () => {
 		}
 	});
 
-	it("emits an error envelope and re-throws when the upload fails", async () => {
+	it("emits an error envelope and returns the successful subset on per-file failure", async () => {
 		const registry = createAssetRegistry();
 		const source = createStudioAssetSource({
 			registry,
@@ -131,9 +129,10 @@ describe("createStudioAssetSource", () => {
 		const events: StudioAssetUploadEvent[] = [];
 		const file = new File(["x"], "broken.png", { type: "image/png" });
 
-		await expect(
-			source.upload([file], (event) => events.push(event)),
-		).rejects.toThrow("upload boom");
+		// PRD §3.3.3: per-file failures surface via the listener, not as a
+		// thrown error. The batch resolves with the successful subset.
+		const result = await source.upload([file], (event) => events.push(event));
+		expect(result).toEqual([]);
 		expect(events).toEqual([{ type: "error", message: "upload boom" }]);
 	});
 
@@ -154,13 +153,12 @@ describe("createStudioAssetSource", () => {
 		void source.rename?.("png-1", "renamed.png");
 		expect(notified).toBe(2);
 
-		void source.replace?.(
-			"png-1",
-			new File([""], "ignored.png", { type: "image/png" }),
-		).catch(() => {
-			// `replace` calls upload(); the test's `upload` returns PNG so
-			// replace round-trips without error.
-		});
+		void source
+			.replace?.("png-1", new File([""], "ignored.png", { type: "image/png" }))
+			.catch(() => {
+				// `replace` calls upload(); the test's `upload` returns PNG so
+				// replace round-trips without error.
+			});
 
 		void source.delete?.("png-1");
 		expect(notified).toBeGreaterThanOrEqual(3);
@@ -227,5 +225,89 @@ describe("createStudioAssetSource", () => {
 		});
 
 		expect(source.getUrl?.("any-id")).toBe("asset://any-id");
+	});
+
+	it("infers font kind for font/* MIME and font URL extensions", () => {
+		const registry = createAssetRegistry();
+		registry.register({
+			id: "font-mime",
+			url: "https://cdn.example.com/sans.bin",
+			meta: { mimeType: "font/woff2", size: 1024 },
+		});
+		registry.register({
+			id: "font-ext",
+			url: "https://cdn.example.com/sans.woff2?v=2",
+			meta: { mimeType: "application/octet-stream", size: 1024 },
+		});
+		const source = createStudioAssetSource({
+			registry,
+			upload: async () => PNG,
+		});
+
+		const list = source.list();
+
+		expect(list[0]?.kind).toBe("font");
+		expect(list[1]?.kind).toBe("font");
+	});
+
+	it("infers document kind for application/pdf and .pdf URLs", () => {
+		const registry = createAssetRegistry();
+		registry.register({
+			id: "pdf-mime",
+			url: "https://cdn.example.com/spec.bin",
+			meta: { mimeType: "application/pdf", size: 1024 },
+		});
+		registry.register({
+			id: "pdf-ext",
+			url: "https://cdn.example.com/spec.pdf#page=2",
+			meta: { mimeType: "application/octet-stream", size: 1024 },
+		});
+		const source = createStudioAssetSource({
+			registry,
+			upload: async () => PNG,
+		});
+
+		const list = source.list();
+
+		expect(list[0]?.kind).toBe("document");
+		expect(list[1]?.kind).toBe("document");
+	});
+
+	it("defaults thumbnailUrl to the underlying URL for image assets only", () => {
+		const registry = createAssetRegistry();
+		registry.register(PNG);
+		registry.register(MP4);
+		const source = createStudioAssetSource({
+			registry,
+			upload: async () => PNG,
+		});
+
+		const list = source.list();
+		const image = list.find((asset) => asset.id === "png-1");
+		const video = list.find((asset) => asset.id === "mp4-1");
+
+		expect(image?.thumbnailUrl).toBe("https://cdn.example.com/photo.png");
+		expect(video?.thumbnailUrl).toBeUndefined();
+	});
+
+	it("getThumbnail option overrides the default for any kind", () => {
+		const registry = createAssetRegistry();
+		registry.register(PNG);
+		registry.register(MP4);
+		const source = createStudioAssetSource({
+			registry,
+			upload: async () => PNG,
+			getThumbnail: (entry) =>
+				entry.id === "mp4-1" ? `${entry.url}?frame=1` : undefined,
+		});
+
+		const list = source.list();
+		const image = list.find((asset) => asset.id === "png-1");
+		const video = list.find((asset) => asset.id === "mp4-1");
+
+		expect(image?.thumbnailUrl).toBeUndefined();
+		expect(video?.thumbnailUrl).toBe(
+			"https://cdn.example.com/clip.mp4?frame=1",
+		);
 	});
 });
