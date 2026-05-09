@@ -13,5 +13,38 @@
 			"@anvilkit/ui",
 			"@anvilkit/utils"
 		]
+	},
+	{
+		"name": "@anvilkit/plugin-asset-manager/ui",
+		"path": "dist/ui/index.js",
+		"limit": "12 KB",
+		"gzip": true,
+		"ignore": [
+			"react",
+			"react-dom",
+			"@puckeditor/core",
+			"@anvilkit/core",
+			"@anvilkit/ir",
+			"@anvilkit/ui",
+			"@anvilkit/utils",
+			"lucide-react"
+		]
+	},
+	{
+		"name": "@anvilkit/plugin-asset-manager/retry",
+		"path": "dist/retry.js",
+		"limit": "1 KB",
+		"gzip": true
+	},
+	{
+		"name": "@anvilkit/plugin-asset-manager/adapters/s3",
+		"path": "dist/adapters/s3-presigned.js",
+		"limit": "3 KB",
+		"gzip": true,
+		"ignore": [
+			"@anvilkit/core",
+			"@anvilkit/ir",
+			"@anvilkit/utils"
+		]
 	}
 ]

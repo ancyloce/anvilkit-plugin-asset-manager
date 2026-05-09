@@ -26,6 +26,36 @@
 				"types": "./dist/ui/index.d.cts",
 				"default": "./dist/ui/index.cjs"
 			}
+		},
+		"./testing": {
+			"import": {
+				"types": "./dist/testing/index.d.ts",
+				"default": "./dist/testing/index.js"
+			},
+			"require": {
+				"types": "./dist/testing/index.d.cts",
+				"default": "./dist/testing/index.cjs"
+			}
+		},
+		"./retry": {
+			"import": {
+				"types": "./dist/retry.d.ts",
+				"default": "./dist/retry.js"
+			},
+			"require": {
+				"types": "./dist/retry.d.cts",
+				"default": "./dist/retry.cjs"
+			}
+		},
+		"./adapters/s3": {
+			"import": {
+				"types": "./dist/adapters/s3-presigned.d.ts",
+				"default": "./dist/adapters/s3-presigned.js"
+			},
+			"require": {
+				"types": "./dist/adapters/s3-presigned.d.cts",
+				"default": "./dist/adapters/s3-presigned.cjs"
+			}
 		}
 	},
 	"files": [
