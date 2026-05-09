@@ -22,6 +22,13 @@ import type {
 import { createAssetReference } from "./asset-reference.js";
 import type { AssetRegistry, UploadResult } from "./types.js";
 
+/**
+ * Default concurrency cap for batched uploads. Editors typically drag
+ * 1–10 files at a time; three concurrent uploads strikes a balance
+ * between throughput and politeness to host endpoints.
+ */
+export const MAX_CONCURRENT_UPLOADS = 3;
+
 export interface CreateStudioAssetSourceOptions {
 	readonly registry: AssetRegistry;
 	/**
@@ -29,41 +36,99 @@ export interface CreateStudioAssetSourceOptions {
 	 * not need to depend on `StudioPluginContext` directly.
 	 */
 	readonly upload: (file: File) => Promise<UploadResult>;
+	/**
+	 * Optional thumbnail derivation. Returning a string sets
+	 * `StudioAsset.thumbnailUrl`; returning `undefined` suppresses the
+	 * thumbnail (overriding the default-for-images behavior).
+	 *
+	 * When omitted, image-kind assets get the original URL as their
+	 * thumbnail and other kinds get no thumbnail.
+	 */
+	readonly getThumbnail?: (entry: UploadResult) => string | undefined;
+	/**
+	 * Maximum number of uploads in flight. Defaults to
+	 * `MAX_CONCURRENT_UPLOADS` (3). Set to 1 to restore the previous
+	 * sequential behavior.
+	 */
+	readonly maxConcurrentUploads?: number;
 }
 
 export function createStudioAssetSource(
 	options: CreateStudioAssetSourceOptions,
 ): StudioAssetSource {
-	const { registry, upload } = options;
+	const { registry, upload, getThumbnail } = options;
+	const maxConcurrent = Math.max(
+		1,
+		options.maxConcurrentUploads ?? MAX_CONCURRENT_UPLOADS,
+	);
+
+	const project = (entry: UploadResult): StudioAsset =>
+		toStudioAsset(entry, getThumbnail);
 
 	return {
 		list() {
-			return registry.list().map(toStudioAsset);
+			return registry.list().map(project);
 		},
 
 		async upload(files, listener) {
-			const uploaded: StudioAsset[] = [];
-			let totalBytes = 0;
-			for (const file of files) {
-				totalBytes += file.size;
+			const fileList = Array.from(files);
+			if (fileList.length === 0) {
+				return [];
 			}
+
+			const totalBytes = fileList.reduce((acc, file) => acc + file.size, 0);
 			let bytesUploaded = 0;
-			for (const file of files) {
-				try {
-					const result = await upload(file);
-					bytesUploaded += file.size;
-					const asset = toStudioAsset(result);
-					uploaded.push(asset);
-					emitProgress(listener, bytesUploaded, totalBytes);
-					emitDone(listener, asset);
-				} catch (error) {
-					const message =
-						error instanceof Error ? error.message : String(error);
-					emitError(listener, message);
-					throw error;
+			const results: Array<StudioAsset | null> = new Array(
+				fileList.length,
+			).fill(null);
+			let nextIndex = 0;
+			let abortError: unknown = undefined;
+
+			const runWorker = async (): Promise<void> => {
+				while (true) {
+					if (abortError !== undefined) {
+						return;
+					}
+					const index = nextIndex++;
+					if (index >= fileList.length) {
+						return;
+					}
+					const file = fileList[index];
+					if (file === undefined) {
+						return;
+					}
+					try {
+						const result = await upload(file);
+						bytesUploaded += file.size;
+						const asset = project(result);
+						results[index] = asset;
+						emitProgress(listener, bytesUploaded, totalBytes);
+						emitDone(listener, asset);
+					} catch (error) {
+						if (isAbortError(error)) {
+							abortError = error;
+							return;
+						}
+						const message =
+							error instanceof Error ? error.message : String(error);
+						emitError(listener, message);
+						// Per-file failure does not abort the batch; continue.
+					}
 				}
+			};
+
+			const workerCount = Math.min(maxConcurrent, fileList.length);
+			const workers: Promise<void>[] = [];
+			for (let i = 0; i < workerCount; i += 1) {
+				workers.push(runWorker());
 			}
-			return uploaded;
+			await Promise.all(workers);
+
+			if (abortError !== undefined) {
+				throw abortError;
+			}
+
+			return results.filter((value): value is StudioAsset => value !== null);
 		},
 
 		delete(assetId) {
@@ -82,9 +147,9 @@ export function createStudioAssetSource(
 			if (replaced === undefined) {
 				// The id no longer exists — fall back to the freshly-uploaded
 				// entry so the caller still sees a valid asset.
-				return toStudioAsset(result);
+				return project(result);
 			}
-			return toStudioAsset(replaced);
+			return project(replaced);
 		},
 
 		getUrl(assetId) {
@@ -97,15 +162,20 @@ export function createStudioAssetSource(
 	};
 }
 
-function toStudioAsset(entry: UploadResult): StudioAsset {
+function toStudioAsset(
+	entry: UploadResult,
+	getThumbnail?: (entry: UploadResult) => string | undefined,
+): StudioAsset {
 	const kind = inferStudioAssetKind(entry);
 	const url = createAssetReference(entry.id);
 	const name = entry.name ?? deriveFallbackName(entry);
+	const thumbnailUrl = deriveThumbnailUrl(entry, kind, getThumbnail);
 	const studioAsset: StudioAsset = {
 		id: entry.id,
 		kind,
 		name,
 		url,
+		...(thumbnailUrl !== undefined ? { thumbnailUrl } : {}),
 		...(entry.meta?.mimeType !== undefined
 			? { mimeType: entry.meta.mimeType }
 			: {}),
@@ -117,10 +187,31 @@ function toStudioAsset(entry: UploadResult): StudioAsset {
 
 export function inferStudioAssetKind(entry: UploadResult): StudioAssetKind {
 	const mimeType = entry.meta?.mimeType;
+	const url = entry.url;
 	if (mimeType?.startsWith("image/")) return "image";
 	if (mimeType?.startsWith("video/")) return "video";
 	if (mimeType?.startsWith("audio/")) return "audio";
+	if (
+		mimeType?.startsWith("font/") ||
+		/\.(?:woff2?|ttf|otf)(?:$|[?#])/i.test(url)
+	) {
+		return "font";
+	}
+	if (mimeType === "application/pdf" || /\.pdf(?:$|[?#])/i.test(url)) {
+		return "document";
+	}
 	return "other";
+}
+
+function deriveThumbnailUrl(
+	entry: UploadResult,
+	kind: StudioAssetKind,
+	getThumbnail: ((entry: UploadResult) => string | undefined) | undefined,
+): string | undefined {
+	if (getThumbnail !== undefined) {
+		return getThumbnail(entry);
+	}
+	return kind === "image" ? entry.url : undefined;
 }
 
 function deriveFallbackName(entry: UploadResult): string {
@@ -152,4 +243,12 @@ function emitError(
 	message: string,
 ): void {
 	listener?.({ type: "error", message });
+}
+
+function isAbortError(error: unknown): boolean {
+	if (error === null || typeof error !== "object") {
+		return false;
+	}
+	const name = (error as { name?: unknown }).name;
+	return name === "AbortError";
 }

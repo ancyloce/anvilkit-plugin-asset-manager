@@ -75,6 +75,9 @@ export function createAssetManagerPlugin(
 						const studioAssetSource = createStudioAssetSource({
 							registry,
 							upload: (file) => uploadAsset(initCtx, file),
+							...(normalizedOptions.getThumbnail
+								? { getThumbnail: normalizedOptions.getThumbnail }
+								: {}),
 						});
 						const unregisterAssetSource =
 							initCtx.registerAssetSource?.(studioAssetSource);
@@ -238,14 +241,32 @@ function dispatchAssetReference(
 	asset: UploadResult,
 ): void {
 	const currentData = ctx.getData() as Record<string, unknown>;
-	const currentAssets = Array.isArray(currentData.assets)
-		? currentData.assets.filter(isRecord)
+	const currentAssetsRaw = Array.isArray(currentData.assets)
+		? currentData.assets
 		: [];
 	const assetEntry = toIRAsset(asset);
-	const nextAssets = [
-		...currentAssets.filter((entry) => entry.id !== asset.id),
-		assetEntry,
-	];
+
+	// Single linear pass — replace the matching entry in place, otherwise
+	// append. Avoids the prior double-pass (`filter` + spread) that
+	// rebuilt the full array on every dispatch.
+	const nextAssets: unknown[] = [];
+	let replaced = false;
+	for (const entry of currentAssetsRaw) {
+		if (
+			isRecord(entry) &&
+			typeof entry.id === "string" &&
+			entry.id === asset.id
+		) {
+			nextAssets.push(assetEntry);
+			replaced = true;
+		} else {
+			nextAssets.push(entry);
+		}
+	}
+	if (!replaced) {
+		nextAssets.push(assetEntry);
+	}
+
 	const nextData = {
 		...currentData,
 		assets: nextAssets,

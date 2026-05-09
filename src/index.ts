@@ -1,6 +1,7 @@
 export type { DataUrlUploaderOptions } from "./adapters/data-url.js";
 export { dataUrlUploader } from "./adapters/data-url.js";
 export { inMemoryUploader } from "./adapters/in-memory.js";
+export type { AssetResolutionErrorCode } from "./errors.js";
 export {
 	AssetResolutionError,
 	AssetValidationError,

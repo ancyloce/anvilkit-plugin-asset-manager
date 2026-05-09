@@ -6,9 +6,16 @@ import type {
 	PageIRNode,
 } from "@anvilkit/core/types";
 
-import { AssetResolutionError } from "./errors.js";
+import { AssetResolutionError, AssetValidationError } from "./errors.js";
 import type { AssetRegistry } from "./types.js";
 import { validateUploadResult } from "./validate-upload-result.js";
+
+const URL_REJECTION_VALIDATION_CODES = new Set([
+	"EMPTY_UPLOAD_URL",
+	"UNSCHEMED_UPLOAD_URL",
+	"DISALLOWED_UPLOAD_URL_SCHEME",
+	"INVALID_UPLOAD_ID",
+]);
 
 const ASSET_REFERENCE_PREFIX = "asset://";
 const ASSET_PROP_KEYS = new Set([
@@ -43,7 +50,7 @@ export function createIRAssetResolver(
 
 		const asset = options.registry.get(assetId);
 		if (!asset) {
-			throw new AssetResolutionError(assetId);
+			throw new AssetResolutionError(assetId, "ASSET_NOT_FOUND");
 		}
 
 		try {
@@ -71,7 +78,12 @@ export function createIRAssetResolver(
 				error instanceof Error
 					? error.message
 					: `Could not resolve asset "${assetId}"`;
-			throw new AssetResolutionError(assetId, message, { cause: error });
+			const code: "ASSET_URL_REJECTED" | "ASSET_VALIDATION_FAILED" =
+				error instanceof AssetValidationError &&
+				URL_REJECTION_VALIDATION_CODES.has(error.code)
+					? "ASSET_URL_REJECTED"
+					: "ASSET_VALIDATION_FAILED";
+			throw new AssetResolutionError(assetId, code, message, { cause: error });
 		}
 	};
 }

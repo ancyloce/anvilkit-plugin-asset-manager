@@ -25,6 +25,13 @@ export interface AssetManagerOptions {
 	readonly maxFileSize?: number;
 	readonly acceptedMimeTypes?: readonly string[];
 	readonly urlAllowlist?: readonly string[];
+	/**
+	 * Optional thumbnail derivation passed to {@link createStudioAssetSource}.
+	 * Returning a string sets `StudioAsset.thumbnailUrl`; returning
+	 * `undefined` suppresses the thumbnail (overriding the default-for-images
+	 * behavior).
+	 */
+	readonly getThumbnail?: (entry: UploadResult) => string | undefined;
 }
 
 /**
@@ -51,7 +58,10 @@ export interface AssetRegistry {
 	 * incoming `next` carries a different one. Returns the updated entry,
 	 * or `undefined` if no asset with that id exists.
 	 */
-	readonly replace: (id: string, next: UploadResult) => UploadResult | undefined;
+	readonly replace: (
+		id: string,
+		next: UploadResult,
+	) => UploadResult | undefined;
 	/**
 	 * Subscribe to mutation notifications. The returned function
 	 * unsubscribes the listener.
