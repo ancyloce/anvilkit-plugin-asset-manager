@@ -8,9 +8,29 @@ Headless asset upload plugin for Anvilkit Studio.
 - `uploadAsset(ctx, file)` for invoking the configured upload adapter and registering the validated result.
 - `getAssetRegistry(ctx)` for reading the plugin runtime registry after `onInit`.
 - `createAssetReference(id)` for producing stable `asset://<id>` references.
-- `createAssetRegistry()` for storing validated asset metadata by `id`.
-- `./ui` React components for a host-rendered upload button and asset browser.
+- `createAssetRegistry()` for storing validated asset metadata, with `search`, `setTags`, and pagination.
+- `./ui` React components for a host-rendered upload button, asset browser (with search + filter chips), command palette, and metadata editor.
 - Reference upload adapters for tests and demos.
+
+## Library management (search, tags, pagination)
+
+`AssetRegistry.search(options)` returns a paginated, filtered slice of the registry:
+
+```ts
+const page = registry.search({
+  query: "hero",          // matches id, name, MIME prefix, and tags (case-insensitive)
+  kinds: ["image"],       // filter by inferred kind (image/video/audio/font/document/other)
+  tags: ["brand"],        // require all listed tags (AND semantics)
+  limit: 20,
+  cursor: undefined,      // opaque; pass `page.nextCursor` to advance
+});
+```
+
+Tags are auto-derived on every upload (kind + up to two filename tokens, capped at 3) and can be edited via `registry.setTags(id, tags)` or the `MetadataPanel` UI. Host-supplied `UploadResult.tags` are preserved verbatim.
+
+`StudioAssetSource.listPaginated(query)` is the sidebar-facing pagination contract — remote sources can implement it to push search and pagination to the server. Sidebar consumers fall back to `list()` when omitted.
+
+`StudioAssetSource.subscribeUploads(listener)` is a streaming channel that fans `progress` / `done` / `error` envelopes out to every subscriber alongside the inline upload listener.
 
 ## Trust model
 
