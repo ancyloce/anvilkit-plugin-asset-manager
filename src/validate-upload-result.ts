@@ -16,13 +16,15 @@ export function validateUploadResult(
 	}
 
 	const normalizedUrl = normalizeAllowedUrl(result.url, options.urlAllowlist);
-	const trimmedName =
-		typeof result.name === "string" ? result.name.trim() : "";
+	const trimmedName = typeof result.name === "string" ? result.name.trim() : "";
 	const nextResult: UploadResult = {
 		id: result.id.trim(),
 		url: normalizedUrl,
 		...(trimmedName !== "" ? { name: trimmedName } : {}),
 		...(result.meta ? { meta: stripUndefinedMeta(result.meta) } : {}),
+		...(result.tags && result.tags.length > 0
+			? { tags: Object.freeze([...result.tags]) }
+			: {}),
 	};
 
 	return Object.freeze(nextResult);

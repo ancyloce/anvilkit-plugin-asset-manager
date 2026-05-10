@@ -6,6 +6,7 @@ export {
 	AssetResolutionError,
 	AssetValidationError,
 } from "./errors.js";
+export { inferAssetKind } from "./infer-kind.js";
 export {
 	createAssetManagerPlugin,
 	createAssetReference,
@@ -21,10 +22,13 @@ export {
 	inferStudioAssetKind,
 } from "./studio-asset-source.js";
 export type {
+	AssetKind,
 	AssetManagerOptions,
 	AssetMeta,
 	AssetRegistry,
 	AssetRegistryListener,
+	AssetSearchOptions,
+	AssetSearchPage,
 	UploadAdapter,
 	UploadResult,
 } from "./types.js";

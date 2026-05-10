@@ -8,6 +8,7 @@ import type {
 import { createAssetReference } from "./asset-reference.js";
 import { AssetValidationError } from "./errors.js";
 import { uploadAssetAction } from "./header-action.js";
+import { inferAssetKind } from "./infer-kind.js";
 import { createAssetRegistry } from "./registry.js";
 import { createIRAssetResolver } from "./resolver.js";
 import { createStudioAssetSource } from "./studio-asset-source.js";
@@ -125,7 +126,8 @@ export async function uploadAsset(
 			mergeUploadMeta(uploadResult, file),
 			options,
 		);
-		const stored = registry.register(validated);
+		const tagged = withDerivedTags(validated, file);
+		const stored = registry.register(tagged);
 		dispatchAssetReference(ctx, stored);
 		ctx.emit("asset-manager:uploaded", {
 			asset: stored,
@@ -202,6 +204,50 @@ function normalizeOptions(
 			? { urlAllowlist: Object.freeze([...options.urlAllowlist]) }
 			: {}),
 	};
+}
+
+/**
+ * Derive a small, capped set of library tags so search and the sidebar
+ * filter row work on the very first upload. Hosts can override or
+ * extend the set later via `AssetRegistry.setTags`. Tag rules:
+ *
+ * - Always include the inferred kind (`image` / `video` / `audio` /
+ *   `font` / `document`).
+ * - Include up to two filename tokens drawn from `file.name` (after
+ *   stripping the extension) — split on common separators, lowercased,
+ *   length ≥ 2, alphanumeric only. Skips numeric-only tokens (`100`,
+ *   `2024`) which carry no library signal.
+ * - Caps total at 3 to keep the sidebar chip row readable.
+ *
+ * If the host-supplied `UploadResult` already carries `tags`, those are
+ * preserved verbatim — derivation only fills in an empty array.
+ */
+function withDerivedTags(asset: UploadResult, file: File): UploadResult {
+	if (asset.tags !== undefined && asset.tags.length > 0) {
+		return asset;
+	}
+	const tags = new Set<string>();
+	const kind = inferAssetKind(asset);
+	if (kind !== "other") {
+		tags.add(kind);
+	}
+	for (const token of filenameTokens(file.name)) {
+		if (tags.size >= 3) break;
+		tags.add(token);
+	}
+	if (tags.size === 0) {
+		return asset;
+	}
+	return { ...asset, tags: Object.freeze([...tags]) };
+}
+
+function filenameTokens(name: string): readonly string[] {
+	const stem = name.replace(/\.[^./\\]+$/, "");
+	const tokens = stem
+		.toLowerCase()
+		.split(/[^a-z0-9]+/)
+		.filter((token) => token.length >= 2 && !/^\d+$/.test(token));
+	return tokens.slice(0, 2);
 }
 
 function mergeUploadMeta(result: UploadResult, file: File): UploadResult {
@@ -281,7 +327,7 @@ function dispatchAssetReference(
 function toIRAsset(asset: UploadResult): PageIRAsset {
 	return {
 		id: asset.id,
-		kind: inferAssetKind(asset.meta?.mimeType, asset.url),
+		kind: inferIRAssetKind(asset.meta?.mimeType, asset.url),
 		url: createAssetReference(asset.id),
 		...(asset.meta
 			? { meta: asset.meta as Readonly<Record<string, unknown>> }
@@ -289,7 +335,7 @@ function toIRAsset(asset: UploadResult): PageIRAsset {
 	};
 }
 
-function inferAssetKind(
+function inferIRAssetKind(
 	mimeType: string | undefined,
 	url: string,
 ): PageIRAsset["kind"] {

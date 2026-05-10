@@ -15,11 +15,15 @@
 import type {
 	StudioAsset,
 	StudioAssetKind,
+	StudioAssetListPage,
+	StudioAssetListQuery,
 	StudioAssetSource,
+	StudioAssetUploadEvent,
 	StudioAssetUploadListener,
 } from "@anvilkit/core/types";
 
 import { createAssetReference } from "./asset-reference.js";
+import { inferAssetKind } from "./infer-kind.js";
 import type { AssetRegistry, UploadResult } from "./types.js";
 
 /**
@@ -65,9 +69,32 @@ export function createStudioAssetSource(
 	const project = (entry: UploadResult): StudioAsset =>
 		toStudioAsset(entry, getThumbnail);
 
+	const uploadListeners = new Set<StudioAssetUploadListener>();
+	const fanOut = (event: StudioAssetUploadEvent): void => {
+		for (const listener of uploadListeners) {
+			listener(event);
+		}
+	};
+
 	return {
 		list() {
 			return registry.list().map(project);
+		},
+
+		listPaginated(query) {
+			const page = registry.search({
+				...(query.query !== undefined ? { query: query.query } : {}),
+				...(query.kinds ? { kinds: query.kinds } : {}),
+				...(query.tags ? { tags: query.tags } : {}),
+				...(query.cursor !== undefined ? { cursor: query.cursor } : {}),
+				...(query.limit !== undefined ? { limit: query.limit } : {}),
+			});
+			const projected: StudioAssetListPage = {
+				items: Object.freeze(page.items.map(project)),
+				total: page.total,
+				nextCursor: page.nextCursor,
+			};
+			return Promise.resolve(projected);
 		},
 
 		async upload(files, listener) {
@@ -83,6 +110,11 @@ export function createStudioAssetSource(
 			).fill(null);
 			let nextIndex = 0;
 			let abortError: unknown = undefined;
+
+			const emit = (event: StudioAssetUploadEvent): void => {
+				listener?.(event);
+				fanOut(event);
+			};
 
 			const runWorker = async (): Promise<void> => {
 				while (true) {
@@ -102,8 +134,12 @@ export function createStudioAssetSource(
 						bytesUploaded += file.size;
 						const asset = project(result);
 						results[index] = asset;
-						emitProgress(listener, bytesUploaded, totalBytes);
-						emitDone(listener, asset);
+						emit({
+							type: "progress",
+							bytesUploaded,
+							bytesTotal: totalBytes,
+						});
+						emit({ type: "done", asset });
 					} catch (error) {
 						if (isAbortError(error)) {
 							abortError = error;
@@ -111,7 +147,7 @@ export function createStudioAssetSource(
 						}
 						const message =
 							error instanceof Error ? error.message : String(error);
-						emitError(listener, message);
+						emit({ type: "error", message });
 						// Per-file failure does not abort the batch; continue.
 					}
 				}
@@ -141,6 +177,11 @@ export function createStudioAssetSource(
 			return Promise.resolve();
 		},
 
+		setTags(assetId, tags) {
+			registry.setTags(assetId, tags);
+			return Promise.resolve();
+		},
+
 		async replace(assetId, file) {
 			const result = await upload(file);
 			const replaced = registry.replace(assetId, result);
@@ -159,6 +200,13 @@ export function createStudioAssetSource(
 		subscribe(listener) {
 			return registry.subscribe(listener);
 		},
+
+		subscribeUploads(listener) {
+			uploadListeners.add(listener);
+			return () => {
+				uploadListeners.delete(listener);
+			};
+		},
 	};
 }
 
@@ -166,7 +214,7 @@ function toStudioAsset(
 	entry: UploadResult,
 	getThumbnail?: (entry: UploadResult) => string | undefined,
 ): StudioAsset {
-	const kind = inferStudioAssetKind(entry);
+	const kind = inferAssetKind(entry);
 	const url = createAssetReference(entry.id);
 	const name = entry.name ?? deriveFallbackName(entry);
 	const thumbnailUrl = deriveThumbnailUrl(entry, kind, getThumbnail);
@@ -180,27 +228,21 @@ function toStudioAsset(
 			? { mimeType: entry.meta.mimeType }
 			: {}),
 		...(entry.meta?.size !== undefined ? { size: entry.meta.size } : {}),
+		...(entry.tags && entry.tags.length > 0
+			? { tags: Object.freeze([...entry.tags]) }
+			: {}),
 	};
 
 	return studioAsset;
 }
 
+/**
+ * Public alias for {@link inferAssetKind}. Preserved as the documented
+ * Studio-side projection so existing imports keep working; library
+ * search now uses the same logic via `infer-kind.ts`.
+ */
 export function inferStudioAssetKind(entry: UploadResult): StudioAssetKind {
-	const mimeType = entry.meta?.mimeType;
-	const url = entry.url;
-	if (mimeType?.startsWith("image/")) return "image";
-	if (mimeType?.startsWith("video/")) return "video";
-	if (mimeType?.startsWith("audio/")) return "audio";
-	if (
-		mimeType?.startsWith("font/") ||
-		/\.(?:woff2?|ttf|otf)(?:$|[?#])/i.test(url)
-	) {
-		return "font";
-	}
-	if (mimeType === "application/pdf" || /\.pdf(?:$|[?#])/i.test(url)) {
-		return "document";
-	}
-	return "other";
+	return inferAssetKind(entry);
 }
 
 function deriveThumbnailUrl(
@@ -221,28 +263,6 @@ function deriveFallbackName(entry: UploadResult): string {
 	}
 	const idTail = entry.id.length > 12 ? `${entry.id.slice(0, 8)}…` : entry.id;
 	return `Asset ${idTail}`;
-}
-
-function emitProgress(
-	listener: StudioAssetUploadListener | undefined,
-	bytesUploaded: number,
-	bytesTotal: number,
-): void {
-	listener?.({ type: "progress", bytesUploaded, bytesTotal });
-}
-
-function emitDone(
-	listener: StudioAssetUploadListener | undefined,
-	asset: StudioAsset,
-): void {
-	listener?.({ type: "done", asset });
-}
-
-function emitError(
-	listener: StudioAssetUploadListener | undefined,
-	message: string,
-): void {
-	listener?.({ type: "error", message });
 }
 
 function isAbortError(error: unknown): boolean {
