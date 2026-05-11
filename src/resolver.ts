@@ -15,6 +15,8 @@ const URL_REJECTION_VALIDATION_CODES = new Set([
 	"UNSCHEMED_UPLOAD_URL",
 	"DISALLOWED_UPLOAD_URL_SCHEME",
 	"INVALID_UPLOAD_ID",
+	"PATH_TRAVERSAL_URL",
+	"MIXED_SCRIPT_HOSTNAME",
 ]);
 
 const ASSET_REFERENCE_PREFIX = "asset://";
@@ -36,7 +38,8 @@ const ASSET_PROP_KEYS = new Set([
 
 export interface CreateIRAssetResolverOptions {
 	readonly registry: AssetRegistry;
-	readonly urlAllowlist?: readonly string[];
+	readonly dataUrlAllowlistOptIn?: boolean;
+	readonly allowMixedScriptHostnames?: boolean;
 }
 
 export function createIRAssetResolver(
@@ -60,7 +63,10 @@ export function createIRAssetResolver(
 					url: asset.url,
 					...(asset.meta ? { meta: asset.meta } : {}),
 				},
-				{ urlAllowlist: options.urlAllowlist },
+				{
+					dataUrlAllowlistOptIn: options.dataUrlAllowlistOptIn,
+					allowMixedScriptHostnames: options.allowMixedScriptHostnames,
+				},
 			);
 
 			const resolution: AssetResolution = {

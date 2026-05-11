@@ -25,7 +25,7 @@ export { createAssetReference };
 const META = {
 	id: "anvilkit-plugin-asset-manager",
 	name: "Asset Manager",
-	version: "0.1.0-alpha.0",
+	version: "1.0.0",
 	coreVersion: "^0.1.0-alpha",
 	description:
 		"Headless asset upload plugin with host-provided persistence and a separate React UI subpath.",
@@ -39,7 +39,6 @@ interface AssetManagerRuntimeState {
 
 interface NormalizedAssetManagerOptions extends AssetManagerOptions {
 	readonly acceptedMimeTypes?: readonly string[];
-	readonly urlAllowlist?: readonly string[];
 }
 
 const stateByToken = new WeakMap<object, AssetManagerRuntimeState>();
@@ -53,7 +52,8 @@ export function createAssetManagerPlugin(
 	const normalizedOptions = normalizeOptions(options);
 	const assetResolver = createIRAssetResolver({
 		registry,
-		urlAllowlist: normalizedOptions.urlAllowlist,
+		dataUrlAllowlistOptIn: normalizedOptions.dataUrlAllowlistOptIn,
+		allowMixedScriptHostnames: normalizedOptions.allowMixedScriptHostnames,
 	});
 
 	return {
@@ -199,9 +199,6 @@ function normalizeOptions(
 		...options,
 		...(options.acceptedMimeTypes
 			? { acceptedMimeTypes: Object.freeze([...options.acceptedMimeTypes]) }
-			: {}),
-		...(options.urlAllowlist
-			? { urlAllowlist: Object.freeze([...options.urlAllowlist]) }
 			: {}),
 	};
 }

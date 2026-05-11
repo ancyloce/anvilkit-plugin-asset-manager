@@ -46,7 +46,21 @@ export interface AssetManagerOptions {
 	readonly uploader: UploadAdapter;
 	readonly maxFileSize?: number;
 	readonly acceptedMimeTypes?: readonly string[];
-	readonly urlAllowlist?: readonly string[];
+	/**
+	 * Permit `data:` URLs to flow through the trust boundary. Defaults to
+	 * `false` — `http`, `https`, and `blob` are always allowed; every
+	 * other scheme is rejected. The previous `urlAllowlist: ["data"]`
+	 * pattern is replaced by this typed flag in v1.0.
+	 */
+	readonly dataUrlAllowlistOptIn?: boolean;
+	/**
+	 * Permit `http(s)` URLs whose hostname mixes Unicode scripts (e.g.
+	 * `аpple.com` blending Cyrillic and Latin). Defaults to `false` —
+	 * mixed-script hostnames are rejected as a homoglyph-attack guard.
+	 * Single-script IDN hosts (e.g. `münchen.de`, `日本.jp`) are always
+	 * allowed regardless of this flag.
+	 */
+	readonly allowMixedScriptHostnames?: boolean;
 	/**
 	 * Optional thumbnail derivation passed to {@link createStudioAssetSource}.
 	 * Returning a string sets `StudioAsset.thumbnailUrl`; returning

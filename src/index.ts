@@ -1,6 +1,12 @@
 export type { DataUrlUploaderOptions } from "./adapters/data-url.js";
 export { dataUrlUploader } from "./adapters/data-url.js";
 export { inMemoryUploader } from "./adapters/in-memory.js";
+export type {
+	RequiredCsp,
+	RequiredCspOptions,
+	S3CspOptions,
+} from "./csp.js";
+export { getRequiredCsp } from "./csp.js";
 export type { AssetResolutionErrorCode } from "./errors.js";
 export {
 	AssetResolutionError,
@@ -32,4 +38,5 @@ export type {
 	UploadAdapter,
 	UploadResult,
 } from "./types.js";
+export type { ValidateUploadResultOptions } from "./validate-upload-result.js";
 export { validateUploadResult } from "./validate-upload-result.js";
