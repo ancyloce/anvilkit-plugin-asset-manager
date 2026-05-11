@@ -24,7 +24,11 @@ import { UploadButton, type UploadProgressSnapshot } from "./UploadButton.js";
 export interface AssetManagerUIProps
 	extends Pick<
 		AssetManagerOptions,
-		"acceptedMimeTypes" | "maxFileSize" | "uploader" | "urlAllowlist"
+		| "acceptedMimeTypes"
+		| "maxFileSize"
+		| "uploader"
+		| "dataUrlAllowlistOptIn"
+		| "allowMixedScriptHostnames"
 	> {
 	readonly registry: AssetRegistry;
 	readonly onAssetInserted?: (asset: UploadResult) => void;
@@ -40,12 +44,13 @@ export interface AssetManagerUIProps
 
 export function AssetManagerUI({
 	acceptedMimeTypes,
+	allowMixedScriptHostnames,
+	dataUrlAllowlistOptIn,
 	maxFileSize,
 	onAssetInserted,
 	registry,
 	searchEnabled = true,
 	uploader,
-	urlAllowlist,
 }: AssetManagerUIProps) {
 	const [assets, setAssets] = React.useState<readonly UploadResult[]>(() =>
 		registry.list(),
@@ -106,7 +111,7 @@ export function AssetManagerUI({
 					...(uploaded.meta ?? {}),
 				},
 			},
-			{ urlAllowlist },
+			{ dataUrlAllowlistOptIn, allowMixedScriptHostnames },
 		);
 		registry.replace(asset.id, validated);
 		setPendingReplace(null);
@@ -140,11 +145,12 @@ export function AssetManagerUI({
 			<CardContent>
 				<UploadButton
 					acceptedMimeTypes={acceptedMimeTypes}
+					allowMixedScriptHostnames={allowMixedScriptHostnames}
+					dataUrlAllowlistOptIn={dataUrlAllowlistOptIn}
 					maxFileSize={maxFileSize}
 					onProgress={setProgress}
 					onUploaded={handleUploaded}
 					uploader={uploader}
-					urlAllowlist={urlAllowlist}
 				/>
 				{showProgress ? (
 					<div data-asset-manager-progress>

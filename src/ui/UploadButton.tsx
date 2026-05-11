@@ -12,7 +12,11 @@ export interface UploadProgressSnapshot {
 export interface UploadButtonProps
 	extends Pick<
 		AssetManagerOptions,
-		"acceptedMimeTypes" | "maxFileSize" | "uploader" | "urlAllowlist"
+		| "acceptedMimeTypes"
+		| "maxFileSize"
+		| "uploader"
+		| "dataUrlAllowlistOptIn"
+		| "allowMixedScriptHostnames"
 	> {
 	readonly onUploaded?: (asset: UploadResult) => void;
 	readonly onError?: (error: unknown) => void;
@@ -26,12 +30,13 @@ export interface UploadButtonProps
 
 export function UploadButton({
 	acceptedMimeTypes,
+	allowMixedScriptHostnames,
+	dataUrlAllowlistOptIn,
 	maxFileSize,
 	onError,
 	onProgress,
 	onUploaded,
 	uploader,
-	urlAllowlist,
 }: UploadButtonProps) {
 	const inputRef = React.useRef<HTMLInputElement>(null);
 	const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
@@ -72,7 +77,7 @@ export function UploadButton({
 							...(uploaded.meta ?? {}),
 						},
 					},
-					{ urlAllowlist },
+					{ dataUrlAllowlistOptIn, allowMixedScriptHostnames },
 				);
 				onUploaded?.(validated);
 			} catch (error) {
