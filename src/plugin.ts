@@ -5,6 +5,7 @@ import type {
 	StudioPluginRegistration,
 } from "@anvilkit/core/types";
 
+import packageJson from "../package.json";
 import { createAssetReference } from "./asset-reference.js";
 import { AssetValidationError } from "./errors.js";
 import { uploadAssetAction } from "./header-action.js";
@@ -25,7 +26,9 @@ export { createAssetReference };
 const META = {
 	id: "anvilkit-plugin-asset-manager",
 	name: "Asset Manager",
-	version: "1.0.0",
+	// Derived from package.json so a Changesets bump can never drift the
+	// runtime metadata; the metadata-drift test guards regressions.
+	version: packageJson.version,
 	coreVersion: "^0.1.0-alpha",
 	description:
 		"Headless asset upload plugin with host-provided persistence and a separate React UI subpath.",
