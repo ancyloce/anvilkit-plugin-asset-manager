@@ -24,7 +24,11 @@ import type {
 
 import { createAssetReference } from "./asset-reference.js";
 import { inferAssetKind } from "./infer-kind.js";
-import type { AssetRegistry, UploadResult } from "./types.js";
+import type {
+	AssetRegistry,
+	UploadAdapterOptions,
+	UploadResult,
+} from "./types.js";
 
 /**
  * Default concurrency cap for batched uploads. Editors typically drag
@@ -39,7 +43,10 @@ export interface CreateStudioAssetSourceOptions {
 	 * Performs the upload. Provided by the plugin so the adapter does
 	 * not need to depend on `StudioPluginContext` directly.
 	 */
-	readonly upload: (file: File) => Promise<UploadResult>;
+	readonly upload: (
+		file: File,
+		options?: UploadAdapterOptions,
+	) => Promise<UploadResult>;
 	/**
 	 * Optional thumbnail derivation. Returning a string sets
 	 * `StudioAsset.thumbnailUrl`; returning `undefined` suppresses the
@@ -97,7 +104,7 @@ export function createStudioAssetSource(
 			return Promise.resolve(projected);
 		},
 
-		async upload(files, listener) {
+		async upload(files, listener, signal) {
 			const fileList = Array.from(files);
 			if (fileList.length === 0) {
 				return [];
@@ -116,6 +123,17 @@ export function createStudioAssetSource(
 				fanOut(event);
 			};
 
+			const abortFromSignal = (): void => {
+				if (abortError === undefined) {
+					abortError =
+						signal?.reason instanceof Error ? signal.reason : makeAbortError();
+				}
+			};
+			if (signal?.aborted) {
+				abortFromSignal();
+			}
+			signal?.addEventListener("abort", abortFromSignal, { once: true });
+
 			const runWorker = async (): Promise<void> => {
 				while (true) {
 					if (abortError !== undefined) {
@@ -130,7 +148,13 @@ export function createStudioAssetSource(
 						return;
 					}
 					try {
-						const result = await upload(file);
+						const result = await upload(file, { signal });
+						// Another worker aborted while this upload was in
+						// flight — drop the result instead of emitting a
+						// `done`/`progress` event for a batch that will reject.
+						if (abortError !== undefined) {
+							return;
+						}
 						bytesUploaded += file.size;
 						const asset = project(result);
 						results[index] = asset;
@@ -143,6 +167,14 @@ export function createStudioAssetSource(
 					} catch (error) {
 						if (isAbortError(error)) {
 							abortError = error;
+							return;
+						}
+						// If the batch is already aborting, drop this per-file
+						// failure instead of fanning a noisy `error` event out
+						// to inline listeners / `subscribeUploads` subscribers —
+						// the eventual batch rejection is the authoritative
+						// outcome for a cancelled run.
+						if (abortError !== undefined || signal?.aborted) {
 							return;
 						}
 						const message =
@@ -158,13 +190,20 @@ export function createStudioAssetSource(
 			for (let i = 0; i < workerCount; i += 1) {
 				workers.push(runWorker());
 			}
-			await Promise.all(workers);
+			try {
+				await Promise.all(workers);
 
-			if (abortError !== undefined) {
-				throw abortError;
+				if (abortError !== undefined) {
+					throw abortError;
+				}
+
+				return results.filter((value): value is StudioAsset => value !== null);
+			} finally {
+				// Always detach the bridge listener — a worker that throws
+				// (e.g. a subscriber callback faulting in `emit`) would
+				// otherwise leak the closure on a long-lived signal.
+				signal?.removeEventListener("abort", abortFromSignal);
 			}
-
-			return results.filter((value): value is StudioAsset => value !== null);
 		},
 
 		delete(assetId) {
@@ -271,4 +310,14 @@ function isAbortError(error: unknown): boolean {
 	}
 	const name = (error as { name?: unknown }).name;
 	return name === "AbortError";
+}
+
+/** DOM `AbortError` when available, else a name-tagged `Error` (SSR/Node). */
+function makeAbortError(): Error {
+	if (typeof DOMException !== "undefined") {
+		return new DOMException("Upload aborted", "AbortError");
+	}
+	const error = new Error("Upload aborted");
+	error.name = "AbortError";
+	return error;
 }
