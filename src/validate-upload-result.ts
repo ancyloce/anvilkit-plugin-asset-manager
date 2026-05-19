@@ -183,23 +183,41 @@ function assertNoMixedScriptHostname(
 	}
 }
 
+// Unicode-property regexes are expensive to construct; compile them once
+// at module load instead of per-character inside the scan loop.
+const SKIP_SCRIPT_RE = /[\p{Script=Common}\p{Script=Inherited}]/u;
+const SCRIPT_MATCHERS: readonly (readonly [string, RegExp])[] = [
+	["Latin", /\p{Script=Latin}/u],
+	["Cyrillic", /\p{Script=Cyrillic}/u],
+	["Greek", /\p{Script=Greek}/u],
+	["Han", /\p{Script=Han}/u],
+	["Hiragana", /\p{Script=Hiragana}/u],
+	["Katakana", /\p{Script=Katakana}/u],
+	["Hangul", /\p{Script=Hangul}/u],
+	["Arabic", /\p{Script=Arabic}/u],
+	["Hebrew", /\p{Script=Hebrew}/u],
+];
+
 function detectHostnameScripts(host: string): Set<string> {
 	const scripts = new Set<string>();
+	// Scan the full hostname — truncating before the script check would
+	// let an attacker pad with one script and hide a confusable char past
+	// the cap (fail-open bypass). The hoisted regexes above already remove
+	// the per-character recompilation cost that motivated bounding this.
 	for (const ch of host) {
 		// Common (digits, ".", "-", ":") and Inherited categories carry
 		// no script signal — skip them so a normal IPv4 / DNS label
 		// doesn't register as its own script.
-		if (/[\p{Script=Common}\p{Script=Inherited}]/u.test(ch)) continue;
-		if (/\p{Script=Latin}/u.test(ch)) scripts.add("Latin");
-		else if (/\p{Script=Cyrillic}/u.test(ch)) scripts.add("Cyrillic");
-		else if (/\p{Script=Greek}/u.test(ch)) scripts.add("Greek");
-		else if (/\p{Script=Han}/u.test(ch)) scripts.add("Han");
-		else if (/\p{Script=Hiragana}/u.test(ch)) scripts.add("Hiragana");
-		else if (/\p{Script=Katakana}/u.test(ch)) scripts.add("Katakana");
-		else if (/\p{Script=Hangul}/u.test(ch)) scripts.add("Hangul");
-		else if (/\p{Script=Arabic}/u.test(ch)) scripts.add("Arabic");
-		else if (/\p{Script=Hebrew}/u.test(ch)) scripts.add("Hebrew");
-		else scripts.add("Other");
+		if (SKIP_SCRIPT_RE.test(ch)) continue;
+		let matched = false;
+		for (const [name, re] of SCRIPT_MATCHERS) {
+			if (re.test(ch)) {
+				scripts.add(name);
+				matched = true;
+				break;
+			}
+		}
+		if (!matched) scripts.add("Other");
 	}
 	return scripts;
 }
