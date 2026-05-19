@@ -14,7 +14,7 @@ export function dataUrlUploader(
 	const maxBytes = options.maxBytes ?? DEFAULT_MAX_BYTES;
 	let counter = 0;
 
-	return async (file) => {
+	return async (file, opts) => {
 		if (file.size > maxBytes) {
 			throw new AssetValidationError(
 				"DATA_URL_FILE_TOO_LARGE",
@@ -24,7 +24,9 @@ export function dataUrlUploader(
 
 		counter += 1;
 		const url = await readAsDataUrl(file);
-		const dimensions = await extractImageDimensions(url, file.type);
+		const dimensions = await extractImageDimensions(url, file.type, {
+			...(opts?.signal ? { signal: opts.signal } : {}),
+		});
 		const result: UploadResult = {
 			id: `asset-${counter}`,
 			url,

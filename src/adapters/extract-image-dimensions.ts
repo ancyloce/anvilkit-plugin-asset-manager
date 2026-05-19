@@ -13,6 +13,12 @@
 export interface ExtractImageDimensionsOptions {
 	/** Abort decode after this many ms. Default 3000. */
 	readonly timeoutMs?: number;
+	/**
+	 * Cancels the in-flight decode. On abort the timer is cleared, the
+	 * `Image` handlers are detached, and the promise resolves `undefined`
+	 * (decode is best-effort — abort is not an error here).
+	 */
+	readonly signal?: AbortSignal;
 }
 
 export interface ImageDimensions {
@@ -36,10 +42,19 @@ export async function extractImageDimensions(
 	}
 
 	const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+	const signal = options.signal;
+
+	if (signal?.aborted) {
+		return undefined;
+	}
 
 	return new Promise<ImageDimensions | undefined>((resolve) => {
 		let settled = false;
 		const image = new Image();
+
+		const onAbort = () => {
+			settle(undefined);
+		};
 
 		const settle = (value: ImageDimensions | undefined) => {
 			if (settled) return;
@@ -49,8 +64,11 @@ export async function extractImageDimensions(
 			if (timer !== undefined) {
 				clearTimeout(timer);
 			}
+			signal?.removeEventListener("abort", onAbort);
 			resolve(value);
 		};
+
+		signal?.addEventListener("abort", onAbort, { once: true });
 
 		image.onload = () => {
 			const width = Math.round(image.naturalWidth);

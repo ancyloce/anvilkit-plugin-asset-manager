@@ -22,6 +22,12 @@ import { AssetValidationError } from "../errors.js";
 import { RetryableError, type RetryOptions, withRetry } from "../retry.js";
 import type { UploadAdapter, UploadResult } from "../types.js";
 
+// `RetryableError` re-export retained for backward compatibility with
+// consumers that imported it from `@anvilkit/plugin-asset-manager/adapters/s3`
+// in earlier releases. New code should import from the canonical entry:
+// `@anvilkit/plugin-asset-manager/retry`. Identity is preserved across
+// both paths so `instanceof` works.
+/** @deprecated Import from `@anvilkit/plugin-asset-manager/retry` instead. */
 export { RetryableError } from "../retry.js";
 export type { RetryOptions } from "../retry.js";
 
@@ -72,30 +78,43 @@ export function s3PresignedAdapter(
 	}
 	const generateId = options.idGenerator ?? defaultIdGenerator;
 
-	return async (file) => {
-		const presign = await withRetry(
-			() => requestPresign(file, fetchImpl, options),
-			{ ...(options.retry ?? {}), signal: options.signal },
+	return async (file, callOptions) => {
+		// Combine the construction-time signal with the per-call signal so
+		// aborting either one cancels the upload. `dispose()` removes the
+		// fallback bridge listeners on completion so a long-lived
+		// `options.signal` doesn't accumulate one closure per upload.
+		const { signal, dispose } = combineSignals(
+			options.signal,
+			callOptions?.signal,
 		);
 
-		await withRetry(() => putToS3(file, presign, fetchImpl, options.signal), {
-			...(options.retry ?? {}),
-			signal: options.signal,
-		});
+		try {
+			const presign = await withRetry(
+				() => requestPresign(file, fetchImpl, options, signal),
+				{ ...(options.retry ?? {}), signal },
+			);
 
-		const id = presign.id ?? generateId();
-		const publicUrl = presign.publicUrl ?? stripQueryAndFragment(presign.url);
+			await withRetry(() => putToS3(file, presign, fetchImpl, signal), {
+				...(options.retry ?? {}),
+				signal,
+			});
 
-		const result: UploadResult = {
-			id,
-			url: publicUrl,
-			...(file.name ? { name: file.name } : {}),
-			meta: {
-				size: file.size,
-				...(file.type ? { mimeType: file.type } : {}),
-			},
-		};
-		return result;
+			const id = presign.id ?? generateId();
+			const publicUrl = presign.publicUrl ?? stripQueryAndFragment(presign.url);
+
+			const result: UploadResult = {
+				id,
+				url: publicUrl,
+				...(file.name ? { name: file.name } : {}),
+				meta: {
+					size: file.size,
+					...(file.type ? { mimeType: file.type } : {}),
+				},
+			};
+			return result;
+		} finally {
+			dispose();
+		}
 	};
 }
 
@@ -103,6 +122,7 @@ async function requestPresign(
 	file: File,
 	fetchImpl: typeof globalThis.fetch,
 	options: S3PresignedAdapterOptions,
+	signal?: AbortSignal,
 ): Promise<S3PresignResponse> {
 	const url =
 		typeof options.presignEndpoint === "string"
@@ -123,7 +143,7 @@ async function requestPresign(
 				...(options.headers ?? {}),
 			},
 			body,
-			...(options.signal ? { signal: options.signal } : {}),
+			...(signal ? { signal } : {}),
 		});
 	} catch (cause) {
 		// Network-level failure (DNS, TCP, TLS) — retryable.
@@ -255,4 +275,62 @@ function defaultIdGenerator(): string {
 		return globalThis.crypto.randomUUID();
 	}
 	return `asset-${Math.random().toString(36).slice(2)}-${Date.now()}`;
+}
+
+interface CombinedSignal {
+	readonly signal: AbortSignal | undefined;
+	/**
+	 * Detaches the bridge listeners installed by the manual-combiner
+	 * fallback so they don't accumulate on a long-lived input signal
+	 * across many uploads. No-op when `AbortSignal.any` was used or when
+	 * either input was missing.
+	 */
+	readonly dispose: () => void;
+}
+
+const NOOP_DISPOSE = (): void => {};
+
+/**
+ * Combine zero, one, or two `AbortSignal`s into a single signal that
+ * fires when any input aborts. Returns a `dispose` callback the caller
+ * MUST invoke in `finally` so the fallback bridge listeners are removed
+ * after a successful upload (the native `AbortSignal.any` path cleans
+ * itself up; the dispose is a no-op there).
+ */
+function combineSignals(a?: AbortSignal, b?: AbortSignal): CombinedSignal {
+	if (!a) return { signal: b, dispose: NOOP_DISPOSE };
+	if (!b) return { signal: a, dispose: NOOP_DISPOSE };
+	if (a === b) return { signal: a, dispose: NOOP_DISPOSE };
+	const anyImpl = (
+		AbortSignal as unknown as {
+			any?: (signals: AbortSignal[]) => AbortSignal;
+		}
+	).any;
+	if (typeof anyImpl === "function") {
+		return { signal: anyImpl([a, b]), dispose: NOOP_DISPOSE };
+	}
+	const controller = new AbortController();
+	const onAbortA = (): void => {
+		if (!controller.signal.aborted) controller.abort(a.reason);
+	};
+	const onAbortB = (): void => {
+		if (!controller.signal.aborted) controller.abort(b.reason);
+	};
+	if (a.aborted) {
+		onAbortA();
+	} else {
+		a.addEventListener("abort", onAbortA, { once: true });
+	}
+	if (b.aborted) {
+		onAbortB();
+	} else {
+		b.addEventListener("abort", onAbortB, { once: true });
+	}
+	return {
+		signal: controller.signal,
+		dispose: () => {
+			a.removeEventListener("abort", onAbortA);
+			b.removeEventListener("abort", onAbortB);
+		},
+	};
 }
