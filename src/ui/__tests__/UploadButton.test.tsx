@@ -27,7 +27,10 @@ describe("UploadButton", () => {
 		await user.upload(input, file);
 
 		await waitFor(() => {
-			expect(uploader).toHaveBeenCalledWith(file);
+			// UploadButton forwards an abort signal so a superseded batch can
+			// cancel mid-flight — assert the file argument and ignore the
+			// options bag.
+			expect(uploader).toHaveBeenCalledWith(file, expect.anything());
 		});
 		expect(onUploaded).toHaveBeenCalledWith({
 			id: "asset-1",

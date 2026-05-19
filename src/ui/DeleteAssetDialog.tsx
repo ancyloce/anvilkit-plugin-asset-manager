@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@anvilkit/ui/button";
 import {
 	Dialog,

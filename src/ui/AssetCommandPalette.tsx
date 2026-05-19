@@ -1,3 +1,5 @@
+"use client";
+
 import {
 	Dialog,
 	DialogContent,
@@ -57,15 +59,13 @@ export function AssetCommandPalette({
 		[registry, maxResults],
 	);
 
-	React.useEffect(() => {
-		if (!open) return;
-		refresh(query);
-		const unsubscribe = registry.subscribe(() => {
-			refresh(query);
-		});
-		return unsubscribe;
-	}, [open, query, registry, refresh]);
+	// Mirror the live query into a ref so the registry subscription can
+	// read it without being a dependency (which would resubscribe on
+	// every keystroke).
+	const queryRef = React.useRef(query);
+	queryRef.current = query;
 
+	// Reset the query and focus the input when the palette opens.
 	React.useEffect(() => {
 		if (!open) return;
 		setQuery("");
@@ -73,6 +73,22 @@ export function AssetCommandPalette({
 			inputRef.current?.focus();
 		});
 	}, [open]);
+
+	// Re-run the search synchronously whenever the query changes.
+	React.useEffect(() => {
+		if (!open) return;
+		refresh(query);
+	}, [open, query, refresh]);
+
+	// Subscribe to registry mutations once per open session — not per
+	// keystroke — re-running the *current* query via the ref.
+	React.useEffect(() => {
+		if (!open) return;
+		const unsubscribe = registry.subscribe(() => {
+			refresh(queryRef.current);
+		});
+		return unsubscribe;
+	}, [open, registry, refresh]);
 
 	function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
 		if (event.key === "ArrowDown") {

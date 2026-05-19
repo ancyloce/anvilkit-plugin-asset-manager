@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@anvilkit/ui/button";
 import * as React from "react";
 import { validateSelectedFile } from "../plugin.js";
@@ -43,6 +45,12 @@ export function UploadButton({
 	const [batch, setBatch] = React.useState<UploadProgressSnapshot | null>(null);
 	const [isDragOver, setIsDragOver] = React.useState(false);
 	const isUploading = batch !== null;
+	// Cancels a previous in-flight batch when a new selection arrives, and
+	// on unmount, so a superseded run stops uploading and stops mutating
+	// this component's progress state.
+	const uploadAbortRef = React.useRef<AbortController | null>(null);
+
+	React.useEffect(() => () => uploadAbortRef.current?.abort(), []);
 
 	const acceptAttr = React.useMemo(
 		() => acceptedMimeTypes?.join(","),
@@ -54,6 +62,12 @@ export function UploadButton({
 			return;
 		}
 
+		// Supersede any in-flight batch — the newer selection owns the UI.
+		uploadAbortRef.current?.abort();
+		const controller = new AbortController();
+		uploadAbortRef.current = controller;
+		const { signal } = controller;
+
 		const total = files.length;
 		setErrorMessage(null);
 		const initial: UploadProgressSnapshot = { completed: 0, total };
@@ -63,11 +77,15 @@ export function UploadButton({
 		let lastError: string | null = null;
 
 		for (let index = 0; index < files.length; index += 1) {
+			if (signal.aborted) return;
 			const file = files[index];
 			if (!file) continue;
 			try {
 				validateSelectedFile(file, { acceptedMimeTypes, maxFileSize });
-				const uploaded = await uploader(file);
+				const uploaded = await uploader(file, { signal });
+				// A newer batch (or unmount) superseded this run mid-upload —
+				// bail without touching state the newer run now owns.
+				if (signal.aborted) return;
 				const validated = validateUploadResult(
 					{
 						...uploaded,
@@ -81,18 +99,23 @@ export function UploadButton({
 				);
 				onUploaded?.(validated);
 			} catch (error) {
+				// Cancellation is not a user-facing error.
+				if (signal.aborted) return;
 				lastError = error instanceof Error ? error.message : String(error);
 				onError?.(error);
 			} finally {
-				const next: UploadProgressSnapshot = {
-					completed: index + 1,
-					total,
-				};
-				setBatch(next);
-				onProgress?.(next);
+				if (!signal.aborted) {
+					const next: UploadProgressSnapshot = {
+						completed: index + 1,
+						total,
+					};
+					setBatch(next);
+					onProgress?.(next);
+				}
 			}
 		}
 
+		if (signal.aborted) return;
 		if (lastError !== null) {
 			setErrorMessage(lastError);
 		}

@@ -1,3 +1,5 @@
+"use client";
+
 import {
 	Card,
 	CardContent,
@@ -7,6 +9,7 @@ import {
 } from "@anvilkit/ui/card";
 import { Input } from "@anvilkit/ui/input";
 import * as React from "react";
+import { flushSync } from "react-dom";
 
 import { inferAssetKind } from "../infer-kind.js";
 import type { AssetKind, UploadResult } from "../types.js";
@@ -56,7 +59,16 @@ export interface AssetBrowserProps {
 	 * scroll math entirely.
 	 */
 	readonly virtualizeThreshold?: number;
-	/** Pixel height of a single row when virtualizing. */
+	/**
+	 * Pixel height of a single row when virtualizing.
+	 *
+	 * **Fixed-height contract:** the windowing math (visible range, scroll
+	 * offset, and keyboard-focus scroll) assumes every row is exactly
+	 * `itemHeight` tall. Rows that wrap or vary in height (long names,
+	 * thumbnails) will desync the scroll position and focus calculation.
+	 * Keep rows uniform, or raise `virtualizeThreshold` so the list renders
+	 * inline instead.
+	 */
 	readonly itemHeight?: number;
 	/** Pixel height of the scroll container when virtualizing. */
 	readonly maxHeight?: number;
@@ -91,24 +103,57 @@ export function AssetBrowser({
 	const [pageLimit, setPageLimit] = React.useState(pageSize);
 	const buttonRefs = React.useRef<Array<HTMLButtonElement | null>>([]);
 	const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
+	// Coalesces scroll-driven re-renders to one per animation frame.
+	const scrollFrameRef = React.useRef<number | null>(null);
+	const pendingScrollTopRef = React.useRef(0);
+
+	React.useEffect(
+		() => () => {
+			if (
+				scrollFrameRef.current !== null &&
+				typeof cancelAnimationFrame === "function"
+			) {
+				cancelAnimationFrame(scrollFrameRef.current);
+			}
+		},
+		[],
+	);
+
+	// Lowercase each asset's searchable fields once per `assets` identity
+	// rather than on every keystroke. Fields are joined with a NUL
+	// (\u0000) so one `includes` covers id/name/mime/tags while keeping
+	// the original per-field match semantics: a user query never
+	// contains NUL, so it cannot match across the field boundary.
+	const searchIndex = React.useMemo(() => {
+		if (!searchEnabled) return null;
+		return assets.map((asset) => ({
+			asset,
+			kind: inferAssetKind(asset),
+			haystack: [
+				asset.id,
+				asset.name ?? "",
+				asset.meta?.mimeType ?? "",
+				...(asset.tags ?? []),
+			]
+				.join("\u0000")
+				.toLowerCase(),
+		}));
+	}, [assets, searchEnabled]);
 
 	const filteredAssets = React.useMemo(() => {
-		if (!searchEnabled) return assets;
+		if (!searchEnabled || searchIndex === null) return assets;
 		const lower = query.trim().toLowerCase();
-		return assets.filter((asset) => {
-			if (activeKinds.length > 0) {
-				if (!activeKinds.includes(inferAssetKind(asset))) return false;
+		const hasKindFilter = activeKinds.length > 0;
+		if (lower === "" && !hasKindFilter) return assets;
+		const result: UploadResult[] = [];
+		for (const entry of searchIndex) {
+			if (hasKindFilter && !activeKinds.includes(entry.kind)) continue;
+			if (lower === "" || entry.haystack.includes(lower)) {
+				result.push(entry.asset);
 			}
-			if (lower === "") return true;
-			if (asset.id.toLowerCase().includes(lower)) return true;
-			if (asset.name?.toLowerCase().includes(lower)) return true;
-			if (asset.meta?.mimeType?.toLowerCase().includes(lower)) return true;
-			if (asset.tags?.some((tag) => tag.toLowerCase().includes(lower))) {
-				return true;
-			}
-			return false;
-		});
-	}, [assets, activeKinds, query, searchEnabled]);
+		}
+		return result;
+	}, [assets, searchIndex, activeKinds, query, searchEnabled]);
 
 	const visibleSlice = React.useMemo(
 		() => (searchEnabled ? filteredAssets.slice(0, pageLimit) : filteredAssets),
@@ -136,24 +181,42 @@ export function AssetBrowser({
 		}
 
 		const clampedIndex = Math.max(0, Math.min(nextIndex, total - 1));
-		setActiveIndex(clampedIndex);
 
 		if (isVirtualized && scrollContainerRef.current) {
 			const targetTop = clampedIndex * itemHeight;
 			const targetBottom = targetTop + itemHeight;
 			const viewTop = scrollContainerRef.current.scrollTop;
-			const viewBottom = viewTop + maxHeight;
+			let nextScrollTop = viewTop;
 			if (targetTop < viewTop) {
-				scrollContainerRef.current.scrollTop = targetTop;
-			} else if (targetBottom > viewBottom) {
-				scrollContainerRef.current.scrollTop = targetBottom - maxHeight;
+				nextScrollTop = targetTop;
+			} else if (targetBottom > viewTop + maxHeight) {
+				nextScrollTop = targetBottom - maxHeight;
 			}
-			queueMicrotask(() => {
-				buttonRefs.current[clampedIndex]?.focus();
+			// Cancel any pending scroll-driven rAF so its stale captured
+			// `pendingScrollTopRef` value cannot overwrite the new
+			// keyboard-driven scroll position after this commit.
+			if (
+				scrollFrameRef.current !== null &&
+				typeof cancelAnimationFrame === "function"
+			) {
+				cancelAnimationFrame(scrollFrameRef.current);
+				scrollFrameRef.current = null;
+			}
+			pendingScrollTopRef.current = nextScrollTop;
+			// Commit the new active index AND scroll position synchronously
+			// so the windowed slice re-renders and the target row is mounted
+			// before we move focus — otherwise an off-window keyboard jump
+			// would focus a node that doesn't exist yet.
+			flushSync(() => {
+				setActiveIndex(clampedIndex);
+				setScrollTop(nextScrollTop);
 			});
+			scrollContainerRef.current.scrollTop = nextScrollTop;
+			buttonRefs.current[clampedIndex]?.focus();
 			return;
 		}
 
+		setActiveIndex(clampedIndex);
 		buttonRefs.current[clampedIndex]?.focus();
 	}
 
@@ -380,7 +443,19 @@ export function AssetBrowser({
 				<div
 					data-asset-manager-virtual
 					onScroll={(event) => {
-						setScrollTop(event.currentTarget.scrollTop);
+						const next = event.currentTarget.scrollTop;
+						if (typeof requestAnimationFrame !== "function") {
+							setScrollTop(next);
+							return;
+						}
+						pendingScrollTopRef.current = next;
+						if (scrollFrameRef.current !== null) {
+							return;
+						}
+						scrollFrameRef.current = requestAnimationFrame(() => {
+							scrollFrameRef.current = null;
+							setScrollTop(pendingScrollTopRef.current);
+						});
 					}}
 					ref={scrollContainerRef}
 					style={{ height: maxHeight, overflowY: "auto", position: "relative" }}
