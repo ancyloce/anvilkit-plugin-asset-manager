@@ -40,7 +40,19 @@ export interface UploadResult {
 	readonly tags?: readonly string[];
 }
 
-export type UploadAdapter = (file: File) => Promise<UploadResult>;
+/**
+ * Options passed to an {@link UploadAdapter}. Currently carries an
+ * optional `AbortSignal` so a cancelled upload batch can short-circuit
+ * the adapter (network request, image decode). Adapters may ignore it.
+ */
+export interface UploadAdapterOptions {
+	readonly signal?: AbortSignal;
+}
+
+export type UploadAdapter = (
+	file: File,
+	options?: UploadAdapterOptions,
+) => Promise<UploadResult>;
 
 export interface AssetManagerOptions {
 	readonly uploader: UploadAdapter;

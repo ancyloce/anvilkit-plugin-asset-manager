@@ -4,6 +4,7 @@ import type {
 	StudioPluginContext,
 	StudioPluginRegistration,
 } from "@anvilkit/core/types";
+import type { Config as PuckConfig } from "@puckeditor/core";
 
 import packageJson from "../package.json";
 import { createAssetReference } from "./asset-reference.js";
@@ -45,11 +46,13 @@ interface NormalizedAssetManagerOptions extends AssetManagerOptions {
 }
 
 const stateByToken = new WeakMap<object, AssetManagerRuntimeState>();
-const tokenByContext = new WeakMap<StudioPluginContext, object>();
+// Keyed by `object` rather than `StudioPluginContext<…>` so the map stays
+// agnostic to the plugin's `UserConfig` type parameter.
+const tokenByContext = new WeakMap<object, object>();
 
-export function createAssetManagerPlugin(
-	options: AssetManagerOptions,
-): StudioPlugin {
+export function createAssetManagerPlugin<
+	UserConfig extends PuckConfig = PuckConfig,
+>(options: AssetManagerOptions): StudioPlugin<UserConfig> {
 	const token = {};
 	const registry = createAssetRegistry();
 	const normalizedOptions = normalizeOptions(options);
@@ -62,7 +65,7 @@ export function createAssetManagerPlugin(
 	return {
 		meta: META,
 		register(_ctx) {
-			const registration: StudioPluginRegistration = {
+			const registration: StudioPluginRegistration<UserConfig> = {
 				meta: META,
 				headerActions: [uploadAssetAction],
 				hooks: {
@@ -78,7 +81,7 @@ export function createAssetManagerPlugin(
 
 						const studioAssetSource = createStudioAssetSource({
 							registry,
-							upload: (file) => uploadAsset(initCtx, file),
+							upload: (file, opts) => uploadAsset(initCtx, file, opts?.signal),
 							...(normalizedOptions.getThumbnail
 								? { getThumbnail: normalizedOptions.getThumbnail }
 								: {}),
@@ -107,16 +110,17 @@ export function createAssetManagerPlugin(
 	};
 }
 
-export function getAssetRegistry(
-	ctx: StudioPluginContext,
+export function getAssetRegistry<UserConfig extends PuckConfig = PuckConfig>(
+	ctx: StudioPluginContext<UserConfig>,
 ): AssetRegistry | undefined {
 	const token = tokenByContext.get(ctx);
 	return token ? stateByToken.get(token)?.registry : undefined;
 }
 
-export async function uploadAsset(
-	ctx: StudioPluginContext,
+export async function uploadAsset<UserConfig extends PuckConfig = PuckConfig>(
+	ctx: StudioPluginContext<UserConfig>,
 	file: File,
+	signal?: AbortSignal,
 ): Promise<UploadResult> {
 	const state = getRuntimeState(ctx);
 	const { options, registry } = state;
@@ -124,7 +128,16 @@ export async function uploadAsset(
 	try {
 		validateSelectedFile(file, options);
 
-		const uploadResult = await options.uploader(file);
+		const uploadResult = await options.uploader(
+			file,
+			signal ? { signal } : undefined,
+		);
+		// Adapters may ignore or only partially honor the abort signal — bail
+		// here BEFORE registering or dispatching so a cancelled batch can't
+		// mutate the registry / Puck data after unmount.
+		if (signal?.aborted) {
+			throw makePluginAbortError();
+		}
 		const validated = validateUploadResult(
 			mergeUploadMeta(uploadResult, file),
 			options,
@@ -139,6 +152,13 @@ export async function uploadAsset(
 
 		return stored;
 	} catch (error) {
+		// Cancellation is not a user-facing failure — re-throw the original
+		// AbortError so callers (StudioAssetSource.upload) can distinguish
+		// it from a real upload error and skip the error toast / emit.
+		if (isAbortLikeError(error) || signal?.aborted) {
+			throw error;
+		}
+
 		const normalizedError =
 			error instanceof AssetValidationError
 				? error
@@ -183,7 +203,9 @@ export function validateSelectedFile(
 	}
 }
 
-function getRuntimeState(ctx: StudioPluginContext): AssetManagerRuntimeState {
+function getRuntimeState<UserConfig extends PuckConfig = PuckConfig>(
+	ctx: StudioPluginContext<UserConfig>,
+): AssetManagerRuntimeState {
 	const token = tokenByContext.get(ctx);
 	const state = token ? stateByToken.get(token) : undefined;
 	if (!state) {
@@ -282,14 +304,16 @@ function mimeTypeMatches(
 	});
 }
 
-function dispatchAssetReference(
-	ctx: StudioPluginContext,
+function dispatchAssetReference<UserConfig extends PuckConfig = PuckConfig>(
+	ctx: StudioPluginContext<UserConfig>,
 	asset: UploadResult,
 ): void {
-	const currentData = ctx.getData() as Record<string, unknown>;
-	const currentAssetsRaw = Array.isArray(currentData.assets)
-		? currentData.assets
-		: [];
+	const currentData = ctx.getData();
+	// Page data carries an opaque `assets` array the IR resolver consumes;
+	// it isn't part of the public `getData()` shape, so read it through a
+	// single narrow view instead of widening the whole object.
+	const assetsView = (currentData as { assets?: unknown }).assets;
+	const currentAssetsRaw = Array.isArray(assetsView) ? assetsView : [];
 	const assetEntry = toIRAsset(asset);
 
 	// Single linear pass — replace the matching entry in place, otherwise
@@ -313,6 +337,9 @@ function dispatchAssetReference(
 		nextAssets.push(assetEntry);
 	}
 
+	// `nextData` is `currentData` plus the opaque `assets` array, so it is
+	// structurally a supertype-compatible value for the `setData` payload —
+	// no `as unknown as` round-trip needed.
 	const nextData = {
 		...currentData,
 		assets: nextAssets,
@@ -320,7 +347,7 @@ function dispatchAssetReference(
 
 	ctx.getPuckApi().dispatch({
 		type: "setData",
-		data: nextData as unknown as ReturnType<StudioPluginContext["getData"]>,
+		data: nextData,
 	});
 }
 
@@ -367,4 +394,20 @@ function inferIRAssetKind(
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null;
+}
+
+/** Build a name-tagged `AbortError` for cancelled upload paths. */
+function makePluginAbortError(): Error {
+	if (typeof DOMException !== "undefined") {
+		return new DOMException("Upload aborted", "AbortError");
+	}
+	const error = new Error("Upload aborted");
+	error.name = "AbortError";
+	return error;
+}
+
+function isAbortLikeError(error: unknown): boolean {
+	if (error === null || typeof error !== "object") return false;
+	const name = (error as { name?: unknown }).name;
+	return name === "AbortError";
 }

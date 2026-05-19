@@ -194,21 +194,27 @@ function defaultSleep(ms: number, signal?: AbortSignal): Promise<void> {
 		return Promise.resolve();
 	}
 	return new Promise<void>((resolve, reject) => {
+		let onAbort: (() => void) | undefined;
 		const timer = setTimeout(() => {
-			signal?.removeEventListener("abort", onAbort);
+			if (signal && onAbort) {
+				signal.removeEventListener("abort", onAbort);
+			}
 			resolve();
 		}, ms);
-		const onAbort = () => {
-			clearTimeout(timer);
-			reject(makeAbortError(signal as AbortSignal));
-		};
 		if (signal) {
-			if (signal.aborted) {
+			// `signal` is narrowed here; capturing it lets `onAbort` pass a
+			// non-null `AbortSignal` to `makeAbortError` without a cast.
+			const activeSignal = signal;
+			onAbort = () => {
 				clearTimeout(timer);
-				reject(makeAbortError(signal));
+				reject(makeAbortError(activeSignal));
+			};
+			if (activeSignal.aborted) {
+				clearTimeout(timer);
+				reject(makeAbortError(activeSignal));
 				return;
 			}
-			signal.addEventListener("abort", onAbort, { once: true });
+			activeSignal.addEventListener("abort", onAbort, { once: true });
 		}
 	});
 }

@@ -36,6 +36,7 @@ export type {
 	AssetSearchOptions,
 	AssetSearchPage,
 	UploadAdapter,
+	UploadAdapterOptions,
 	UploadResult,
 } from "./types.js";
 export type { ValidateUploadResultOptions } from "./validate-upload-result.js";

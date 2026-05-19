@@ -195,9 +195,7 @@ function cloneNode(
 	return {
 		id: node.id,
 		type: node.type,
-		props: cloneValue(node.props, rewriteMap) as Readonly<
-			Record<string, unknown>
-		>,
+		props: cloneProps(node.props, rewriteMap),
 		...(node.children
 			? { children: node.children.map((child) => cloneNode(child, rewriteMap)) }
 			: {}),
@@ -220,6 +218,22 @@ function cloneAsset(
 			? { meta: resolution?.meta ?? asset.meta }
 			: {}),
 	};
+}
+
+/**
+ * Clone a node's props with the same URL-rewrite pass as {@link cloneValue}
+ * but with a precise object return type, so callers don't need an
+ * `as Record<string, unknown>` assertion.
+ */
+function cloneProps(
+	props: Readonly<Record<string, unknown>>,
+	rewriteMap: ReadonlyMap<string, AssetResolution>,
+): Readonly<Record<string, unknown>> {
+	const next: Record<string, unknown> = {};
+	for (const [key, value] of Object.entries(props)) {
+		next[key] = cloneValue(value, rewriteMap, key);
+	}
+	return next;
 }
 
 function cloneValue(
