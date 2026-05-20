@@ -4506,7 +4506,7 @@
 							},
 							{
 								"kind": "text",
-								"text": " will reschedule the\r\nunderlying call rather than rethrow.\r\n\r\nAdapters should throw "
+								"text": " will reschedule the\nunderlying call rather than rethrow.\n\nAdapters should throw "
 							},
 							{
 								"kind": "code",
@@ -4514,7 +4514,7 @@
 							},
 							{
 								"kind": "text",
-								"text": " for HTTP 5xx, network\r\nfailures, and other recoverable conditions; non-retryable errors\r\n(4xx, schema mismatches, abort) should be thrown as plain "
+								"text": " for HTTP 5xx, network\nfailures, and other recoverable conditions; non-retryable errors\n(4xx, schema mismatches, abort) should be thrown as plain "
 							},
 							{
 								"kind": "code",
@@ -4522,7 +4522,7 @@
 							},
 							{
 								"kind": "text",
-								"text": "\r\nsubclasses (typically "
+								"text": "\nsubclasses (typically "
 							},
 							{
 								"kind": "code",
@@ -4530,7 +4530,7 @@
 							},
 							{
 								"kind": "text",
-								"text": ").\r\n\r\nThe optional "
+								"text": ").\n\nThe optional "
 							},
 							{
 								"kind": "code",
@@ -4538,7 +4538,7 @@
 							},
 							{
 								"kind": "text",
-								"text": " overrides the next computed delay,\r\nuseful when the server returned a "
+								"text": " overrides the next computed delay,\nuseful when the server returned a "
 							},
 							{
 								"kind": "code",
@@ -4718,7 +4718,7 @@
 								"summary": [
 									{
 										"kind": "text",
-										"text": "Base delay in milliseconds. The actual delay grows exponentially\r\n("
+										"text": "Base delay in milliseconds. The actual delay grows exponentially\n("
 									},
 									{
 										"kind": "code",
@@ -4841,7 +4841,7 @@
 								"summary": [
 									{
 										"kind": "text",
-										"text": "Maximum number of retry attempts after the initial call.\r\n"
+										"text": "Maximum number of retry attempts after the initial call.\n"
 									},
 									{
 										"kind": "code",
@@ -5038,7 +5038,7 @@
 									},
 									{
 										"kind": "text",
-										"text": " with full-jitter exponential\r\nbackoff. Honors "
+										"text": " with full-jitter exponential\nbackoff. Honors "
 									},
 									{
 										"kind": "code",
@@ -5046,7 +5046,7 @@
 									},
 									{
 										"kind": "text",
-										"text": " between attempts and during sleep.\r\n\r\nResolution order on each error:\r\n 1. If the signal is aborted → throw "
+										"text": " between attempts and during sleep.\n\nResolution order on each error:\n 1. If the signal is aborted → throw "
 									},
 									{
 										"kind": "code",
@@ -5054,7 +5054,7 @@
 									},
 									{
 										"kind": "text",
-										"text": " immediately.\r\n 2. If the error is not a "
+										"text": " immediately.\n 2. If the error is not a "
 									},
 									{
 										"kind": "code",
@@ -5062,7 +5062,7 @@
 									},
 									{
 										"kind": "text",
-										"text": " → rethrow.\r\n 3. If retries are exhausted → rethrow the last error.\r\n 4. Otherwise compute backoff, sleep, and try again."
+										"text": " → rethrow.\n 3. If retries are exhausted → rethrow the last error.\n 4. Otherwise compute backoff, sleep, and try again."
 									}
 								]
 							},
@@ -5871,7 +5871,7 @@
 								"summary": [
 									{
 										"kind": "text",
-										"text": "Maximum number of results rendered. Defaults to 20 — enough to\r\nsurface relevant matches without ballooning the dialog height."
+										"text": "Maximum number of results rendered. Defaults to 20 — enough to\nsurface relevant matches without ballooning the dialog height."
 									}
 								]
 							},
@@ -5945,7 +5945,7 @@
 								"summary": [
 									{
 										"kind": "text",
-										"text": "Invoked when a result is selected. The host typically calls\r\n"
+										"text": "Invoked when a result is selected. The host typically calls\n"
 									},
 									{
 										"kind": "code",
@@ -6352,7 +6352,7 @@
 									},
 									{
 										"kind": "text",
-										"text": ", exposes the search input + kind chips on the embedded\r\n"
+										"text": ", exposes the search input + kind chips on the embedded\n"
 									},
 									{
 										"kind": "code",
@@ -6360,7 +6360,7 @@
 									},
 									{
 										"kind": "text",
-										"text": " and enables Cmd-K / Ctrl-K to open the\r\n"
+										"text": " and enables Cmd-K / Ctrl-K to open the\n"
 									},
 									{
 										"kind": "code",
@@ -6376,7 +6376,7 @@
 									},
 									{
 										"kind": "text",
-										"text": " because Phase 3 is the\r\nlibrary-management milestone — hosts that want the lean Phase 1\r\nchrome can opt out."
+										"text": " because Phase 3 is the\nlibrary-management milestone — hosts that want the lean Phase 1\nchrome can opt out."
 									}
 								]
 							},
@@ -6497,7 +6497,7 @@
 									},
 									{
 										"kind": "text",
-										"text": ", the dialog is closed.\r\nSetting this to an asset opens the dialog; the host clears it on\r\ncancel or after confirm resolves."
+										"text": ", the dialog is closed.\nSetting this to an asset opens the dialog; the host clears it on\ncancel or after confirm resolves."
 									}
 								]
 							},
@@ -6561,7 +6561,7 @@
 								"summary": [
 									{
 										"kind": "text",
-										"text": "Called when the user confirms. May return a Promise to keep the\r\n\"Delete\" button in a busy state until it settles."
+										"text": "Called when the user confirms. May return a Promise to keep the\n\"Delete\" button in a busy state until it settles."
 									}
 								]
 							},
@@ -6638,7 +6638,7 @@
 								"summary": [
 									{
 										"kind": "text",
-										"text": "Optional context such as \"This asset is referenced in 2 nodes\".\r\nRendered after the default destructive-action description."
+										"text": "Optional context such as \"This asset is referenced in 2 nodes\".\nRendered after the default destructive-action description."
 									}
 								]
 							},
@@ -6687,7 +6687,7 @@
 									},
 									{
 										"kind": "text",
-										"text": ", the panel is\r\nclosed. Setting this opens it; the host clears it on cancel or\r\nafter "
+										"text": ", the panel is\nclosed. Setting this opens it; the host clears it on cancel or\nafter "
 									},
 									{
 										"kind": "code",
@@ -6759,7 +6759,7 @@
 								"summary": [
 									{
 										"kind": "text",
-										"text": "Save handler. Receives the original asset plus the new name and\r\ntag set. May return a Promise to keep the Save button busy until\r\nthe underlying registry mutation settles."
+										"text": "Save handler. Receives the original asset plus the new name and\ntag set. May return a Promise to keep the Save button busy until\nthe underlying registry mutation settles."
 									}
 								]
 							},
@@ -7038,7 +7038,7 @@
 								"summary": [
 									{
 										"kind": "text",
-										"text": "Receives the selected file. Typically calls\r\n"
+										"text": "Receives the selected file. Typically calls\n"
 									},
 									{
 										"kind": "code",
@@ -7046,7 +7046,7 @@
 									},
 									{
 										"kind": "text",
-										"text": " or\r\n"
+										"text": " or\n"
 									},
 									{
 										"kind": "code",
