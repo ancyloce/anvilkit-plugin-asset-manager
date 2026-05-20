@@ -1,43 +1,36 @@
 export type { DataUrlUploaderOptions } from "./adapters/data-url.js";
 export { dataUrlUploader } from "./adapters/data-url.js";
 export { inMemoryUploader } from "./adapters/in-memory.js";
-export type {
-	RequiredCsp,
-	RequiredCspOptions,
-	S3CspOptions,
-} from "./csp.js";
+export type { RequiredCsp, RequiredCspOptions, S3CspOptions } from "./csp.js";
 export { getRequiredCsp } from "./csp.js";
 export type { AssetResolutionErrorCode } from "./errors.js";
-export {
-	AssetResolutionError,
-	AssetValidationError,
-} from "./errors.js";
+export { AssetResolutionError, AssetValidationError } from "./errors.js";
 export { inferAssetKind } from "./infer-kind.js";
 export {
-	createAssetManagerPlugin,
-	createAssetReference,
-	getAssetRegistry,
-	uploadAsset,
+  createAssetManagerPlugin,
+  createAssetReference,
+  getAssetRegistry,
+  uploadAsset,
 } from "./plugin.js";
 export { createAssetRegistry } from "./registry.js";
 export type { CreateIRAssetResolverOptions } from "./resolver.js";
 export { createIRAssetResolver, resolveAssets } from "./resolver.js";
 export type { CreateStudioAssetSourceOptions } from "./studio-asset-source.js";
 export {
-	createStudioAssetSource,
-	inferStudioAssetKind,
+  createStudioAssetSource,
+  inferStudioAssetKind,
 } from "./studio-asset-source.js";
 export type {
-	AssetKind,
-	AssetManagerOptions,
-	AssetMeta,
-	AssetRegistry,
-	AssetRegistryListener,
-	AssetSearchOptions,
-	AssetSearchPage,
-	UploadAdapter,
-	UploadAdapterOptions,
-	UploadResult,
+  AssetKind,
+  AssetManagerOptions,
+  AssetMeta,
+  AssetRegistry,
+  AssetRegistryListener,
+  AssetSearchOptions,
+  AssetSearchPage,
+  UploadAdapter,
+  UploadAdapterOptions,
+  UploadResult,
 } from "./types.js";
 export type { ValidateUploadResultOptions } from "./validate-upload-result.js";
 export { validateUploadResult } from "./validate-upload-result.js";

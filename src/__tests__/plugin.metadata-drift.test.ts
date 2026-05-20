@@ -9,10 +9,10 @@ import { createAssetManagerPlugin } from "../plugin.js";
  * a Changesets bump can never leave the runtime metadata stale.
  */
 describe("plugin metadata drift", () => {
-	it("meta.version matches package.json version", () => {
-		const plugin = createAssetManagerPlugin({
-			uploader: inMemoryUploader(),
-		});
-		expect(plugin.meta.version).toBe(packageJson.version);
-	});
+  it("meta.version matches package.json version", () => {
+    const plugin = createAssetManagerPlugin({
+      uploader: inMemoryUploader(),
+    });
+    expect(plugin.meta.version).toBe(packageJson.version);
+  });
 });

@@ -8,33 +8,33 @@ import { extractImageDimensions } from "./extract-image-dimensions.js";
  * still referenced. Not for production use.
  */
 export function inMemoryUploader(): UploadAdapter {
-	let counter = 0;
+  let counter = 0;
 
-	return async (file, opts) => {
-		counter += 1;
-		const id = `asset-${counter}`;
+  return async (file, opts) => {
+    counter += 1;
+    const id = `asset-${counter}`;
 
-		const url =
-			typeof URL.createObjectURL === "function"
-				? URL.createObjectURL(file)
-				: `blob:asset-manager/${id}`;
+    const url =
+      typeof URL.createObjectURL === "function"
+        ? URL.createObjectURL(file)
+        : `blob:asset-manager/${id}`;
 
-		const dimensions = await extractImageDimensions(url, file.type, {
-			...(opts?.signal ? { signal: opts.signal } : {}),
-		});
+    const dimensions = await extractImageDimensions(url, file.type, {
+      ...(opts?.signal ? { signal: opts.signal } : {}),
+    });
 
-		const result: UploadResult = {
-			id,
-			url,
-			meta: {
-				size: file.size,
-				...(file.type ? { mimeType: file.type } : {}),
-				...(dimensions
-					? { width: dimensions.width, height: dimensions.height }
-					: {}),
-			},
-		};
+    const result: UploadResult = {
+      id,
+      url,
+      meta: {
+        size: file.size,
+        ...(file.type ? { mimeType: file.type } : {}),
+        ...(dimensions
+          ? { width: dimensions.width, height: dimensions.height }
+          : {}),
+      },
+    };
 
-		return result;
-	};
+    return result;
+  };
 }

@@ -11,7 +11,7 @@ export { MetadataPanel } from "./MetadataPanel.js";
 export type { ReplaceAssetDialogProps } from "./ReplaceAssetDialog.js";
 export { ReplaceAssetDialog } from "./ReplaceAssetDialog.js";
 export type {
-	UploadButtonProps,
-	UploadProgressSnapshot,
+  UploadButtonProps,
+  UploadProgressSnapshot,
 } from "./UploadButton.js";
 export { UploadButton } from "./UploadButton.js";

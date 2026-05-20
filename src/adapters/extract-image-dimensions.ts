@@ -11,91 +11,91 @@
  */
 
 export interface ExtractImageDimensionsOptions {
-	/** Abort decode after this many ms. Default 3000. */
-	readonly timeoutMs?: number;
-	/**
-	 * Cancels the in-flight decode. On abort the timer is cleared, the
-	 * `Image` handlers are detached, and the promise resolves `undefined`
-	 * (decode is best-effort — abort is not an error here).
-	 */
-	readonly signal?: AbortSignal;
+  /** Abort decode after this many ms. Default 3000. */
+  readonly timeoutMs?: number;
+  /**
+   * Cancels the in-flight decode. On abort the timer is cleared, the
+   * `Image` handlers are detached, and the promise resolves `undefined`
+   * (decode is best-effort — abort is not an error here).
+   */
+  readonly signal?: AbortSignal;
 }
 
 export interface ImageDimensions {
-	readonly width: number;
-	readonly height: number;
+  readonly width: number;
+  readonly height: number;
 }
 
 const DEFAULT_TIMEOUT_MS = 3000;
 
 export async function extractImageDimensions(
-	url: string,
-	mimeType: string | undefined,
-	options: ExtractImageDimensionsOptions = {},
+  url: string,
+  mimeType: string | undefined,
+  options: ExtractImageDimensionsOptions = {},
 ): Promise<ImageDimensions | undefined> {
-	if (!mimeType || !mimeType.startsWith("image/")) {
-		return undefined;
-	}
+  if (!mimeType || !mimeType.startsWith("image/")) {
+    return undefined;
+  }
 
-	if (typeof Image === "undefined") {
-		return undefined;
-	}
+  if (typeof Image === "undefined") {
+    return undefined;
+  }
 
-	const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
-	const signal = options.signal;
+  const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  const signal = options.signal;
 
-	if (signal?.aborted) {
-		return undefined;
-	}
+  if (signal?.aborted) {
+    return undefined;
+  }
 
-	return new Promise<ImageDimensions | undefined>((resolve) => {
-		let settled = false;
-		const image = new Image();
+  return new Promise<ImageDimensions | undefined>((resolve) => {
+    let settled = false;
+    const image = new Image();
 
-		const onAbort = () => {
-			settle(undefined);
-		};
+    const onAbort = () => {
+      settle(undefined);
+    };
 
-		const settle = (value: ImageDimensions | undefined) => {
-			if (settled) return;
-			settled = true;
-			image.onload = null;
-			image.onerror = null;
-			if (timer !== undefined) {
-				clearTimeout(timer);
-			}
-			signal?.removeEventListener("abort", onAbort);
-			resolve(value);
-		};
+    const settle = (value: ImageDimensions | undefined) => {
+      if (settled) return;
+      settled = true;
+      image.onload = null;
+      image.onerror = null;
+      if (timer !== undefined) {
+        clearTimeout(timer);
+      }
+      signal?.removeEventListener("abort", onAbort);
+      resolve(value);
+    };
 
-		signal?.addEventListener("abort", onAbort, { once: true });
+    signal?.addEventListener("abort", onAbort, { once: true });
 
-		image.onload = () => {
-			const width = Math.round(image.naturalWidth);
-			const height = Math.round(image.naturalHeight);
-			if (
-				!Number.isFinite(width) ||
-				!Number.isFinite(height) ||
-				width < 1 ||
-				height < 1
-			) {
-				settle(undefined);
-				return;
-			}
-			settle({ width, height });
-		};
+    image.onload = () => {
+      const width = Math.round(image.naturalWidth);
+      const height = Math.round(image.naturalHeight);
+      if (
+        !Number.isFinite(width) ||
+        !Number.isFinite(height) ||
+        width < 1 ||
+        height < 1
+      ) {
+        settle(undefined);
+        return;
+      }
+      settle({ width, height });
+    };
 
-		image.onerror = () => {
-			settle(undefined);
-		};
+    image.onerror = () => {
+      settle(undefined);
+    };
 
-		const timer =
-			timeoutMs > 0
-				? setTimeout(() => {
-						settle(undefined);
-					}, timeoutMs)
-				: undefined;
+    const timer =
+      timeoutMs > 0
+        ? setTimeout(() => {
+            settle(undefined);
+          }, timeoutMs)
+        : undefined;
 
-		image.src = url;
-	});
+    image.src = url;
+  });
 }
