@@ -1,32 +1,31 @@
 import {
-  createFakeStudioContext,
-  registerPlugin,
+	createFakeStudioContext,
+	registerPlugin,
 } from "@anvilkit/core/testing";
 import { describe, expect, it } from "vitest";
-
-import { AssetValidationError } from "../utils/errors.js";
 import { createAssetManagerPlugin, uploadAsset } from "../plugin.js";
+import { AssetValidationError } from "../utils/errors.js";
 
 describe("createAssetManagerPlugin maxFileSize", () => {
-  it("rejects files that exceed maxFileSize", async () => {
-    const ctx = createFakeStudioContext();
-    const plugin = createAssetManagerPlugin({
-      maxFileSize: 3,
-      uploader: async () => ({
-        id: "asset-1",
-        url: "https://cdn.example.com/asset.txt",
-      }),
-    });
-    const harness = await registerPlugin(plugin, { ctx });
-    await harness.runInit();
+	it("rejects files that exceed maxFileSize", async () => {
+		const ctx = createFakeStudioContext();
+		const plugin = createAssetManagerPlugin({
+			maxFileSize: 3,
+			uploader: async () => ({
+				id: "asset-1",
+				url: "https://cdn.example.com/asset.txt",
+			}),
+		});
+		const harness = await registerPlugin(plugin, { ctx });
+		await harness.runInit();
 
-    const error = await uploadAsset(
-      ctx,
-      new File(["hello"], "hello.txt", { type: "text/plain" }),
-    ).catch((caught) => caught);
+		const error = await uploadAsset(
+			ctx,
+			new File(["hello"], "hello.txt", { type: "text/plain" }),
+		).catch((caught) => caught);
 
-    expect(error).toBeInstanceOf(AssetValidationError);
-    expect((error as AssetValidationError).code).toBe("FILE_TOO_LARGE");
-    expect(ctx._mocks.dispatchCalls).toHaveLength(0);
-  });
+		expect(error).toBeInstanceOf(AssetValidationError);
+		expect((error as AssetValidationError).code).toBe("FILE_TOO_LARGE");
+		expect(ctx._mocks.dispatchCalls).toHaveLength(0);
+	});
 });

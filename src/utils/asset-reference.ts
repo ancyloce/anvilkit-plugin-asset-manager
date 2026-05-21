@@ -8,5 +8,5 @@
  */
 
 export function createAssetReference(id: string): string {
-  return `asset://${id}`;
+	return `asset://${id}`;
 }

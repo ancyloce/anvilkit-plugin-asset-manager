@@ -1,73 +1,73 @@
-import { AssetValidationError } from "../utils/errors.js";
 import type { UploadAdapter, UploadResult } from "../types/types.js";
+import { AssetValidationError } from "../utils/errors.js";
 import { extractImageDimensions } from "./extract-image-dimensions.js";
 
 export interface DataUrlUploaderOptions {
-  readonly maxBytes?: number;
+	readonly maxBytes?: number;
 }
 
 const DEFAULT_MAX_BYTES = 1_048_576;
 
 export function dataUrlUploader(
-  options: DataUrlUploaderOptions = {},
+	options: DataUrlUploaderOptions = {},
 ): UploadAdapter {
-  const maxBytes = options.maxBytes ?? DEFAULT_MAX_BYTES;
-  let counter = 0;
+	const maxBytes = options.maxBytes ?? DEFAULT_MAX_BYTES;
+	let counter = 0;
 
-  return async (file, opts) => {
-    if (file.size > maxBytes) {
-      throw new AssetValidationError(
-        "DATA_URL_FILE_TOO_LARGE",
-        `File size ${file.size} bytes exceeds the data URL adapter limit of ${maxBytes} bytes.`,
-      );
-    }
+	return async (file, opts) => {
+		if (file.size > maxBytes) {
+			throw new AssetValidationError(
+				"DATA_URL_FILE_TOO_LARGE",
+				`File size ${file.size} bytes exceeds the data URL adapter limit of ${maxBytes} bytes.`,
+			);
+		}
 
-    counter += 1;
-    const url = await readAsDataUrl(file);
-    const dimensions = await extractImageDimensions(url, file.type, {
-      ...(opts?.signal ? { signal: opts.signal } : {}),
-    });
-    const result: UploadResult = {
-      id: `asset-${counter}`,
-      url,
-      meta: {
-        size: file.size,
-        ...(file.type ? { mimeType: file.type } : {}),
-        ...(dimensions
-          ? { width: dimensions.width, height: dimensions.height }
-          : {}),
-      },
-    };
+		counter += 1;
+		const url = await readAsDataUrl(file);
+		const dimensions = await extractImageDimensions(url, file.type, {
+			...(opts?.signal ? { signal: opts.signal } : {}),
+		});
+		const result: UploadResult = {
+			id: `asset-${counter}`,
+			url,
+			meta: {
+				size: file.size,
+				...(file.type ? { mimeType: file.type } : {}),
+				...(dimensions
+					? { width: dimensions.width, height: dimensions.height }
+					: {}),
+			},
+		};
 
-    return result;
-  };
+		return result;
+	};
 }
 
 function readAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => {
-      reject(
-        new AssetValidationError(
-          "DATA_URL_READ_FAILED",
-          "Failed to read file as a data URL.",
-          { cause: reader.error },
-        ),
-      );
-    };
-    reader.onload = () => {
-      if (typeof reader.result !== "string") {
-        reject(
-          new AssetValidationError(
-            "DATA_URL_READ_FAILED",
-            "FileReader did not produce a string data URL.",
-          ),
-        );
-        return;
-      }
+	return new Promise((resolve, reject) => {
+		const reader = new FileReader();
+		reader.onerror = () => {
+			reject(
+				new AssetValidationError(
+					"DATA_URL_READ_FAILED",
+					"Failed to read file as a data URL.",
+					{ cause: reader.error },
+				),
+			);
+		};
+		reader.onload = () => {
+			if (typeof reader.result !== "string") {
+				reject(
+					new AssetValidationError(
+						"DATA_URL_READ_FAILED",
+						"FileReader did not produce a string data URL.",
+					),
+				);
+				return;
+			}
 
-      resolve(reader.result);
-    };
-    reader.readAsDataURL(file);
-  });
+			resolve(reader.result);
+		};
+		reader.readAsDataURL(file);
+	});
 }

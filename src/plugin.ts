@@ -8,6 +8,12 @@ import type { Config as PuckConfig } from "@puckeditor/core";
 
 import config from "../meta/config.json";
 import packageJson from "../package.json";
+import type {
+	AssetManagerOptions,
+	AssetMeta,
+	AssetRegistry,
+	UploadResult,
+} from "./types/types.js";
 import { createAssetReference } from "./utils/asset-reference.js";
 import { AssetValidationError } from "./utils/errors.js";
 import { uploadAssetAction } from "./utils/header-action.js";
@@ -15,12 +21,6 @@ import { inferAssetKind } from "./utils/infer-kind.js";
 import { createAssetRegistry } from "./utils/registry.js";
 import { createIRAssetResolver } from "./utils/resolver.js";
 import { createStudioAssetSource } from "./utils/studio-asset-source.js";
-import type {
-	AssetManagerOptions,
-	AssetMeta,
-	AssetRegistry,
-	UploadResult,
-} from "./types/types.js";
 import { validateUploadResult } from "./utils/validate-upload-result.js";
 
 export { createAssetReference };
