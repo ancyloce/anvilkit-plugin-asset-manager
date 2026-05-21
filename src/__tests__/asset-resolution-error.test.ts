@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { AssetResolutionError } from "../errors.js";
-import { createAssetRegistry } from "../registry.js";
-import { createIRAssetResolver } from "../resolver.js";
+import { AssetResolutionError } from "../utils/errors.js";
+import { createAssetRegistry } from "../utils/registry.js";
+import { createIRAssetResolver } from "../utils/resolver.js";
 
 describe("AssetResolutionError", () => {
   it("defaults code to ASSET_NOT_FOUND when only assetId is provided", () => {

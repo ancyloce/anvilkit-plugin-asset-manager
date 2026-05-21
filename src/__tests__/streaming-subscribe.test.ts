@@ -1,8 +1,8 @@
 import type { StudioAssetUploadEvent } from "@anvilkit/core/types";
 import { describe, expect, it } from "vitest";
 
-import { createAssetRegistry } from "../registry.js";
-import { createStudioAssetSource } from "../studio-asset-source.js";
+import { createAssetRegistry } from "../utils/registry.js";
+import { createStudioAssetSource } from "../utils/studio-asset-source.js";
 
 describe("createStudioAssetSource.subscribeUploads", () => {
   it("fans upload events out to every subscriber alongside the inline listener", async () => {

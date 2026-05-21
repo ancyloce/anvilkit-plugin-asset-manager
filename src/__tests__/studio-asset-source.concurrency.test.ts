@@ -1,11 +1,11 @@
 import type { StudioAssetUploadEvent } from "@anvilkit/core/types";
 import { describe, expect, it } from "vitest";
 
-import { createAssetRegistry } from "../registry.js";
+import { createAssetRegistry } from "../utils/registry.js";
 import {
   MAX_CONCURRENT_UPLOADS,
   createStudioAssetSource,
-} from "../studio-asset-source.js";
+} from "../utils/studio-asset-source.js";
 import type { UploadResult } from "../types/types.js";
 
 interface Deferred<T> {

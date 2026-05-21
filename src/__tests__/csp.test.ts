@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getRequiredCsp } from "../csp.js";
+import { getRequiredCsp } from "../utils/csp.js";
 
 describe("getRequiredCsp", () => {
   it("returns empty directives when no adapters are described", () => {

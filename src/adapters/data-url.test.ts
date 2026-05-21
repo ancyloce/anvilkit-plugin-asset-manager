@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { AssetValidationError } from "../errors.js";
+import { AssetValidationError } from "../utils/errors.js";
 import { dataUrlUploader } from "./data-url.js";
 
 interface FakeImageInstance {

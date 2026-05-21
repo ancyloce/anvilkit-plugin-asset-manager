@@ -6,7 +6,7 @@ import {
 import type { StudioPluginContext } from "@anvilkit/core/types";
 import { describe, expect, it } from "vitest";
 
-import { AssetValidationError } from "../errors.js";
+import { AssetValidationError } from "../utils/errors.js";
 import {
   createAssetManagerPlugin,
   getAssetRegistry,

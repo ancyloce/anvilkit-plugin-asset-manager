@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createAssetRegistry } from "../registry.js";
+import { createAssetRegistry } from "../utils/registry.js";
 import type { UploadResult } from "../types/types.js";
 
 const PNG: UploadResult = {

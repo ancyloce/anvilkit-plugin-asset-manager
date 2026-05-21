@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createAssetRegistry } from "../registry.js";
+import { createAssetRegistry } from "../utils/registry.js";
 
 const SEED = {
   id: "asset-1",

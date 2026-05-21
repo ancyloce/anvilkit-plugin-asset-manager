@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { AssetValidationError } from "../errors.js";
-import { validateUploadResult } from "../validate-upload-result.js";
+import { AssetValidationError } from "../utils/errors.js";
+import { validateUploadResult } from "../utils/validate-upload-result.js";
 
 describe("validateUploadResult", () => {
   it("rejects hostile or malformed URLs", () => {

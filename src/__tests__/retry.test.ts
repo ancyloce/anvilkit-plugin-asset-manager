@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { RetryableError, withRetry } from "../retry.js";
+import { RetryableError, withRetry } from "../utils/retry.js";
 
 describe("RetryableError", () => {
   it("captures cause and retryAfterMs", () => {

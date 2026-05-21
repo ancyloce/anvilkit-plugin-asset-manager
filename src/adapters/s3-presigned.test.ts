@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { AssetValidationError } from "../errors.js";
+import { AssetValidationError } from "../utils/errors.js";
 import { s3PresignedAdapter } from "./s3-presigned.js";
 
 interface FakeCall {

@@ -4,7 +4,7 @@ import {
 } from "@anvilkit/core/testing";
 import { describe, expect, it } from "vitest";
 
-import { AssetValidationError } from "../errors.js";
+import { AssetValidationError } from "../utils/errors.js";
 import { createAssetManagerPlugin, uploadAsset } from "../plugin.js";
 
 describe("createAssetManagerPlugin maxFileSize", () => {

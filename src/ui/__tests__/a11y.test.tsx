@@ -4,7 +4,7 @@ import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { axe } from "vitest-axe";
 
-import { createAssetRegistry } from "../../registry.js";
+import { createAssetRegistry } from "../../utils/registry.js";
 import { AssetManagerUI } from "../AssetManagerUI.js";
 
 describe("AssetManagerUI accessibility", () => {

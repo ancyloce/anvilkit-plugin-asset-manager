@@ -1,9 +1,9 @@
 import type { PageIR } from "@anvilkit/core/types";
 import { describe, expect, it } from "vitest";
 
-import { AssetResolutionError } from "../errors.js";
-import { createAssetRegistry } from "../registry.js";
-import { createIRAssetResolver, resolveAssets } from "../resolver.js";
+import { AssetResolutionError } from "../utils/errors.js";
+import { createAssetRegistry } from "../utils/registry.js";
+import { createIRAssetResolver, resolveAssets } from "../utils/resolver.js";
 
 function createIr(url: string): PageIR {
   return {
