@@ -10,8 +10,8 @@ import {
 import { Input } from "@anvilkit/ui/input";
 import * as React from "react";
 
-import { inferAssetKind } from "../infer-kind.js";
-import type { AssetRegistry, UploadResult } from "../types.js";
+import { inferAssetKind } from "../utils/infer-kind.js";
+import type { AssetRegistry, UploadResult } from "../types/types.js";
 
 export interface AssetCommandPaletteProps {
   /** Registry the palette searches against. */

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { createAssetRegistry } from "../registry.js";
 import { createStudioAssetSource } from "../studio-asset-source.js";
-import type { UploadResult } from "../types.js";
+import type { UploadResult } from "../types/types.js";
 
 const PNG: UploadResult = {
   id: "png-1",

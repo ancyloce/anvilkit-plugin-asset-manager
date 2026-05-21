@@ -11,11 +11,11 @@ import { Progress } from "@anvilkit/ui/progress";
 import * as React from "react";
 
 import type {
-  AssetManagerOptions,
-  AssetRegistry,
-  UploadResult,
-} from "../types.js";
-import { validateUploadResult } from "../validate-upload-result.js";
+	AssetManagerOptions,
+	AssetRegistry,
+	UploadResult,
+} from "../types/types.js";
+import { validateUploadResult } from "../utils/validate-upload-result.js";
 import { AssetBrowser } from "./AssetBrowser.js";
 import { AssetCommandPalette } from "./AssetCommandPalette.js";
 import { DeleteAssetDialog } from "./DeleteAssetDialog.js";

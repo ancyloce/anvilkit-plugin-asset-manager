@@ -28,7 +28,7 @@ import type {
   AssetRegistry,
   UploadAdapterOptions,
   UploadResult,
-} from "./types.js";
+} from "../types/types.js";
 
 /**
  * Default concurrency cap for batched uploads. Editors typically drag

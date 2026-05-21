@@ -11,7 +11,7 @@ import {
 } from "@anvilkit/ui/dialog";
 import * as React from "react";
 
-import type { UploadResult } from "../types.js";
+import type { UploadResult } from "../types/types.js";
 
 export interface DeleteAssetDialogProps {
   /**

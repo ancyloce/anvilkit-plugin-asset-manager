@@ -12,7 +12,7 @@ import {
 import { Input } from "@anvilkit/ui/input";
 import * as React from "react";
 
-import type { UploadResult } from "../types.js";
+import type { UploadResult } from "../types/types.js";
 
 export interface MetadataPanelProps {
   /**

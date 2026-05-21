@@ -18,9 +18,9 @@
  * @experimental Public surface may change before v1.0.
  */
 
-import { AssetValidationError } from "../errors.js";
-import { RetryableError, type RetryOptions, withRetry } from "../retry.js";
-import type { UploadAdapter, UploadResult } from "../types.js";
+import { AssetValidationError } from "../utils/errors.js";
+import { RetryableError, type RetryOptions, withRetry } from "../utils/retry.js";
+import type { UploadAdapter, UploadResult } from "../types/types.js";
 
 // `RetryableError` re-export retained for backward compatibility with
 // consumers that imported it from `@anvilkit/plugin-asset-manager/adapters/s3`
@@ -28,8 +28,8 @@ import type { UploadAdapter, UploadResult } from "../types.js";
 // `@anvilkit/plugin-asset-manager/retry`. Identity is preserved across
 // both paths so `instanceof` works.
 /** @deprecated Import from `@anvilkit/plugin-asset-manager/retry` instead. */
-export { RetryableError } from "../retry.js";
-export type { RetryOptions } from "../retry.js";
+export { RetryableError } from "../utils/retry.js";
+export type { RetryOptions } from "../utils/retry.js";
 
 export interface S3PresignedAdapterOptions {
 	/** Endpoint that returns a presigned PUT target for the file. */

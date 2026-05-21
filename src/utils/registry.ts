@@ -5,7 +5,7 @@ import type {
   AssetSearchOptions,
   AssetSearchPage,
   UploadResult,
-} from "./types.js";
+} from "../types/types.js";
 
 const DEFAULT_SEARCH_LIMIT = 50;
 

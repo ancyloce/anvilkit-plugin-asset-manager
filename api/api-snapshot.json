@@ -8840,417 +8840,417 @@
 		},
 		"161": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetKind"
 		},
 		"162": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetManagerOptions"
 		},
 		"163": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetManagerOptions.uploader"
 		},
 		"164": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetManagerOptions.maxFileSize"
 		},
 		"165": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetManagerOptions.acceptedMimeTypes"
 		},
 		"166": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetManagerOptions.dataUrlAllowlistOptIn"
 		},
 		"167": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetManagerOptions.allowMixedScriptHostnames"
 		},
 		"168": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetManagerOptions.getThumbnail"
 		},
 		"169": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "__type"
 		},
 		"170": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "__type"
 		},
 		"171": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "entry"
 		},
 		"172": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetMeta"
 		},
 		"173": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetMeta.size"
 		},
 		"174": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetMeta.mimeType"
 		},
 		"175": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetMeta.width"
 		},
 		"176": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetMeta.height"
 		},
 		"177": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetRegistry"
 		},
 		"178": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetRegistry.register"
 		},
 		"179": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "__type"
 		},
 		"180": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "__type"
 		},
 		"181": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "asset"
 		},
 		"182": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetRegistry.get"
 		},
 		"183": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "__type"
 		},
 		"184": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "__type"
 		},
 		"185": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "id"
 		},
 		"186": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetRegistry.list"
 		},
 		"187": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "__type"
 		},
 		"188": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "__type"
 		},
 		"189": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetRegistry.delete"
 		},
 		"190": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "__type"
 		},
 		"191": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "__type"
 		},
 		"192": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "id"
 		},
 		"193": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetRegistry.rename"
 		},
 		"194": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "__type"
 		},
 		"195": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "__type"
 		},
 		"196": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "id"
 		},
 		"197": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "name"
 		},
 		"198": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetRegistry.replace"
 		},
 		"199": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "__type"
 		},
 		"200": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "__type"
 		},
 		"201": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "id"
 		},
 		"202": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "next"
 		},
 		"203": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetRegistry.setTags"
 		},
 		"204": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "__type"
 		},
 		"205": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "__type"
 		},
 		"206": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "id"
 		},
 		"207": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "tags"
 		},
 		"208": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetRegistry.search"
 		},
 		"209": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "__type"
 		},
 		"210": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "__type"
 		},
 		"211": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "options"
 		},
 		"212": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetRegistry.subscribe"
 		},
 		"213": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "__type"
 		},
 		"214": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "__type"
 		},
 		"215": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "listener"
 		},
 		"216": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "__type"
 		},
 		"217": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "__type"
 		},
 		"218": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetRegistryListener"
 		},
 		"219": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "__type"
 		},
 		"220": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "__type"
 		},
 		"221": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetSearchOptions"
 		},
 		"222": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetSearchOptions.query"
 		},
 		"223": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetSearchOptions.kinds"
 		},
 		"224": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetSearchOptions.tags"
 		},
 		"225": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetSearchOptions.cursor"
 		},
 		"226": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetSearchOptions.limit"
 		},
 		"227": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetSearchPage"
 		},
 		"228": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetSearchPage.items"
 		},
 		"229": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetSearchPage.total"
 		},
 		"230": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "AssetSearchPage.nextCursor"
 		},
 		"231": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "UploadAdapter"
 		},
 		"232": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "__type"
 		},
 		"233": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "__type"
 		},
 		"234": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "file"
 		},
 		"235": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "options"
 		},
 		"236": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "UploadAdapterOptions"
 		},
 		"237": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "UploadAdapterOptions.signal"
 		},
 		"238": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "UploadResult"
 		},
 		"239": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "UploadResult.url"
 		},
 		"240": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "UploadResult.id"
 		},
 		"241": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "UploadResult.name"
 		},
 		"242": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "UploadResult.meta"
 		},
 		"243": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "UploadResult.tags"
 		},
 		"244": {
@@ -9520,27 +9520,27 @@
 		},
 		"297": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "dataUrlAllowlistOptIn"
 		},
 		"298": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "allowMixedScriptHostnames"
 		},
 		"299": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "uploader"
 		},
 		"300": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "maxFileSize"
 		},
 		"301": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "acceptedMimeTypes"
 		},
 		"302": {
@@ -9755,12 +9755,12 @@
 		},
 		"344": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "maxFileSize"
 		},
 		"345": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "acceptedMimeTypes"
 		},
 		"346": {
@@ -9845,27 +9845,27 @@
 		},
 		"362": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "dataUrlAllowlistOptIn"
 		},
 		"363": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "allowMixedScriptHostnames"
 		},
 		"364": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "uploader"
 		},
 		"365": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "maxFileSize"
 		},
 		"366": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types.ts",
+			"packagePath": "src/types/types.ts",
 			"qualifiedName": "acceptedMimeTypes"
 		},
 		"367": {

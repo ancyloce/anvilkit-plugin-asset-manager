@@ -1,4 +1,4 @@
-import type { UploadAdapter, UploadResult } from "../types.js";
+import type { UploadAdapter, UploadResult } from "../types/types.js";
 import { extractImageDimensions } from "./extract-image-dimensions.js";
 
 /**

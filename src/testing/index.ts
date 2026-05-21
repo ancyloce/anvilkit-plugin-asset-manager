@@ -7,13 +7,13 @@
  * on the registry + uploader contracts owned by this package.
  */
 
-import { createAssetRegistry } from "../registry.js";
+import { createAssetRegistry } from "../utils/registry.js";
 import type {
   AssetMeta,
   AssetRegistry,
   UploadAdapter,
   UploadResult,
-} from "../types.js";
+} from "../types/types.js";
 
 export interface CreateTestRegistryOptions {
   readonly initial?: readonly UploadResult[];

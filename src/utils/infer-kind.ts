@@ -1,4 +1,4 @@
-import type { AssetKind, UploadResult } from "./types.js";
+import type { AssetKind, UploadResult } from "../types/types.js";
 
 /**
  * Library-management kind inference. Used by both

@@ -7,7 +7,7 @@ import type {
 } from "@anvilkit/core/types";
 
 import { AssetResolutionError, AssetValidationError } from "./errors.js";
-import type { AssetRegistry } from "./types.js";
+import type { AssetRegistry } from "../types/types.js";
 import { validateUploadResult } from "./validate-upload-result.js";
 
 const URL_REJECTION_VALIDATION_CODES = new Set([

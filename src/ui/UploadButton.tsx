@@ -3,8 +3,8 @@
 import { Button } from "@anvilkit/ui/button";
 import * as React from "react";
 import { validateSelectedFile } from "../plugin.js";
-import type { AssetManagerOptions, UploadResult } from "../types.js";
-import { validateUploadResult } from "../validate-upload-result.js";
+import type { AssetManagerOptions, UploadResult } from "../types/types.js";
+import { validateUploadResult } from "../utils/validate-upload-result.js";
 
 export interface UploadProgressSnapshot {
   readonly completed: number;

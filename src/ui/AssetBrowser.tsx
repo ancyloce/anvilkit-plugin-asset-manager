@@ -11,8 +11,8 @@ import { Input } from "@anvilkit/ui/input";
 import * as React from "react";
 import { flushSync } from "react-dom";
 
-import { inferAssetKind } from "../infer-kind.js";
-import type { AssetKind, UploadResult } from "../types.js";
+import { inferAssetKind } from "../utils/infer-kind.js";
+import type { AssetKind, UploadResult } from "../types/types.js";
 
 const KIND_FILTERS: readonly AssetKind[] = [
   "image",

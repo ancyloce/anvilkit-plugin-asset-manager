@@ -1,25 +1,25 @@
 export type { DataUrlUploaderOptions } from "./adapters/data-url.js";
 export { dataUrlUploader } from "./adapters/data-url.js";
 export { inMemoryUploader } from "./adapters/in-memory.js";
-export type { RequiredCsp, RequiredCspOptions, S3CspOptions } from "./csp.js";
-export { getRequiredCsp } from "./csp.js";
-export type { AssetResolutionErrorCode } from "./errors.js";
-export { AssetResolutionError, AssetValidationError } from "./errors.js";
-export { inferAssetKind } from "./infer-kind.js";
+export type { RequiredCsp, RequiredCspOptions, S3CspOptions } from "./utils/csp.js";
+export { getRequiredCsp } from "./utils/csp.js";
+export type { AssetResolutionErrorCode } from "./utils/errors.js";
+export { AssetResolutionError, AssetValidationError } from "./utils/errors.js";
+export { inferAssetKind } from "./utils/infer-kind.js";
 export {
   createAssetManagerPlugin,
   createAssetReference,
   getAssetRegistry,
   uploadAsset,
 } from "./plugin.js";
-export { createAssetRegistry } from "./registry.js";
-export type { CreateIRAssetResolverOptions } from "./resolver.js";
-export { createIRAssetResolver, resolveAssets } from "./resolver.js";
-export type { CreateStudioAssetSourceOptions } from "./studio-asset-source.js";
+export { createAssetRegistry } from "./utils/registry.js";
+export type { CreateIRAssetResolverOptions } from "./utils/resolver.js";
+export { createIRAssetResolver, resolveAssets } from "./utils/resolver.js";
+export type { CreateStudioAssetSourceOptions } from "./utils/studio-asset-source.js";
 export {
   createStudioAssetSource,
   inferStudioAssetKind,
-} from "./studio-asset-source.js";
+} from "./utils/studio-asset-source.js";
 export type {
   AssetKind,
   AssetManagerOptions,
@@ -31,6 +31,6 @@ export type {
   UploadAdapter,
   UploadAdapterOptions,
   UploadResult,
-} from "./types.js";
-export type { ValidateUploadResultOptions } from "./validate-upload-result.js";
-export { validateUploadResult } from "./validate-upload-result.js";
+} from "./types/types.js";
+export type { ValidateUploadResultOptions } from "./utils/validate-upload-result.js";
+export { validateUploadResult } from "./utils/validate-upload-result.js";

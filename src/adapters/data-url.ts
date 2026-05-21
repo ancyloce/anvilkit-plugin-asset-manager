@@ -1,5 +1,5 @@
-import { AssetValidationError } from "../errors.js";
-import type { UploadAdapter, UploadResult } from "../types.js";
+import { AssetValidationError } from "../utils/errors.js";
+import type { UploadAdapter, UploadResult } from "../types/types.js";
 import { extractImageDimensions } from "./extract-image-dimensions.js";
 
 export interface DataUrlUploaderOptions {

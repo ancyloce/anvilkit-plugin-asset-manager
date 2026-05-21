@@ -1,5 +1,5 @@
 import { AssetValidationError } from "./errors.js";
-import type { AssetManagerOptions, UploadResult } from "./types.js";
+import type { AssetManagerOptions, UploadResult } from "../types/types.js";
 
 const ALWAYS_ALLOWED_SCHEMES = new Set(["http", "https", "blob"]);
 const HARD_BLOCKED_SCHEMES = new Set(["javascript", "vbscript"]);

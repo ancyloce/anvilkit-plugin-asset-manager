@@ -6,7 +6,7 @@ import {
   MAX_CONCURRENT_UPLOADS,
   createStudioAssetSource,
 } from "../studio-asset-source.js";
-import type { UploadResult } from "../types.js";
+import type { UploadResult } from "../types/types.js";
 
 interface Deferred<T> {
   readonly promise: Promise<T>;
