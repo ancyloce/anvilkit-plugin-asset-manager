@@ -1,5 +1,5 @@
 {
-	"_comment": "Budget raised 6144->6656 (6 KiB -> 6.5 KiB). The easy win was already banked by sourcing the plugin version from version.ts instead of importing the whole package.json (esbuild inlines a default JSON import wholesale, ~2.9 kB raw). The residual is legitimate code: every bundled module (registry, resolver, validate-upload-result, studio-asset-source, adapters) maps to a public export. 6656 leaves modest headroom while still catching order-of-magnitude regressions.",
-	"budgetGzippedBytes": 6656,
+	"_comment": "Budget raised 6656->8192 (6.5 KiB -> 8 KiB) when the plugin gained a `meta.icon` (single tree-shaken `Images` glyph from lucide-react, the same per-plugin-bundled convention as export-html/version-history/design-system). lucide-react is a regular dependency project-wide, not externalized, so the one icon lands in the entry chunk (~0.8 kB gzipped). Earlier the easy win was banked by sourcing the version from version.ts instead of importing the whole package.json. 8192 leaves modest headroom while still catching order-of-magnitude regressions.",
+	"budgetGzippedBytes": 8192,
 	"forbiddenStrings": []
 }
