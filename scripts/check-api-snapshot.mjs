@@ -44,7 +44,7 @@ function main() {
 		"./src/index.ts",
 		"./src/ui/index.ts",
 		"./src/testing/index.ts",
-		"./src/retry.ts",
+		"./src/utils/retry.ts",
 		"./src/adapters/s3-presigned.ts",
 		"--tsconfig",
 		"./tsconfig.json",
