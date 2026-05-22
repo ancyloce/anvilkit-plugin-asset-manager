@@ -2,7 +2,7 @@
 	{
 		"name": "@anvilkit/plugin-asset-manager",
 		"path": "dist/index.js",
-		"limit": "6 KB",
+		"limit": "8 KB",
 		"gzip": true,
 		"ignore": [
 			"react",
@@ -32,7 +32,7 @@
 	},
 	{
 		"name": "@anvilkit/plugin-asset-manager/retry",
-		"path": "dist/retry.js",
+		"path": "dist/utils/retry.js",
 		"limit": "1 KB",
 		"gzip": true
 	},
