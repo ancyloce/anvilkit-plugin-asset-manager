@@ -5,6 +5,8 @@ import type {
 	StudioPluginRegistration,
 } from "@anvilkit/core/types";
 import type { Config as PuckConfig } from "@puckeditor/core";
+import { Images } from "lucide-react";
+import { createElement } from "react";
 
 import config from "../meta/config.json" with { type: "json" };
 import type {
@@ -32,6 +34,7 @@ export { createAssetReference };
 const META = {
 	...config,
 	version: ASSET_MANAGER_VERSION,
+	icon: createElement(Images),
 } as const;
 
 interface AssetManagerRuntimeState {
