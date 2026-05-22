@@ -39,12 +39,12 @@
 		},
 		"./retry": {
 			"import": {
-				"types": "./dist/retry.d.ts",
-				"default": "./dist/retry.js"
+				"types": "./dist/utils/retry.d.ts",
+				"default": "./dist/utils/retry.js"
 			},
 			"require": {
-				"types": "./dist/retry.d.cts",
-				"default": "./dist/retry.cjs"
+				"types": "./dist/utils/retry.d.cts",
+				"default": "./dist/utils/retry.cjs"
 			}
 		},
 		"./adapters/s3": {

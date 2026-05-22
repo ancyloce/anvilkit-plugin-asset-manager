@@ -4,8 +4,11 @@ import { inMemoryUploader } from "../adapters/in-memory.js";
 import { createAssetManagerPlugin } from "../plugin.js";
 
 /**
- * Metadata drift guard: `META.version` is derived from package.json, so
- * a Changesets bump can never leave the runtime metadata stale.
+ * Metadata drift guard: `META.version` comes from the hand-maintained
+ * `version.ts` constant (a `package.json` import would inline the whole
+ * file and blow the gzip budget). This test ties that constant back to
+ * package.json, so a Changesets bump that forgets `version.ts` fails
+ * here rather than leaving the runtime metadata stale.
  */
 describe("plugin metadata drift", () => {
 	it("meta.version matches package.json version", () => {

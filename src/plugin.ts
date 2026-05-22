@@ -6,8 +6,7 @@ import type {
 } from "@anvilkit/core/types";
 import type { Config as PuckConfig } from "@puckeditor/core";
 
-import config from "../meta/config.json";
-import packageJson from "../package.json";
+import config from "../meta/config.json" with { type: "json" };
 import type {
 	AssetManagerOptions,
 	AssetMeta,
@@ -22,14 +21,17 @@ import { createAssetRegistry } from "./utils/registry.js";
 import { createIRAssetResolver } from "./utils/resolver.js";
 import { createStudioAssetSource } from "./utils/studio-asset-source.js";
 import { validateUploadResult } from "./utils/validate-upload-result.js";
+import { ASSET_MANAGER_VERSION } from "./version.js";
 
 export { createAssetReference };
 
-// `version` is derived from package.json so a Changesets bump can never drift
-// the runtime metadata; `plugin.metadata-drift.test.ts` guards regressions.
+// `version` comes from the hand-maintained `version.ts` constant rather than a
+// `package.json` import, which esbuild would inline whole and blow the gzip
+// budget. `plugin.metadata-drift.test.ts` asserts it matches package.json, so a
+// Changesets bump can never drift the runtime metadata.
 const META = {
 	...config,
-	version: packageJson.version,
+	version: ASSET_MANAGER_VERSION,
 } as const;
 
 interface AssetManagerRuntimeState {
