@@ -4760,7 +4760,7 @@
 								"summary": [
 									{
 										"kind": "text",
-										"text": "Pixel height of a single row when virtualizing.\n\n**Fixed-height contract:** the windowing math (visible range, scroll\noffset, and keyboard-focus scroll) assumes every row is exactly\n"
+										"text": "Pixel height of a single row when virtualizing.\n\n**Fixed-height contract:** the windowing math assumes every row is\nroughly "
 									},
 									{
 										"kind": "code",
@@ -4768,7 +4768,7 @@
 									},
 									{
 										"kind": "text",
-										"text": " tall. Rows that wrap or vary in height (long names,\nthumbnails) will desync the scroll position and focus calculation.\nKeep rows uniform, or raise "
+										"text": " tall. Rows that wrap or vary in height (long\nnames, thumbnails) will desync the scroll-into-view calculation. Keep\nrows uniform, or raise "
 									},
 									{
 										"kind": "code",
@@ -5111,7 +5111,15 @@
 								"summary": [
 									{
 										"kind": "text",
-										"text": "Threshold above which the list windows visible items. Below the\nthreshold the entire list renders inline so small libraries skip\nscroll math entirely."
+										"text": "Threshold above which the list windows visible items. Below the\nthreshold the entire list renders inline so small libraries skip\nscroll math entirely. Forwarded to the shared "
+									},
+									{
+										"kind": "code",
+										"text": "`Windowed`"
+									},
+									{
+										"kind": "text",
+										"text": " primitive."
 									}
 								]
 							},
