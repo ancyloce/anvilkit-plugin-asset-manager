@@ -10,7 +10,7 @@ Headless asset manager plugin for Anvilkit Studio. The host provides the upload 
 pnpm add @anvilkit/plugin-asset-manager @anvilkit/core react react-dom @puckeditor/core
 ```
 
-Non-optional peers: `react ^18.2.0 || ^19.0.0`, `react-dom ^18.2.0 || ^19.0.0`, `@puckeditor/core ^0.21.2`.
+Non-optional peers: `react >=19.0.0`, `react-dom >=19.0.0`, `@puckeditor/core ^0.21.2`.
 
 Subpath imports:
 
