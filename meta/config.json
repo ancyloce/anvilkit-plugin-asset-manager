@@ -1,7 +1,7 @@
 {
 	"id": "anvilkit-plugin-asset-manager",
 	"name": "Asset Manager",
-	"version": "0.1.5",
+	"version": "0.1.6",
 	"coreVersion": "^0.1.0-alpha",
 	"description": "Headless asset upload plugin with host-provided persistence and a separate React UI subpath.",
 	"capabilities": { "header": true }

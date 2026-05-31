@@ -1,6 +1,6 @@
 {
 	"name": "@anvilkit/plugin-asset-manager",
-	"version": "0.1.5",
+	"version": "0.1.6",
 	"description": "Headless asset manager plugin for Anvilkit Studio with host-provided uploads and optional React UI.",
 	"type": "module",
 	"main": "./dist/index.cjs",
