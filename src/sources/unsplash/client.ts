@@ -221,6 +221,15 @@ export function createUnsplashClient(
 			return (await readJson<UnsplashTopicSummary[]>(response)) ?? [];
 		},
 
+		async getPhoto(id, signal) {
+			const response = await request(
+				`/photos/${encodeURIComponent(id)}`,
+				{},
+				signal,
+			);
+			return readJson<UnsplashPhoto>(response);
+		},
+
 		async trackDownload(downloadLocation, signal) {
 			// Mandatory on insert, but never blocks it: swallow all failures.
 			try {

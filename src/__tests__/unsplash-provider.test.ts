@@ -44,6 +44,8 @@ function routingFetch() {
 		if (u.includes("/search/photos"))
 			return makeResponse(200, { total: 100, results: [photo] });
 		if (u.includes("/topics/")) return makeResponse(200, [photo]);
+		if (u.includes("/download")) return makeResponse(200, {});
+		if (u.includes("/photos/")) return makeResponse(200, photo); // getPhoto by id
 		return makeResponse(200, {});
 	});
 }

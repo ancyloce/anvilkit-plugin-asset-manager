@@ -157,14 +157,40 @@ export function createUnsplashProvider(
 		return listPage;
 	};
 
-	const pickResult = async (asset: StudioAsset): Promise<UploadResult> => {
+	const pickResult = async (
+		asset: StudioAsset,
+		signal?: AbortSignal,
+	): Promise<UploadResult> => {
 		const cached = byId.get(asset.id);
 		if (cached?.meta?.attribution !== undefined) {
 			// Mandatory trigger, fire-and-forget so it never blocks insert.
-			void client.trackDownload(cached.meta.attribution.downloadLocation);
+			void client.trackDownload(
+				cached.meta.attribution.downloadLocation,
+				signal,
+			);
 			return cached;
 		}
-		return { id: asset.id, url: asset.url };
+		// Cache miss (e.g. the provider was recreated since the search). The photo
+		// id is embedded in `asset.id`, so refetch the photo and STILL fire the
+		// mandatory download trigger — Unsplash compliance must never be skipped.
+		const photoId = asset.id.startsWith("unsplash:")
+			? asset.id.slice("unsplash:".length)
+			: asset.id;
+		try {
+			const result = toUploadResult(await client.getPhoto(photoId, signal));
+			byId.set(result.id, result);
+			if (result.meta?.attribution !== undefined) {
+				void client.trackDownload(
+					result.meta.attribution.downloadLocation,
+					signal,
+				);
+			}
+			return result;
+		} catch {
+			// Could not recover the photo — return the bare reference rather than
+			// fabricate a (non-compliant) trigger for a download_location we lack.
+			return { id: asset.id, url: asset.url };
+		}
 	};
 
 	const listThemes = (): readonly AssetTheme[] => themes;
