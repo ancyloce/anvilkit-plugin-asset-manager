@@ -68,6 +68,8 @@ export interface UnsplashClient {
 		signal?: AbortSignal,
 	): Promise<readonly UnsplashPhoto[]>;
 	listTopics(signal?: AbortSignal): Promise<readonly UnsplashTopicSummary[]>;
+	/** Fetch a single photo by id — used to recover `download_location` on a cache miss. */
+	getPhoto(id: string, signal?: AbortSignal): Promise<UnsplashPhoto>;
 	/** Fires the MANDATORY download trigger. Non-throwing — best-effort. */
 	trackDownload(downloadLocation: string, signal?: AbortSignal): Promise<void>;
 }
