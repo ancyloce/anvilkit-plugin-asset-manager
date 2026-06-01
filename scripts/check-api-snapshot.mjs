@@ -46,6 +46,7 @@ function main() {
 		"./src/testing/index.ts",
 		"./src/utils/retry.ts",
 		"./src/adapters/s3-presigned.ts",
+		"./src/sources/unsplash/index.ts",
 		"--tsconfig",
 		"./tsconfig.json",
 		"--logLevel",

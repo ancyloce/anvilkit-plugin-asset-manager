@@ -1,5 +1,5 @@
 {
 	"_comment": "Budget raised 6656->8192 (6.5 KiB -> 8 KiB) when the plugin gained a `meta.icon` (single tree-shaken `Images` glyph from lucide-react, the same per-plugin-bundled convention as export-html/version-history/design-system). lucide-react is a regular dependency project-wide, not externalized, so the one icon lands in the entry chunk (~0.8 kB gzipped). Earlier the easy win was banked by sourcing the version from version.ts instead of importing the whole package.json. 8192 leaves modest headroom while still catching order-of-magnitude regressions.",
 	"budgetGzippedBytes": 8192,
-	"forbiddenStrings": []
+	"forbiddenStrings": ["api.unsplash.com", "images.unsplash.com"]
 }
