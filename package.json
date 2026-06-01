@@ -56,6 +56,16 @@
 				"types": "./dist/adapters/s3-presigned.d.cts",
 				"default": "./dist/adapters/s3-presigned.cjs"
 			}
+		},
+		"./providers/unsplash": {
+			"import": {
+				"types": "./dist/sources/unsplash/index.d.ts",
+				"default": "./dist/sources/unsplash/index.js"
+			},
+			"require": {
+				"types": "./dist/sources/unsplash/index.d.cts",
+				"default": "./dist/sources/unsplash/index.cjs"
+			}
 		}
 	},
 	"files": [

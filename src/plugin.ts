@@ -10,6 +10,9 @@ import { createElement } from "react";
 
 import config from "../meta/config.json" with { type: "json" };
 import { inMemoryUploader } from "./adapters/in-memory.js";
+// Type-only: erased at build, so these lazy modules never enter the headless entry.
+import type { CompositeAssetSource } from "./sources/composite-source.js";
+import type { AssetSourceProvider } from "./sources/provider.js";
 import type { AssetManagerOptions } from "./types/options.js";
 import type {
 	AssetMeta,
@@ -18,6 +21,7 @@ import type {
 	UploadResult,
 } from "./types/types.js";
 import { createAssetReference } from "./utils/asset-reference.js";
+import type { UploadFn } from "./utils/data-source.js";
 import { AssetValidationError } from "./utils/errors.js";
 import { uploadAssetAction } from "./utils/header-action.js";
 import { inferAssetKind } from "./utils/infer-kind.js";
@@ -58,7 +62,7 @@ const tokenByContext = new WeakMap<object, object>();
 
 export function createAssetManagerPlugin<
 	UserConfig extends PuckConfig = PuckConfig,
->(options: AssetManagerOptions): StudioPlugin<UserConfig> {
+>(options: AssetManagerOptions = {}): StudioPlugin<UserConfig> {
 	const token = {};
 	const registry = createAssetRegistry();
 	const normalizedOptions = normalizeOptions(options);
@@ -85,17 +89,50 @@ export function createAssetManagerPlugin<
 						tokenByContext.set(initCtx, token);
 						initCtx.registerAssetResolver(assetResolver);
 
+						const upload: UploadFn = (file, opts) =>
+							uploadAsset(initCtx, file, opts?.signal);
+
+						// Lightweight registry-backed source, registered synchronously for
+						// immediate sidebar availability + zero new headless bytes.
 						const studioAssetSource = createStudioAssetSource({
 							registry,
-							upload: (file, opts) => uploadAsset(initCtx, file, opts?.signal),
+							upload,
 							...(normalizedOptions.getThumbnail
 								? { getThumbnail: normalizedOptions.getThumbnail }
 								: {}),
 						});
-						const unregisterAssetSource =
+						let unregisterAssetSource =
 							initCtx.registerAssetSource?.(studioAssetSource);
-						if (unregisterAssetSource !== undefined) {
-							cleanups.push(unregisterAssetSource);
+						cleanups.push(() => unregisterAssetSource?.());
+
+						// Richer surface (host dataSource / providers / Unsplash) is loaded
+						// lazily so the folder + data-source + composite code never enters
+						// the headless entry chunk, then swapped in for the lightweight one.
+						if (needsRichSource(normalizedOptions)) {
+							let disposed = false;
+							cleanups.push(() => {
+								disposed = true;
+							});
+							void loadRichSource(initCtx, registry, upload, normalizedOptions)
+								.then((composite) => {
+									if (disposed) return;
+									unregisterAssetSource?.();
+									unregisterAssetSource = undefined;
+									const unregisterComposite =
+										initCtx.registerAssetSource?.(composite);
+									if (disposed) {
+										unregisterComposite?.();
+										return;
+									}
+									cleanups.push(() => unregisterComposite?.());
+								})
+								.catch((error) => {
+									initCtx.log(
+										"error",
+										"asset-manager: failed to load the data source.",
+										{ error },
+									);
+								});
 						}
 					},
 					onDestroy(destroyCtx) {
@@ -223,6 +260,75 @@ function getRuntimeState<UserConfig extends PuckConfig = PuckConfig>(
 	return state;
 }
 
+/**
+ * Whether to load the richer composite source. Folder *UI* lands in Phase 2
+ * (core `ImageModule` + `./ui`); in Phase 1 the composite is engaged when a host
+ * supplies a backend, extra providers, or Unsplash — otherwise the lightweight
+ * registry-backed source is sufficient and cheaper.
+ */
+function needsRichSource(options: NormalizedAssetManagerOptions): boolean {
+	return (
+		options.dataSource !== undefined ||
+		(options.providers !== undefined && options.providers.length > 0) ||
+		options.unsplash !== undefined
+	);
+}
+
+/**
+ * Dynamically import the data-source + composite modules (own async chunk) and
+ * assemble the composite over the resolved data plane. Keeping these behind
+ * `import()` is what holds the headless entry under its gzip budget.
+ */
+async function loadRichSource<UserConfig extends PuckConfig = PuckConfig>(
+	ctx: StudioPluginContext<UserConfig>,
+	registry: AssetRegistry,
+	upload: UploadFn,
+	options: NormalizedAssetManagerOptions,
+): Promise<CompositeAssetSource> {
+	const [{ resolveDataSource }, { createCompositeAssetSource }] =
+		await Promise.all([
+			import("./utils/data-source.js"),
+			import("./sources/composite-source.js"),
+		]);
+	const maxDepth =
+		typeof options.folders === "object" ? options.folders.maxDepth : undefined;
+	const resolved = resolveDataSource({
+		registry,
+		upload,
+		...(options.dataSource ? { hostDataSource: options.dataSource } : {}),
+		...(maxDepth !== undefined ? { maxDepth } : {}),
+		warn: (message) => ctx.log("warn", message),
+	});
+
+	const providers: AssetSourceProvider[] = [...(options.providers ?? [])];
+	if (options.unsplash !== undefined) {
+		// Own lazy chunk — the Unsplash client/themes never enter this one either.
+		const { createUnsplashProvider, unsplashEnabled } = await import(
+			"./sources/unsplash/index.js"
+		);
+		if (unsplashEnabled(options.unsplash)) {
+			if (
+				options.unsplash.accessKey !== undefined &&
+				options.unsplash.proxyEndpoint === undefined
+			) {
+				ctx.log(
+					"warn",
+					"asset-manager: the Unsplash accessKey is public in the browser — use a server proxy (proxyEndpoint) in production.",
+				);
+			}
+			providers.push(createUnsplashProvider(options.unsplash));
+		}
+	}
+
+	return createCompositeAssetSource({
+		source: resolved,
+		registry,
+		upload,
+		...(providers.length > 0 ? { providers } : {}),
+		...(options.getThumbnail ? { getThumbnail: options.getThumbnail } : {}),
+	});
+}
+
 function normalizeOptions(
 	options: AssetManagerOptions,
 ): NormalizedAssetManagerOptions {
@@ -231,8 +337,8 @@ function normalizeOptions(
 		// Zero-config: omitting `uploader` resolves the in-memory default so
 		// `createAssetManagerPlugin()` works with no args (PRD 0002 §4/§5). The
 		// resolved value is non-optional, so every internal `options.uploader(...)`
-		// call site stays type-safe. (The dataSource/folder resolution ladder
-		// lands in Phase 1 — only the uploader rung is wired here.)
+		// call site stays type-safe. The dataSource/folder per-plane ladder is
+		// resolved separately via `resolveDataSource` (wired in `onInit`).
 		uploader: options.uploader ?? inMemoryUploader(),
 		...(options.acceptedMimeTypes
 			? { acceptedMimeTypes: Object.freeze([...options.acceptedMimeTypes]) }

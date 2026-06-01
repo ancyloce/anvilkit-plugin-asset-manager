@@ -1,8 +1,8 @@
 [
 	{
-		"name": "@anvilkit/plugin-asset-manager",
+		"name": "@anvilkit/plugin-asset-manager (total incl. lazy chunks)",
 		"path": "dist/index.js",
-		"limit": "8 KB",
+		"limit": "14 KB",
 		"gzip": true,
 		"ignore": [
 			"react",
@@ -45,6 +45,15 @@
 			"@anvilkit/core",
 			"@anvilkit/ir",
 			"@anvilkit/utils"
+		]
+	},
+	{
+		"name": "@anvilkit/plugin-asset-manager/providers/unsplash",
+		"path": "dist/sources/unsplash/index.js",
+		"limit": "4 KB",
+		"gzip": true,
+		"ignore": [
+			"@anvilkit/core"
 		]
 	}
 ]
