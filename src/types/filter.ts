@@ -55,6 +55,6 @@ export interface AssetListPage extends AssetSearchPage {
 	readonly folders?: readonly AssetFolder[];
 	/** Root → … → current folder, for the breadcrumb. Omitted at root. */
 	readonly folderPath?: readonly AssetFolder[];
-	/** Per-source page tokens for federated paging. */
-	readonly sourceCursors?: Readonly<Record<AssetSourceId, string | undefined>>;
+	/** Per-source page tokens for federated paging, keyed by source id. */
+	readonly sourceCursors?: Readonly<Record<string, string | undefined>>;
 }
