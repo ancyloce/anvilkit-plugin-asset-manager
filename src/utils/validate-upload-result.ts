@@ -1,4 +1,5 @@
-import type { AssetManagerOptions, UploadResult } from "../types/types.js";
+import type { AssetManagerOptions } from "../types/options.js";
+import type { UploadResult } from "../types/types.js";
 import { AssetValidationError } from "./errors.js";
 
 const ALWAYS_ALLOWED_SCHEMES = new Set(["http", "https", "blob"]);
