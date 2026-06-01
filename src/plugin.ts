@@ -9,10 +9,12 @@ import { Images } from "lucide-react";
 import { createElement } from "react";
 
 import config from "../meta/config.json" with { type: "json" };
+import { inMemoryUploader } from "./adapters/in-memory.js";
+import type { AssetManagerOptions } from "./types/options.js";
 import type {
-	AssetManagerOptions,
 	AssetMeta,
 	AssetRegistry,
+	UploadAdapter,
 	UploadResult,
 } from "./types/types.js";
 import { createAssetReference } from "./utils/asset-reference.js";
@@ -44,6 +46,8 @@ interface AssetManagerRuntimeState {
 }
 
 interface NormalizedAssetManagerOptions extends AssetManagerOptions {
+	/** Resolved to a concrete uploader — the host's or the in-memory default. */
+	readonly uploader: UploadAdapter;
 	readonly acceptedMimeTypes?: readonly string[];
 }
 
@@ -224,6 +228,12 @@ function normalizeOptions(
 ): NormalizedAssetManagerOptions {
 	return {
 		...options,
+		// Zero-config: omitting `uploader` resolves the in-memory default so
+		// `createAssetManagerPlugin()` works with no args (PRD 0002 §4/§5). The
+		// resolved value is non-optional, so every internal `options.uploader(...)`
+		// call site stays type-safe. (The dataSource/folder resolution ladder
+		// lands in Phase 1 — only the uploader rung is wired here.)
+		uploader: options.uploader ?? inMemoryUploader(),
 		...(options.acceptedMimeTypes
 			? { acceptedMimeTypes: Object.freeze([...options.acceptedMimeTypes]) }
 			: {}),
