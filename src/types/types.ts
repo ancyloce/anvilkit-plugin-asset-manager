@@ -3,6 +3,21 @@ export interface AssetMeta {
 	readonly mimeType?: string;
 	readonly width?: number;
 	readonly height?: number;
+	/**
+	 * Optional provenance/attribution for externally-sourced assets (PRD 0002
+	 * §8.4). Set when an asset is inserted from a credit-requiring provider such
+	 * as Unsplash; export plugins read it to emit the required photographer +
+	 * source credit. NOTE: the in-memory registry's freeze reconstructor is
+	 * extended to preserve this field in Phase 1 (M5); the type is additive here.
+	 */
+	readonly attribution?: {
+		readonly source: "unsplash";
+		readonly photographerName: string;
+		readonly photographerUrl: string;
+		readonly unsplashUrl: string;
+		readonly photoUrl: string;
+		readonly downloadLocation: string;
+	};
 }
 
 /**
@@ -54,33 +69,11 @@ export type UploadAdapter = (
 	options?: UploadAdapterOptions,
 ) => Promise<UploadResult>;
 
-export interface AssetManagerOptions {
-	readonly uploader: UploadAdapter;
-	readonly maxFileSize?: number;
-	readonly acceptedMimeTypes?: readonly string[];
-	/**
-	 * Permit `data:` URLs to flow through the trust boundary. Defaults to
-	 * `false` — `http`, `https`, and `blob` are always allowed; every
-	 * other scheme is rejected. The previous `urlAllowlist: ["data"]`
-	 * pattern is replaced by this typed flag in v1.0.
-	 */
-	readonly dataUrlAllowlistOptIn?: boolean;
-	/**
-	 * Permit `http(s)` URLs whose hostname mixes Unicode scripts (e.g.
-	 * `аpple.com` blending Cyrillic and Latin). Defaults to `false` —
-	 * mixed-script hostnames are rejected as a homoglyph-attack guard.
-	 * Single-script IDN hosts (e.g. `münchen.de`, `日本.jp`) are always
-	 * allowed regardless of this flag.
-	 */
-	readonly allowMixedScriptHostnames?: boolean;
-	/**
-	 * Optional thumbnail derivation passed to {@link createStudioAssetSource}.
-	 * Returning a string sets `StudioAsset.thumbnailUrl`; returning
-	 * `undefined` suppresses the thumbnail (overriding the default-for-images
-	 * behavior).
-	 */
-	readonly getThumbnail?: (entry: UploadResult) => string | undefined;
-}
+// `AssetManagerOptions` is defined in `./options.ts` (hoisted there so it can
+// aggregate the data-source / folder / provider / category contracts without
+// forming an import cycle). It is re-exported from the package barrel under the
+// same name. The `Pick<AssetManagerOptions, "acceptedMimeTypes" | "maxFileSize">`
+// trust-boundary subset used by `validate-upload-result.ts` imports from there.
 
 /**
  * Listener invoked after every registry mutation
