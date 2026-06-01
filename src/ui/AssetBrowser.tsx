@@ -12,6 +12,7 @@ import { Windowed } from "@anvilkit/ui/windowed";
 import * as React from "react";
 import type { AssetKind, UploadResult } from "../types/types.js";
 import { inferAssetKind } from "../utils/infer-kind.js";
+import { ASSET_DRAG_MIME } from "./FolderTree.js";
 
 const KIND_FILTERS: readonly AssetKind[] = [
 	"image",
@@ -47,6 +48,16 @@ export interface AssetBrowserProps {
 	 * pre-filter at the host layer) keep their previous chrome.
 	 */
 	readonly searchEnabled?: boolean;
+	/**
+	 * Optional content rendered above the filter row — typically a folder
+	 * breadcrumb + tree + source tabs (PRD 0002 §7.4). Purely additive.
+	 */
+	readonly aboveFilters?: React.ReactNode;
+	/**
+	 * When `true`, asset rows are draggable carrying an asset-id payload
+	 * (`ASSET_DRAG_MIME`) so they can be dropped onto a `FolderTree` row.
+	 */
+	readonly draggableRows?: boolean;
 	/**
 	 * Page size used by the "Load more" affordance once the visible
 	 * slice exceeds this number. Defaults to 100.
@@ -84,6 +95,8 @@ export function AssetBrowser({
 	onReplace,
 	onEdit,
 	searchEnabled = false,
+	aboveFilters,
+	draggableRows = false,
 	pageSize = DEFAULT_PAGE_SIZE,
 	virtualizeThreshold = DEFAULT_VIRTUALIZE_THRESHOLD,
 	itemHeight = DEFAULT_ITEM_HEIGHT,
@@ -200,6 +213,19 @@ export function AssetBrowser({
 		<>
 			<button
 				aria-label={`Insert asset ${asset.id}`}
+				draggable={draggableRows}
+				data-asset-draggable={draggableRows ? "" : undefined}
+				onDragStart={
+					draggableRows
+						? (event) => {
+								event.dataTransfer.setData(
+									ASSET_DRAG_MIME,
+									JSON.stringify([asset.id]),
+								);
+								event.dataTransfer.effectAllowed = "move";
+							}
+						: undefined
+				}
 				onClick={() => {
 					onInsert(asset);
 				}}
@@ -290,7 +316,7 @@ export function AssetBrowser({
 		</>
 	);
 
-	const filterRow = searchEnabled ? (
+	const searchRow = searchEnabled ? (
 		<div data-asset-manager-filters>
 			<Input
 				aria-label="Search assets"
@@ -323,6 +349,13 @@ export function AssetBrowser({
 			</div>
 		</div>
 	) : null;
+
+	const filterRow = (
+		<>
+			{aboveFilters}
+			{searchRow}
+		</>
+	);
 
 	if (total === 0) {
 		const emptyLabel =
