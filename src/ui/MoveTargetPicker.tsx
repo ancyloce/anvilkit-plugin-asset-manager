@@ -1,0 +1,94 @@
+"use client";
+
+import { Button } from "@anvilkit/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from "@anvilkit/ui/dialog";
+import * as React from "react";
+
+import type { AssetFolder } from "../types/folders.js";
+
+/**
+ * Keyboard-accessible move-target picker — the a11y fallback for drag-to-folder.
+ * Renders a `role="listbox"` of folders plus a root option.
+ */
+export interface MoveTargetPickerProps {
+	readonly open: boolean;
+	readonly onOpenChange: (open: boolean) => void;
+	readonly folders: readonly AssetFolder[];
+	readonly onPick: (folderId: string | null) => void | Promise<void>;
+	readonly rootLabel?: string;
+}
+
+export function MoveTargetPicker({
+	open,
+	onOpenChange,
+	folders,
+	onPick,
+	rootLabel = "All assets",
+}: MoveTargetPickerProps) {
+	const [busy, setBusy] = React.useState(false);
+
+	async function pick(folderId: string | null) {
+		if (busy) return;
+		setBusy(true);
+		try {
+			await onPick(folderId);
+			onOpenChange(false);
+		} finally {
+			setBusy(false);
+		}
+	}
+
+	return (
+		<Dialog
+			open={open}
+			onOpenChange={(next) => {
+				if (!busy) onOpenChange(next);
+			}}
+		>
+			<DialogContent>
+				<DialogHeader>
+					<DialogTitle>Move to folder</DialogTitle>
+				</DialogHeader>
+				<ul
+					aria-label="Move to folder"
+					data-testid="ak-move-target-picker"
+					className="flex max-h-72 flex-col gap-1 overflow-auto"
+				>
+					<li>
+						<Button
+							type="button"
+							variant="ghost"
+							size="sm"
+							className="w-full justify-start"
+							data-move-target="root"
+							disabled={busy}
+							onClick={() => void pick(null)}
+						>
+							{rootLabel}
+						</Button>
+					</li>
+					{folders.map((folder) => (
+						<li key={folder.id}>
+							<Button
+								type="button"
+								variant="ghost"
+								size="sm"
+								className="w-full justify-start"
+								data-move-target={folder.id}
+								disabled={busy}
+								onClick={() => void pick(folder.id)}
+							>
+								{folder.name}
+							</Button>
+						</li>
+					))}
+				</ul>
+			</DialogContent>
+		</Dialog>
+	);
+}
