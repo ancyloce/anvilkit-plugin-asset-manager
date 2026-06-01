@@ -23,6 +23,12 @@ export interface AssetSourceCapabilities {
 	readonly mutable: boolean;
 	/** Unsplash = true. */
 	readonly requiresAttribution: boolean;
+	/**
+	 * Supports folder scoping. Only the local library provider sets this; a
+	 * folder-scoped query (`AssetFilter.folderId`) drops providers without it
+	 * from the federation. Defaults to `false` when omitted.
+	 */
+	readonly folders?: boolean;
 }
 
 export interface AssetTheme {
