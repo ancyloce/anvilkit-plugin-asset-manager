@@ -248,7 +248,11 @@ export function createStudioAssetSource(
 	};
 }
 
-function toStudioAsset(
+/**
+ * Project a registry `UploadResult` into the sidebar's `StudioAsset` shape.
+ * Exported so the composite source reuses the exact same projection.
+ */
+export function toStudioAsset(
 	entry: UploadResult,
 	getThumbnail?: (entry: UploadResult) => string | undefined,
 ): StudioAsset {

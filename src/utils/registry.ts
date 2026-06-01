@@ -1,4 +1,5 @@
 import type {
+	AssetKind,
 	AssetRegistry,
 	AssetRegistryListener,
 	AssetSearchOptions,
@@ -106,6 +107,13 @@ function freezeUploadResult(asset: UploadResult): UploadResult {
 						...(asset.meta.height !== undefined
 							? { height: asset.meta.height }
 							: {}),
+						...(asset.meta.attribution !== undefined
+							? {
+									attribution: Object.freeze({
+										...asset.meta.attribution,
+									}),
+								}
+							: {}),
 					}),
 				}
 			: {}),
@@ -130,33 +138,47 @@ function normalizeTags(tags: readonly string[]): string[] {
 	return out;
 }
 
-function runSearch(
-	assetsById: Map<string, UploadResult>,
-	options: AssetSearchOptions,
-): AssetSearchPage {
+/**
+ * Pure predicate: does `entry` satisfy the query / kind / tag filters? Exported
+ * so the in-memory data-source compose layer applies the EXACT same matching
+ * before adding its folder clause (PRD 0002 §9.2 — single source of truth for
+ * search semantics).
+ */
+export function assetMatchesSearch(
+	entry: UploadResult,
+	options: {
+		readonly query?: string;
+		readonly kinds?: readonly AssetKind[];
+		readonly tags?: readonly string[];
+	},
+): boolean {
 	const query = options.query?.trim().toLowerCase() ?? "";
-	const kindFilter =
-		options.kinds && options.kinds.length > 0 ? options.kinds : undefined;
-	const tagFilter =
-		options.tags && options.tags.length > 0
-			? options.tags.map((t) => t.trim().toLowerCase()).filter((t) => t !== "")
-			: undefined;
-
-	const matches: UploadResult[] = [];
-	for (const entry of assetsById.values()) {
-		if (!matchesQuery(entry, query)) continue;
-		if (
-			kindFilter !== undefined &&
-			!kindFilter.includes(inferAssetKind(entry))
-		) {
-			continue;
-		}
-		if (tagFilter !== undefined && !matchesAllTags(entry, tagFilter)) {
-			continue;
-		}
-		matches.push(entry);
+	if (!matchesQuery(entry, query)) return false;
+	if (
+		options.kinds &&
+		options.kinds.length > 0 &&
+		!options.kinds.includes(inferAssetKind(entry))
+	) {
+		return false;
 	}
+	if (options.tags && options.tags.length > 0) {
+		const tagFilter = options.tags
+			.map((t) => t.trim().toLowerCase())
+			.filter((t) => t !== "");
+		if (tagFilter.length > 0 && !matchesAllTags(entry, tagFilter)) return false;
+	}
+	return true;
+}
 
+/**
+ * Pure offset-cursor pagination over a pre-filtered match list. Shared by
+ * `runSearch` and the folder-scoped data-source path so the cursor contract is
+ * identical regardless of which clause did the filtering.
+ */
+export function paginateMatches(
+	matches: readonly UploadResult[],
+	options: { readonly cursor?: string; readonly limit?: number },
+): AssetSearchPage {
 	const total = matches.length;
 	const limit =
 		options.limit !== undefined && options.limit > 0
@@ -166,12 +188,22 @@ function runSearch(
 	const slice = matches.slice(offset, offset + limit);
 	const nextOffset = offset + slice.length;
 	const nextCursor = nextOffset < total ? String(nextOffset) : undefined;
-
 	return Object.freeze({
 		items: Object.freeze(slice),
 		total,
 		nextCursor,
 	});
+}
+
+function runSearch(
+	assetsById: Map<string, UploadResult>,
+	options: AssetSearchOptions,
+): AssetSearchPage {
+	const matches: UploadResult[] = [];
+	for (const entry of assetsById.values()) {
+		if (assetMatchesSearch(entry, options)) matches.push(entry);
+	}
+	return paginateMatches(matches, options);
 }
 
 function matchesQuery(entry: UploadResult, query: string): boolean {
