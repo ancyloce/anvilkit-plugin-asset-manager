@@ -48,12 +48,22 @@ export interface AssetManagerUIProps
 	 * chrome can opt out.
 	 */
 	readonly searchEnabled?: boolean;
+	/**
+	 * Optional content rendered above the browser's filter row — e.g. a
+	 * `FolderBreadcrumb` + `FolderTree` for folder navigation (PRD 0002 §7.4).
+	 * The host wires these to the resolved data source / composite source.
+	 */
+	readonly aboveFilters?: React.ReactNode;
+	/** Make asset rows draggable so they can be dropped onto a `FolderTree`. */
+	readonly draggableRows?: boolean;
 }
 
 export function AssetManagerUI({
 	acceptedMimeTypes,
 	allowMixedScriptHostnames,
+	aboveFilters,
 	dataUrlAllowlistOptIn,
+	draggableRows,
 	maxFileSize,
 	onAssetInserted,
 	registry,
@@ -183,6 +193,8 @@ export function AssetManagerUI({
 						setPendingReplace(asset);
 					}}
 					searchEnabled={searchEnabled}
+					{...(aboveFilters !== undefined ? { aboveFilters } : {})}
+					{...(draggableRows !== undefined ? { draggableRows } : {})}
 				/>
 				<DeleteAssetDialog
 					asset={pendingDelete}
