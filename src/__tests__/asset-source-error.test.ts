@@ -48,6 +48,7 @@ describe("AssetSourceError", () => {
 		const codes: readonly AssetSourceErrorCode[] = [
 			"DATA_SOURCE_UNAVAILABLE",
 			"DATA_SOURCE_TIMEOUT",
+			"ASSET_MUTATION_REJECTED",
 			"FOLDER_NOT_FOUND",
 			"FOLDER_CYCLE",
 			"FOLDER_NAME_CONFLICT",
