@@ -10,9 +10,10 @@ import {
 import { Progress } from "@anvilkit/ui/progress";
 import * as React from "react";
 
+import type { AssetManagerOptions } from "../types/options.js";
 import type {
-	AssetManagerOptions,
 	AssetRegistry,
+	UploadAdapter,
 	UploadResult,
 } from "../types/types.js";
 import { validateUploadResult } from "../utils/validate-upload-result.js";
@@ -28,10 +29,15 @@ export interface AssetManagerUIProps
 		AssetManagerOptions,
 		| "acceptedMimeTypes"
 		| "maxFileSize"
-		| "uploader"
 		| "dataUrlAllowlistOptIn"
 		| "allowMixedScriptHostnames"
 	> {
+	/**
+	 * Binary uploader. Required at the UI boundary even though
+	 * `AssetManagerOptions.uploader` is optional — the plugin passes the
+	 * resolved (defaulted) uploader.
+	 */
+	readonly uploader: UploadAdapter;
 	readonly registry: AssetRegistry;
 	readonly onAssetInserted?: (asset: UploadResult) => void;
 	/**

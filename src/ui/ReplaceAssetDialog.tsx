@@ -12,7 +12,8 @@ import {
 import * as React from "react";
 
 import { validateSelectedFile } from "../plugin.js";
-import type { AssetManagerOptions, UploadResult } from "../types/types.js";
+import type { AssetManagerOptions } from "../types/options.js";
+import type { UploadResult } from "../types/types.js";
 
 export interface ReplaceAssetDialogProps
 	extends Pick<AssetManagerOptions, "acceptedMimeTypes" | "maxFileSize"> {

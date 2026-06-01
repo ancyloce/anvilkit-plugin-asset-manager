@@ -3,7 +3,8 @@
 import { Button } from "@anvilkit/ui/button";
 import * as React from "react";
 import { validateSelectedFile } from "../plugin.js";
-import type { AssetManagerOptions, UploadResult } from "../types/types.js";
+import type { AssetManagerOptions } from "../types/options.js";
+import type { UploadAdapter, UploadResult } from "../types/types.js";
 import { validateUploadResult } from "../utils/validate-upload-result.js";
 
 export interface UploadProgressSnapshot {
@@ -16,10 +17,15 @@ export interface UploadButtonProps
 		AssetManagerOptions,
 		| "acceptedMimeTypes"
 		| "maxFileSize"
-		| "uploader"
 		| "dataUrlAllowlistOptIn"
 		| "allowMixedScriptHostnames"
 	> {
+	/**
+	 * Binary uploader. Required at the UI boundary even though
+	 * `AssetManagerOptions.uploader` is optional — the plugin passes the
+	 * resolved (defaulted) uploader, so the component never sees `undefined`.
+	 */
+	readonly uploader: UploadAdapter;
 	readonly onUploaded?: (asset: UploadResult) => void;
 	readonly onError?: (error: unknown) => void;
 	/**
