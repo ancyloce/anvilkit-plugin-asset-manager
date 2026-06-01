@@ -261,13 +261,15 @@ function getRuntimeState<UserConfig extends PuckConfig = PuckConfig>(
 }
 
 /**
- * Whether to load the richer composite source. Folder *UI* lands in Phase 2
- * (core `ImageModule` + `./ui`); in Phase 1 the composite is engaged when a host
- * supplies a backend, extra providers, or Unsplash — otherwise the lightweight
- * registry-backed source is sufficient and cheaper.
+ * Whether to load the richer composite source. Folders are ON by default
+ * (PRD 0002 §4.1), so any caller that hasn't explicitly set `folders: false`
+ * gets the composite (folder-aware sidebar). It also engages for a host
+ * backend, extra providers, or Unsplash. Only `folders: false` + no
+ * backend/provider keeps the lightweight, flat registry source.
  */
 function needsRichSource(options: NormalizedAssetManagerOptions): boolean {
 	return (
+		options.folders !== false ||
 		options.dataSource !== undefined ||
 		(options.providers !== undefined && options.providers.length > 0) ||
 		options.unsplash !== undefined

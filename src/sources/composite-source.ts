@@ -14,6 +14,7 @@ import type {
 	StudioAssetListPage,
 	StudioAssetListQuery,
 	StudioAssetSource,
+	StudioAssetTheme,
 } from "@anvilkit/core/types";
 
 import type { AssetFilter, AssetListPage } from "../types/filter.js";
@@ -70,8 +71,25 @@ export function createCompositeAssetSource(
 		...(getThumbnail ? { getThumbnail } : {}),
 	});
 
-	const project = (entry: UploadResult): StudioAsset =>
-		toStudioAsset(entry, getThumbnail);
+	const project = (entry: UploadResult): StudioAsset => {
+		const attribution = entry.meta?.attribution;
+		return {
+			...toStudioAsset(entry, getThumbnail),
+			// Enrich with folder membership (from the side-index) + provenance so the
+			// sidebar can show which folder/source an asset belongs to.
+			folderId: source.folders.folderOf(entry.id),
+			source: entry.id.startsWith("unsplash:") ? "unsplash" : "local",
+			...(attribution
+				? {
+						attribution: {
+							photographerName: attribution.photographerName,
+							photographerUrl: attribution.photographerUrl,
+							sourceUrl: attribution.unsplashUrl,
+						},
+					}
+				: {}),
+		};
+	};
 
 	// Local library is always provider[0]; external providers federate alongside.
 	const providers: readonly AssetSourceProvider[] = [
@@ -106,6 +124,9 @@ export function createCompositeAssetSource(
 				items: Object.freeze(page.items.map(project)),
 				total: page.total,
 				nextCursor: page.nextCursor,
+				...(page.folders ? { folders: page.folders } : {}),
+				...(page.folderPath ? { folderPath: page.folderPath } : {}),
+				...(page.sourceCursors ? { sourceCursors: page.sourceCursors } : {}),
 			};
 		},
 
@@ -133,5 +154,27 @@ export function createCompositeAssetSource(
 		removeFolder: (id, opts) => source.removeFolder(id, opts),
 		moveFolder: (id, parentId) => source.moveFolder(id, parentId),
 		moveAsset: (assetId, folderId) => source.move(assetId, folderId),
+
+		// ── external-source surface ──
+		async pickResult(asset) {
+			const provider = providers.find((p) => p.id === asset.source);
+			if (provider === undefined || provider.id === "local") return asset;
+			// Fires the provider's download trigger + materializes the result into
+			// the registry so its asset://<id> reference resolves on insert.
+			const result = await provider.pickResult(asset);
+			registry.register(result);
+			return project(result);
+		},
+		subscribeStatus: (listener) => source.subscribeStatus(listener),
+		async listThemes() {
+			// Aggregate the themes of every external (non-local) provider; empty
+			// when only the local library is present (sidebar shows no theme chips).
+			const themes: StudioAssetTheme[] = [];
+			for (const provider of providers) {
+				if (provider.id === "local") continue;
+				themes.push(...(await provider.listThemes()));
+			}
+			return themes;
+		},
 	};
 }

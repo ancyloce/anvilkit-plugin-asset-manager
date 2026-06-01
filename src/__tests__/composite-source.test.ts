@@ -104,3 +104,101 @@ describe("subscribe", () => {
 		expect(listener).toHaveBeenCalledTimes(2);
 	});
 });
+
+describe("Phase-2 page pass-through + enrichment", () => {
+	it("returns folders + breadcrumb and enriches items with folderId/source", async () => {
+		registry.register({ id: "a1", url: "https://x/a1.png" });
+		const folder = await composite.createFolder(null, "Marketing");
+		await composite.moveAsset("a1", folder.id);
+		const page = await composite.listPaginated({ folderId: folder.id });
+		expect(page.folders).toEqual([]); // no child folders of Marketing
+		expect(page.folderPath?.map((f) => f.name)).toEqual(["Marketing"]);
+		const item = page.items.find((i) => i.id === "a1");
+		expect(item?.folderId).toBe(folder.id);
+		expect(item?.source).toBe("local");
+	});
+
+	it("listThemes aggregates external providers' themes", async () => {
+		const themed = createCompositeAssetSource({
+			source: resolveDataSource({
+				registry,
+				upload: async (f) => ({ id: f.name, url: "u" }),
+			}),
+			registry,
+			upload: async (f) => ({ id: f.name, url: "u" }),
+			providers: [
+				{
+					id: "unsplash",
+					label: "Unsplash",
+					capabilities: {
+						searchable: true,
+						themed: true,
+						mutable: false,
+						requiresAttribution: true,
+						folders: false,
+					},
+					listThemes: () => [
+						{ id: "nature", label: "assetManager.unsplash.theme.nature" },
+					],
+					search: async () => ({ items: [], total: 0, nextCursor: undefined }),
+					pickResult: async (a) => ({ id: a.id, url: a.url }),
+				},
+			],
+		});
+		const themes = await themed.listThemes?.();
+		expect(themes?.map((t) => t.id)).toEqual(["nature"]);
+	});
+
+	it("pickResult materializes an external result into the registry", async () => {
+		const picked = {
+			id: "unsplash:p1",
+			url: "https://images.unsplash.com/p1",
+			meta: {
+				attribution: {
+					source: "unsplash" as const,
+					photographerName: "Jane",
+					photographerUrl: "https://unsplash.com/@jane",
+					unsplashUrl: "https://unsplash.com/?utm_source=demo",
+					photoUrl: "https://unsplash.com/photos/p1",
+					downloadLocation: "https://api.unsplash.com/photos/p1/download",
+				},
+			},
+		};
+		const withUnsplash = createCompositeAssetSource({
+			source: resolveDataSource({
+				registry,
+				upload: async (f) => ({ id: f.name, url: "u" }),
+			}),
+			registry,
+			upload: async (f) => ({ id: f.name, url: "u" }),
+			providers: [
+				{
+					id: "unsplash",
+					label: "Unsplash",
+					capabilities: {
+						searchable: true,
+						themed: true,
+						mutable: false,
+						requiresAttribution: true,
+						folders: false,
+					},
+					listThemes: () => [],
+					search: async () => ({ items: [], total: 0, nextCursor: undefined }),
+					pickResult: async () => picked,
+				},
+			],
+		});
+
+		const result = await withUnsplash.pickResult?.({
+			id: "unsplash:p1",
+			kind: "image",
+			name: "p",
+			url: "asset://unsplash:p1",
+			source: "unsplash",
+		});
+		// Registered (so asset://unsplash:p1 resolves) + attribution projected.
+		expect(registry.get("unsplash:p1")).toBeDefined();
+		expect(result?.source).toBe("unsplash");
+		expect(result?.attribution?.photographerName).toBe("Jane");
+	});
+});

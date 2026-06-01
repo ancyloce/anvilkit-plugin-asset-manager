@@ -154,6 +154,34 @@ describe("createUnsplashProvider — pickResult", () => {
 		).toBe(true);
 	});
 
+	it("refetches + fires the trigger on a cache miss (provider recreated)", async () => {
+		const fetchMock = routingFetch();
+		const provider = createUnsplashProvider({
+			appName: "demo",
+			accessKey: "K",
+			fetch: fetchMock,
+		});
+		// No preceding search → byId is empty, as after a page reload.
+		const result = await provider.pickResult({
+			id: "unsplash:p1",
+			kind: "image",
+			name: "A mountain",
+			url: "asset://unsplash:p1",
+		});
+		expect(result.url).toBe("https://images.unsplash.com/photo-1?ixid=abc");
+		expect(result.meta?.attribution?.downloadLocation).toBe(
+			"https://api.unsplash.com/photos/p1/download",
+		);
+		expect(
+			fetchMock.mock.calls.some((c) => /\/photos\/p1$/.test(String(c[0]))),
+		).toBe(true);
+		expect(
+			fetchMock.mock.calls.some(
+				(c) => c[0] === "https://api.unsplash.com/photos/p1/download",
+			),
+		).toBe(true);
+	});
+
 	it("exposes Unsplash capabilities (read-only, themed, attribution-required)", () => {
 		const provider = createUnsplashProvider({ appName: "d", accessKey: "K" });
 		expect(provider.capabilities).toMatchObject({
