@@ -198,6 +198,9 @@ export function UploadButton({
 					void handleChange(event);
 				}}
 				ref={inputRef}
+				// Keep inline: hides the trigger-only file input from the a11y tree
+				// regardless of whether Tailwind CSS is loaded (the `hidden` class is
+				// env-dependent and exposes this unlabeled input to axe in jsdom).
 				style={{ display: "none" }}
 				type="file"
 			/>
@@ -224,13 +227,9 @@ function UploadSpinner() {
 	return (
 		<svg
 			aria-hidden
+			className="mr-1.5 inline-block animate-spin"
 			fill="none"
 			height={14}
-			style={{
-				display: "inline-block",
-				marginRight: 6,
-				animation: "spin 1s linear infinite",
-			}}
 			viewBox="0 0 24 24"
 			width={14}
 		>

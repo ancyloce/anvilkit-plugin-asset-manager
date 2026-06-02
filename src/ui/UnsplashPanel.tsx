@@ -73,14 +73,7 @@ export function UnsplashPanel({
 				role="status"
 				aria-live="polite"
 				data-testid="ak-unsplash-status"
-				style={{
-					position: "absolute",
-					width: 1,
-					height: 1,
-					overflow: "hidden",
-					clip: "rect(0 0 0 0)",
-					whiteSpace: "nowrap",
-				}}
+				className="sr-only"
 			>
 				{status === "loading" ? "Loading photos…" : ""}
 			</span>

@@ -1,5 +1,13 @@
 "use client";
 
+import {
+	Breadcrumb,
+	BreadcrumbItem,
+	BreadcrumbList,
+	BreadcrumbPage,
+	BreadcrumbSeparator,
+} from "@anvilkit/ui/breadcrumb";
+import { Button } from "@anvilkit/ui/button";
 import * as React from "react";
 
 import type { AssetFolder } from "../types/folders.js";
@@ -16,35 +24,55 @@ export function FolderBreadcrumb({
 	onNavigate,
 	rootLabel = "All assets",
 }: FolderBreadcrumbProps) {
+	const atRoot = path.length === 0;
 	return (
-		<nav
-			aria-label="Folders"
-			data-testid="ak-folder-breadcrumb"
-			className="flex flex-wrap items-center gap-1 text-sm"
-		>
-			<button
-				type="button"
-				data-folder-crumb="root"
-				aria-current={path.length === 0 ? "page" : undefined}
-				className="hover:underline"
-				onClick={() => onNavigate(null)}
-			>
-				{rootLabel}
-			</button>
-			{path.map((folder, index) => (
-				<React.Fragment key={folder.id}>
-					<span aria-hidden="true">›</span>
-					<button
-						type="button"
-						data-folder-crumb={folder.id}
-						aria-current={index === path.length - 1 ? "page" : undefined}
-						className="hover:underline"
-						onClick={() => onNavigate(folder.id)}
-					>
-						{folder.name}
-					</button>
-				</React.Fragment>
-			))}
-		</nav>
+		<Breadcrumb aria-label="Folders" data-testid="ak-folder-breadcrumb">
+			<BreadcrumbList>
+				<BreadcrumbItem>
+					{atRoot ? (
+						<BreadcrumbPage data-folder-crumb="root">
+							{rootLabel}
+						</BreadcrumbPage>
+					) : (
+						<Button
+							type="button"
+							variant="link"
+							size="sm"
+							className="h-auto p-0"
+							data-folder-crumb="root"
+							onClick={() => onNavigate(null)}
+						>
+							{rootLabel}
+						</Button>
+					)}
+				</BreadcrumbItem>
+				{path.map((folder, index) => {
+					const isCurrent = index === path.length - 1;
+					return (
+						<React.Fragment key={folder.id}>
+							<BreadcrumbSeparator />
+							<BreadcrumbItem>
+								{isCurrent ? (
+									<BreadcrumbPage data-folder-crumb={folder.id}>
+										{folder.name}
+									</BreadcrumbPage>
+								) : (
+									<Button
+										type="button"
+										variant="link"
+										size="sm"
+										className="h-auto p-0"
+										data-folder-crumb={folder.id}
+										onClick={() => onNavigate(folder.id)}
+									>
+										{folder.name}
+									</Button>
+								)}
+							</BreadcrumbItem>
+						</React.Fragment>
+					);
+				})}
+			</BreadcrumbList>
+		</Breadcrumb>
 	);
 }

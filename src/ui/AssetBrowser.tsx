@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@anvilkit/ui/button";
 import {
 	Card,
 	CardContent,
@@ -278,40 +279,46 @@ export function AssetBrowser({
 				<span>{asset.meta?.mimeType ?? "unknown type"}</span>
 			</button>
 			{onEdit !== undefined ? (
-				<button
+				<Button
 					aria-label={`Edit asset ${asset.id}`}
 					data-asset-action="edit"
 					onClick={() => {
 						onEdit(asset);
 					}}
 					type="button"
+					variant="ghost"
+					size="sm"
 				>
 					Edit
-				</button>
+				</Button>
 			) : null}
 			{onReplace !== undefined ? (
-				<button
+				<Button
 					aria-label={`Replace asset ${asset.id}`}
 					data-asset-action="replace"
 					onClick={() => {
 						onReplace(asset);
 					}}
 					type="button"
+					variant="ghost"
+					size="sm"
 				>
 					Replace
-				</button>
+				</Button>
 			) : null}
 			{onDelete !== undefined ? (
-				<button
+				<Button
 					aria-label={`Delete asset ${asset.id}`}
 					data-asset-action="delete"
 					onClick={() => {
 						onDelete(asset);
 					}}
 					type="button"
+					variant="ghost"
+					size="sm"
 				>
 					Delete
-				</button>
+				</Button>
 			) : null}
 		</>
 	);
@@ -331,7 +338,7 @@ export function AssetBrowser({
 				{KIND_FILTERS.map((kind) => {
 					const active = activeKinds.includes(kind);
 					return (
-						<button
+						<Button
 							aria-label={`Filter ${kind} assets`}
 							aria-pressed={active}
 							data-asset-kind-filter={kind}
@@ -341,9 +348,11 @@ export function AssetBrowser({
 								setPageLimit(pageSize);
 							}}
 							type="button"
+							variant={active ? "secondary" : "ghost"}
+							size="sm"
 						>
 							{kind}
-						</button>
+						</Button>
 					);
 				})}
 			</div>
@@ -403,15 +412,17 @@ export function AssetBrowser({
 					threshold={virtualizeThreshold}
 				/>
 				{hasMore ? (
-					<button
+					<Button
 						data-asset-action="load-more"
 						onClick={() => {
 							setPageLimit((current) => current + pageSize);
 						}}
 						type="button"
+						variant="outline"
+						size="sm"
 					>
 						Load more
-					</button>
+					</Button>
 				) : null}
 			</CardContent>
 		</Card>

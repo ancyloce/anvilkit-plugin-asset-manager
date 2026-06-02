@@ -10,6 +10,7 @@ import {
 	DialogTitle,
 } from "@anvilkit/ui/dialog";
 import { Input } from "@anvilkit/ui/input";
+import { Label } from "@anvilkit/ui/label";
 import * as React from "react";
 
 import type { UploadResult } from "../types/types.js";
@@ -110,7 +111,7 @@ export function MetadataPanel({
 					</DialogDescription>
 				</DialogHeader>
 				<div data-asset-manager-metadata>
-					<label htmlFor="asset-metadata-name">Name</label>
+					<Label htmlFor="asset-metadata-name">Name</Label>
 					<Input
 						id="asset-metadata-name"
 						value={name}
@@ -121,12 +122,12 @@ export function MetadataPanel({
 						disabled={busy}
 					/>
 					<div data-asset-manager-tag-editor>
-						<label htmlFor="asset-metadata-tag-input">Tags</label>
+						<Label htmlFor="asset-metadata-tag-input">Tags</Label>
 						<ul aria-label="Current tags" role="list">
 							{tags.map((tag) => (
 								<li key={tag}>
 									<span>{tag}</span>
-									<button
+									<Button
 										aria-label={`Remove tag ${tag}`}
 										data-asset-action="remove-tag"
 										disabled={busy}
@@ -134,9 +135,11 @@ export function MetadataPanel({
 											removeTag(tag);
 										}}
 										type="button"
+										variant="ghost"
+										size="icon-xs"
 									>
 										×
-									</button>
+									</Button>
 								</li>
 							))}
 						</ul>
