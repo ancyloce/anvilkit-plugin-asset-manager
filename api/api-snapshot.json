@@ -578,7 +578,7 @@
 					]
 				},
 				{
-					"id": 734,
+					"id": 735,
 					"name": "RetryableError",
 					"variant": "reference",
 					"kind": 4194304,
@@ -608,7 +608,7 @@
 					"target": 23
 				},
 				{
-					"id": 733,
+					"id": 734,
 					"name": "RetryOptions",
 					"variant": "reference",
 					"kind": 4194304,
@@ -633,8 +633,8 @@
 				{
 					"title": "References",
 					"children": [
-						734,
-						733
+						735,
+						734
 					]
 				}
 			]
@@ -647,28 +647,28 @@
 			"flags": {},
 			"children": [
 				{
-					"id": 415,
+					"id": 416,
 					"name": "AssetResolutionError",
 					"variant": "declaration",
 					"kind": 128,
 					"flags": {},
 					"children": [
 						{
-							"id": 416,
+							"id": 417,
 							"name": "constructor",
 							"variant": "declaration",
 							"kind": 512,
 							"flags": {},
 							"signatures": [
 								{
-									"id": 417,
+									"id": 418,
 									"name": "AssetResolutionError",
 									"variant": "signature",
 									"kind": 16384,
 									"flags": {},
 									"parameters": [
 										{
-											"id": 418,
+											"id": 419,
 											"name": "assetId",
 											"variant": "param",
 											"kind": 32768,
@@ -679,21 +679,21 @@
 											}
 										},
 										{
-											"id": 419,
+											"id": 420,
 											"name": "code",
 											"variant": "param",
 											"kind": 32768,
 											"flags": {},
 											"type": {
 												"type": "reference",
-												"target": 413,
+												"target": 414,
 												"name": "AssetResolutionErrorCode",
 												"package": "@anvilkit/plugin-asset-manager"
 											},
 											"defaultValue": "\"ASSET_NOT_FOUND\""
 										},
 										{
-											"id": 420,
+											"id": 421,
 											"name": "message",
 											"variant": "param",
 											"kind": 32768,
@@ -705,7 +705,7 @@
 											"defaultValue": "..."
 										},
 										{
-											"id": 421,
+											"id": 422,
 											"name": "options",
 											"variant": "param",
 											"kind": 32768,
@@ -715,14 +715,14 @@
 											"type": {
 												"type": "reflection",
 												"declaration": {
-													"id": 422,
+													"id": 423,
 													"name": "__type",
 													"variant": "declaration",
 													"kind": 65536,
 													"flags": {},
 													"children": [
 														{
-															"id": 423,
+															"id": 424,
 															"name": "cause",
 															"variant": "declaration",
 															"kind": 1024,
@@ -740,7 +740,7 @@
 														{
 															"title": "Properties",
 															"children": [
-																423
+																424
 															]
 														}
 													]
@@ -750,7 +750,7 @@
 									],
 									"type": {
 										"type": "reference",
-										"target": 415,
+										"target": 416,
 										"name": "AssetResolutionError",
 										"package": "@anvilkit/plugin-asset-manager"
 									},
@@ -770,7 +770,7 @@
 							}
 						},
 						{
-							"id": 424,
+							"id": 425,
 							"name": "assetId",
 							"variant": "declaration",
 							"kind": 1024,
@@ -783,7 +783,7 @@
 							}
 						},
 						{
-							"id": 425,
+							"id": 426,
 							"name": "code",
 							"variant": "declaration",
 							"kind": 1024,
@@ -792,7 +792,7 @@
 							},
 							"type": {
 								"type": "reference",
-								"target": 413,
+								"target": 414,
 								"name": "AssetResolutionErrorCode",
 								"package": "@anvilkit/plugin-asset-manager"
 							}
@@ -802,14 +802,14 @@
 						{
 							"title": "Constructors",
 							"children": [
-								416
+								417
 							]
 						},
 						{
 							"title": "Properties",
 							"children": [
-								424,
-								425
+								425,
+								426
 							]
 						}
 					],
@@ -827,7 +827,7 @@
 					]
 				},
 				{
-					"id": 426,
+					"id": 427,
 					"name": "AssetSourceError",
 					"variant": "declaration",
 					"kind": 128,
@@ -906,34 +906,34 @@
 					},
 					"children": [
 						{
-							"id": 427,
+							"id": 428,
 							"name": "constructor",
 							"variant": "declaration",
 							"kind": 512,
 							"flags": {},
 							"signatures": [
 								{
-									"id": 428,
+									"id": 429,
 									"name": "AssetSourceError",
 									"variant": "signature",
 									"kind": 16384,
 									"flags": {},
 									"parameters": [
 										{
-											"id": 429,
+											"id": 430,
 											"name": "code",
 											"variant": "param",
 											"kind": 32768,
 											"flags": {},
 											"type": {
 												"type": "reference",
-												"target": 414,
+												"target": 415,
 												"name": "AssetSourceErrorCode",
 												"package": "@anvilkit/plugin-asset-manager"
 											}
 										},
 										{
-											"id": 430,
+											"id": 431,
 											"name": "message",
 											"variant": "param",
 											"kind": 32768,
@@ -944,7 +944,7 @@
 											}
 										},
 										{
-											"id": 431,
+											"id": 432,
 											"name": "options",
 											"variant": "param",
 											"kind": 32768,
@@ -954,14 +954,14 @@
 											"type": {
 												"type": "reflection",
 												"declaration": {
-													"id": 432,
+													"id": 433,
 													"name": "__type",
 													"variant": "declaration",
 													"kind": 65536,
 													"flags": {},
 													"children": [
 														{
-															"id": 433,
+															"id": 434,
 															"name": "cause",
 															"variant": "declaration",
 															"kind": 1024,
@@ -975,7 +975,7 @@
 															}
 														},
 														{
-															"id": 434,
+															"id": 435,
 															"name": "retryable",
 															"variant": "declaration",
 															"kind": 1024,
@@ -989,7 +989,7 @@
 															}
 														},
 														{
-															"id": 436,
+															"id": 437,
 															"name": "retryAfterMs",
 															"variant": "declaration",
 															"kind": 1024,
@@ -1003,7 +1003,7 @@
 															}
 														},
 														{
-															"id": 435,
+															"id": 436,
 															"name": "status",
 															"variant": "declaration",
 															"kind": 1024,
@@ -1021,10 +1021,10 @@
 														{
 															"title": "Properties",
 															"children": [
-																433,
 																434,
-																436,
-																435
+																435,
+																437,
+																436
 															]
 														}
 													]
@@ -1034,7 +1034,7 @@
 									],
 									"type": {
 										"type": "reference",
-										"target": 426,
+										"target": 427,
 										"name": "AssetSourceError",
 										"package": "@anvilkit/plugin-asset-manager"
 									},
@@ -1054,7 +1054,7 @@
 							}
 						},
 						{
-							"id": 437,
+							"id": 438,
 							"name": "code",
 							"variant": "declaration",
 							"kind": 1024,
@@ -1063,13 +1063,13 @@
 							},
 							"type": {
 								"type": "reference",
-								"target": 414,
+								"target": 415,
 								"name": "AssetSourceErrorCode",
 								"package": "@anvilkit/plugin-asset-manager"
 							}
 						},
 						{
-							"id": 438,
+							"id": 439,
 							"name": "retryable",
 							"variant": "declaration",
 							"kind": 1024,
@@ -1082,7 +1082,7 @@
 							}
 						},
 						{
-							"id": 440,
+							"id": 441,
 							"name": "retryAfterMs",
 							"variant": "declaration",
 							"kind": 1024,
@@ -1096,7 +1096,7 @@
 							}
 						},
 						{
-							"id": 439,
+							"id": 440,
 							"name": "status",
 							"variant": "declaration",
 							"kind": 1024,
@@ -1114,16 +1114,16 @@
 						{
 							"title": "Constructors",
 							"children": [
-								427
+								428
 							]
 						},
 						{
 							"title": "Properties",
 							"children": [
-								437,
 								438,
-								440,
-								439
+								439,
+								441,
+								440
 							]
 						}
 					],
@@ -1141,28 +1141,28 @@
 					]
 				},
 				{
-					"id": 441,
+					"id": 442,
 					"name": "AssetValidationError",
 					"variant": "declaration",
 					"kind": 128,
 					"flags": {},
 					"children": [
 						{
-							"id": 442,
+							"id": 443,
 							"name": "constructor",
 							"variant": "declaration",
 							"kind": 512,
 							"flags": {},
 							"signatures": [
 								{
-									"id": 443,
+									"id": 444,
 									"name": "AssetValidationError",
 									"variant": "signature",
 									"kind": 16384,
 									"flags": {},
 									"parameters": [
 										{
-											"id": 444,
+											"id": 445,
 											"name": "code",
 											"variant": "param",
 											"kind": 32768,
@@ -1173,7 +1173,7 @@
 											}
 										},
 										{
-											"id": 445,
+											"id": 446,
 											"name": "message",
 											"variant": "param",
 											"kind": 32768,
@@ -1184,7 +1184,7 @@
 											}
 										},
 										{
-											"id": 446,
+											"id": 447,
 											"name": "options",
 											"variant": "param",
 											"kind": 32768,
@@ -1194,14 +1194,14 @@
 											"type": {
 												"type": "reflection",
 												"declaration": {
-													"id": 447,
+													"id": 448,
 													"name": "__type",
 													"variant": "declaration",
 													"kind": 65536,
 													"flags": {},
 													"children": [
 														{
-															"id": 448,
+															"id": 449,
 															"name": "cause",
 															"variant": "declaration",
 															"kind": 1024,
@@ -1219,7 +1219,7 @@
 														{
 															"title": "Properties",
 															"children": [
-																448
+																449
 															]
 														}
 													]
@@ -1229,7 +1229,7 @@
 									],
 									"type": {
 										"type": "reference",
-										"target": 441,
+										"target": 442,
 										"name": "AssetValidationError",
 										"package": "@anvilkit/plugin-asset-manager"
 									},
@@ -1249,7 +1249,7 @@
 							}
 						},
 						{
-							"id": 449,
+							"id": 450,
 							"name": "code",
 							"variant": "declaration",
 							"kind": 1024,
@@ -1266,13 +1266,13 @@
 						{
 							"title": "Constructors",
 							"children": [
-								442
+								443
 							]
 						},
 						{
 							"title": "Properties",
 							"children": [
-								449
+								450
 							]
 						}
 					],
@@ -6146,14 +6146,14 @@
 					]
 				},
 				{
-					"id": 455,
+					"id": 456,
 					"name": "CreateIRAssetResolverOptions",
 					"variant": "declaration",
 					"kind": 256,
 					"flags": {},
 					"children": [
 						{
-							"id": 458,
+							"id": 459,
 							"name": "allowMixedScriptHostnames",
 							"variant": "declaration",
 							"kind": 1024,
@@ -6167,7 +6167,7 @@
 							}
 						},
 						{
-							"id": 457,
+							"id": 458,
 							"name": "dataUrlAllowlistOptIn",
 							"variant": "declaration",
 							"kind": 1024,
@@ -6181,7 +6181,7 @@
 							}
 						},
 						{
-							"id": 456,
+							"id": 457,
 							"name": "registry",
 							"variant": "declaration",
 							"kind": 1024,
@@ -6200,22 +6200,22 @@
 						{
 							"title": "Properties",
 							"children": [
+								459,
 								458,
-								457,
-								456
+								457
 							]
 						}
 					]
 				},
 				{
-					"id": 466,
+					"id": 467,
 					"name": "CreateStudioAssetSourceOptions",
 					"variant": "declaration",
 					"kind": 256,
 					"flags": {},
 					"children": [
 						{
-							"id": 473,
+							"id": 474,
 							"name": "getThumbnail",
 							"variant": "declaration",
 							"kind": 1024,
@@ -6250,21 +6250,21 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 474,
+									"id": 475,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 475,
+											"id": 476,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
 											"flags": {},
 											"parameters": [
 												{
-													"id": 476,
+													"id": 477,
 													"name": "entry",
 													"variant": "param",
 													"kind": 32768,
@@ -6296,7 +6296,7 @@
 							}
 						},
 						{
-							"id": 477,
+							"id": 478,
 							"name": "maxConcurrentUploads",
 							"variant": "declaration",
 							"kind": 1024,
@@ -6326,7 +6326,7 @@
 							}
 						},
 						{
-							"id": 467,
+							"id": 468,
 							"name": "registry",
 							"variant": "declaration",
 							"kind": 1024,
@@ -6341,7 +6341,7 @@
 							}
 						},
 						{
-							"id": 468,
+							"id": 469,
 							"name": "upload",
 							"variant": "declaration",
 							"kind": 1024,
@@ -6367,21 +6367,21 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 469,
+									"id": 470,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 470,
+											"id": 471,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
 											"flags": {},
 											"parameters": [
 												{
-													"id": 471,
+													"id": 472,
 													"name": "file",
 													"variant": "param",
 													"kind": 32768,
@@ -6398,7 +6398,7 @@
 													}
 												},
 												{
-													"id": 472,
+													"id": 473,
 													"name": "options",
 													"variant": "param",
 													"kind": 32768,
@@ -6441,10 +6441,10 @@
 						{
 							"title": "Properties",
 							"children": [
-								473,
-								477,
-								467,
-								468
+								474,
+								478,
+								468,
+								469
 							]
 						}
 					]
@@ -6567,14 +6567,14 @@
 					]
 				},
 				{
-					"id": 399,
+					"id": 400,
 					"name": "RequiredCsp",
 					"variant": "declaration",
 					"kind": 256,
 					"flags": {},
 					"children": [
 						{
-							"id": 400,
+							"id": 401,
 							"name": "connectSrc",
 							"variant": "declaration",
 							"kind": 1024,
@@ -6594,7 +6594,7 @@
 							}
 						},
 						{
-							"id": 401,
+							"id": 402,
 							"name": "imgSrc",
 							"variant": "declaration",
 							"kind": 1024,
@@ -6614,7 +6614,7 @@
 							}
 						},
 						{
-							"id": 402,
+							"id": 403,
 							"name": "mediaSrc",
 							"variant": "declaration",
 							"kind": 1024,
@@ -6638,22 +6638,22 @@
 						{
 							"title": "Properties",
 							"children": [
-								400,
 								401,
-								402
+								402,
+								403
 							]
 						}
 					]
 				},
 				{
-					"id": 403,
+					"id": 404,
 					"name": "RequiredCspOptions",
 					"variant": "declaration",
 					"kind": 256,
 					"flags": {},
 					"children": [
 						{
-							"id": 404,
+							"id": 405,
 							"name": "dataUrl",
 							"variant": "declaration",
 							"kind": 1024,
@@ -6683,7 +6683,7 @@
 							}
 						},
 						{
-							"id": 405,
+							"id": 406,
 							"name": "inMemory",
 							"variant": "declaration",
 							"kind": 1024,
@@ -6713,7 +6713,7 @@
 							}
 						},
 						{
-							"id": 406,
+							"id": 407,
 							"name": "s3",
 							"variant": "declaration",
 							"kind": 1024,
@@ -6742,7 +6742,7 @@
 								"types": [
 									{
 										"type": "reference",
-										"target": 407,
+										"target": 408,
 										"name": "S3CspOptions",
 										"package": "@anvilkit/plugin-asset-manager"
 									},
@@ -6753,7 +6753,7 @@
 											"type": "array",
 											"elementType": {
 												"type": "reference",
-												"target": 407,
+												"target": 408,
 												"name": "S3CspOptions",
 												"package": "@anvilkit/plugin-asset-manager"
 											}
@@ -6767,15 +6767,15 @@
 						{
 							"title": "Properties",
 							"children": [
-								404,
 								405,
-								406
+								406,
+								407
 							]
 						}
 					]
 				},
 				{
-					"id": 407,
+					"id": 408,
 					"name": "S3CspOptions",
 					"variant": "declaration",
 					"kind": 256,
@@ -6829,7 +6829,7 @@
 					},
 					"children": [
 						{
-							"id": 408,
+							"id": 409,
 							"name": "presignEndpoint",
 							"variant": "declaration",
 							"kind": 1024,
@@ -6873,7 +6873,7 @@
 							}
 						},
 						{
-							"id": 409,
+							"id": 410,
 							"name": "publicHost",
 							"variant": "declaration",
 							"kind": 1024,
@@ -6931,8 +6931,8 @@
 						{
 							"title": "Properties",
 							"children": [
-								408,
-								409
+								409,
+								410
 							]
 						}
 					]
@@ -7056,7 +7056,7 @@
 							}
 						},
 						{
-							"id": 380,
+							"id": 381,
 							"name": "fetch",
 							"variant": "declaration",
 							"kind": 1024,
@@ -7075,14 +7075,14 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 381,
+									"id": 382,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 382,
+											"id": 383,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
@@ -7097,7 +7097,7 @@
 											},
 											"parameters": [
 												{
-													"id": 383,
+													"id": 384,
 													"name": "input",
 													"variant": "param",
 													"kind": 32768,
@@ -7129,7 +7129,7 @@
 													}
 												},
 												{
-													"id": 384,
+													"id": 385,
 													"name": "init",
 													"variant": "param",
 													"kind": 32768,
@@ -7265,7 +7265,7 @@
 							}
 						},
 						{
-							"id": 385,
+							"id": 386,
 							"name": "rehostOnPick",
 							"variant": "declaration",
 							"kind": 1024,
@@ -7287,6 +7287,44 @@
 							}
 						},
 						{
+							"id": 380,
+							"name": "requestTimeoutMs",
+							"variant": "declaration",
+							"kind": 1024,
+							"flags": {
+								"isOptional": true,
+								"isReadonly": true
+							},
+							"comment": {
+								"summary": [
+									{
+										"kind": "text",
+										"text": "Per-request timeout for search / topic / photo lookups (ms). A request\nthat exceeds it aborts and surfaces as a retryable "
+									},
+									{
+										"kind": "code",
+										"text": "`PROVIDER_NETWORK`"
+									},
+									{
+										"kind": "text",
+										"text": "\nerror, so a blocked or flaky network path (e.g. a VPN/proxy black-holing\n"
+									},
+									{
+										"kind": "code",
+										"text": "`api.unsplash.com`"
+									},
+									{
+										"kind": "text",
+										"text": ") lets the sidebar fall back to \"Unsplash unavailable\"\ninstead of spinning. Default 15_000. Ignored if not a positive number."
+									}
+								]
+							},
+							"type": {
+								"type": "intrinsic",
+								"name": "number"
+							}
+						},
+						{
 							"id": 376,
 							"name": "themes",
 							"variant": "declaration",
@@ -7297,7 +7335,7 @@
 							},
 							"type": {
 								"type": "reference",
-								"target": 393,
+								"target": 394,
 								"name": "UnsplashThemeConfig",
 								"package": "@anvilkit/plugin-asset-manager"
 							}
@@ -7311,18 +7349,19 @@
 								375,
 								379,
 								374,
-								380,
+								381,
 								378,
 								377,
 								372,
-								385,
+								386,
+								380,
 								376
 							]
 						}
 					]
 				},
 				{
-					"id": 386,
+					"id": 387,
 					"name": "UnsplashTheme",
 					"variant": "declaration",
 					"kind": 256,
@@ -7367,7 +7406,7 @@
 					},
 					"children": [
 						{
-							"id": 392,
+							"id": 393,
 							"name": "contentFilter",
 							"variant": "declaration",
 							"kind": 1024,
@@ -7406,7 +7445,7 @@
 							}
 						},
 						{
-							"id": 387,
+							"id": 388,
 							"name": "id",
 							"variant": "declaration",
 							"kind": 1024,
@@ -7419,7 +7458,7 @@
 							}
 						},
 						{
-							"id": 388,
+							"id": 389,
 							"name": "label",
 							"variant": "declaration",
 							"kind": 1024,
@@ -7440,7 +7479,7 @@
 							}
 						},
 						{
-							"id": 391,
+							"id": 392,
 							"name": "orientation",
 							"variant": "declaration",
 							"kind": 1024,
@@ -7467,7 +7506,7 @@
 							}
 						},
 						{
-							"id": 390,
+							"id": 391,
 							"name": "query",
 							"variant": "declaration",
 							"kind": 1024,
@@ -7497,7 +7536,7 @@
 							}
 						},
 						{
-							"id": 389,
+							"id": 390,
 							"name": "topicSlugs",
 							"variant": "declaration",
 							"kind": 1024,
@@ -7538,25 +7577,25 @@
 						{
 							"title": "Properties",
 							"children": [
-								392,
-								387,
+								393,
 								388,
+								389,
+								392,
 								391,
-								390,
-								389
+								390
 							]
 						}
 					]
 				},
 				{
-					"id": 393,
+					"id": 394,
 					"name": "UnsplashThemeConfig",
 					"variant": "declaration",
 					"kind": 256,
 					"flags": {},
 					"children": [
 						{
-							"id": 395,
+							"id": 396,
 							"name": "additionalThemes",
 							"variant": "declaration",
 							"kind": 1024,
@@ -7579,7 +7618,7 @@
 									"type": "array",
 									"elementType": {
 										"type": "reference",
-										"target": 386,
+										"target": 387,
 										"name": "UnsplashTheme",
 										"package": "@anvilkit/plugin-asset-manager"
 									}
@@ -7587,7 +7626,7 @@
 							}
 						},
 						{
-							"id": 398,
+							"id": 399,
 							"name": "allowFreeSearch",
 							"variant": "declaration",
 							"kind": 1024,
@@ -7625,7 +7664,7 @@
 							}
 						},
 						{
-							"id": 397,
+							"id": 398,
 							"name": "defaultThemeId",
 							"variant": "declaration",
 							"kind": 1024,
@@ -7639,7 +7678,7 @@
 							}
 						},
 						{
-							"id": 396,
+							"id": 397,
 							"name": "excludeThemes",
 							"variant": "declaration",
 							"kind": 1024,
@@ -7668,7 +7707,7 @@
 							}
 						},
 						{
-							"id": 394,
+							"id": 395,
 							"name": "themes",
 							"variant": "declaration",
 							"kind": 1024,
@@ -7691,7 +7730,7 @@
 									"type": "array",
 									"elementType": {
 										"type": "reference",
-										"target": 386,
+										"target": 387,
 										"name": "UnsplashTheme",
 										"package": "@anvilkit/plugin-asset-manager"
 									}
@@ -7703,11 +7742,11 @@
 						{
 							"title": "Properties",
 							"children": [
-								395,
+								396,
+								399,
 								398,
 								397,
-								396,
-								394
+								395
 							]
 						}
 					]
@@ -8118,7 +8157,7 @@
 					}
 				},
 				{
-					"id": 413,
+					"id": 414,
 					"name": "AssetResolutionErrorCode",
 					"variant": "declaration",
 					"kind": 2097152,
@@ -8174,7 +8213,7 @@
 					}
 				},
 				{
-					"id": 414,
+					"id": 415,
 					"name": "AssetSourceErrorCode",
 					"variant": "declaration",
 					"kind": 2097152,
@@ -8189,7 +8228,7 @@
 								"kind": "inline-tag",
 								"tag": "@link",
 								"text": "AssetValidationError",
-								"target": 441
+								"target": 442
 							},
 							{
 								"kind": "text",
@@ -8199,7 +8238,7 @@
 								"kind": "inline-tag",
 								"tag": "@link",
 								"text": "AssetResolutionError",
-								"target": 415
+								"target": 416
 							},
 							{
 								"kind": "text",
@@ -8581,7 +8620,7 @@
 											},
 											"type": {
 												"type": "reference",
-												"target": 426,
+												"target": 427,
 												"name": "AssetSourceError",
 												"package": "@anvilkit/plugin-asset-manager"
 											}
@@ -8779,7 +8818,7 @@
 					}
 				},
 				{
-					"id": 484,
+					"id": 485,
 					"name": "ValidateUploadResultOptions",
 					"variant": "declaration",
 					"kind": 2097152,
@@ -9002,14 +9041,14 @@
 					]
 				},
 				{
-					"id": 453,
+					"id": 454,
 					"name": "createAssetRegistry",
 					"variant": "declaration",
 					"kind": 64,
 					"flags": {},
 					"signatures": [
 						{
-							"id": 454,
+							"id": 455,
 							"name": "createAssetRegistry",
 							"variant": "signature",
 							"kind": 4096,
@@ -9024,28 +9063,28 @@
 					]
 				},
 				{
-					"id": 459,
+					"id": 460,
 					"name": "createIRAssetResolver",
 					"variant": "declaration",
 					"kind": 64,
 					"flags": {},
 					"signatures": [
 						{
-							"id": 460,
+							"id": 461,
 							"name": "createIRAssetResolver",
 							"variant": "signature",
 							"kind": 4096,
 							"flags": {},
 							"parameters": [
 								{
-									"id": 461,
+									"id": 462,
 									"name": "options",
 									"variant": "param",
 									"kind": 32768,
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"target": 455,
+										"target": 456,
 										"name": "CreateIRAssetResolverOptions",
 										"package": "@anvilkit/plugin-asset-manager"
 									}
@@ -9065,28 +9104,28 @@
 					]
 				},
 				{
-					"id": 478,
+					"id": 479,
 					"name": "createStudioAssetSource",
 					"variant": "declaration",
 					"kind": 64,
 					"flags": {},
 					"signatures": [
 						{
-							"id": 479,
+							"id": 480,
 							"name": "createStudioAssetSource",
 							"variant": "signature",
 							"kind": 4096,
 							"flags": {},
 							"parameters": [
 								{
-									"id": 480,
+									"id": 481,
 									"name": "options",
 									"variant": "param",
 									"kind": 32768,
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"target": 466,
+										"target": 467,
 										"name": "CreateStudioAssetSourceOptions",
 										"package": "@anvilkit/plugin-asset-manager"
 									}
@@ -9232,28 +9271,28 @@
 					]
 				},
 				{
-					"id": 410,
+					"id": 411,
 					"name": "getRequiredCsp",
 					"variant": "declaration",
 					"kind": 64,
 					"flags": {},
 					"signatures": [
 						{
-							"id": 411,
+							"id": 412,
 							"name": "getRequiredCsp",
 							"variant": "signature",
 							"kind": 4096,
 							"flags": {},
 							"parameters": [
 								{
-									"id": 412,
+									"id": 413,
 									"name": "options",
 									"variant": "param",
 									"kind": 32768,
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"target": 403,
+										"target": 404,
 										"name": "RequiredCspOptions",
 										"package": "@anvilkit/plugin-asset-manager"
 									},
@@ -9262,7 +9301,7 @@
 							],
 							"type": {
 								"type": "reference",
-								"target": 399,
+								"target": 400,
 								"name": "RequiredCsp",
 								"package": "@anvilkit/plugin-asset-manager"
 							}
@@ -9270,14 +9309,14 @@
 					]
 				},
 				{
-					"id": 450,
+					"id": 451,
 					"name": "inferAssetKind",
 					"variant": "declaration",
 					"kind": 64,
 					"flags": {},
 					"signatures": [
 						{
-							"id": 451,
+							"id": 452,
 							"name": "inferAssetKind",
 							"variant": "signature",
 							"kind": 4096,
@@ -9308,7 +9347,7 @@
 							},
 							"parameters": [
 								{
-									"id": 452,
+									"id": 453,
 									"name": "entry",
 									"variant": "param",
 									"kind": 32768,
@@ -9331,14 +9370,14 @@
 					]
 				},
 				{
-					"id": 481,
+					"id": 482,
 					"name": "inferStudioAssetKind",
 					"variant": "declaration",
 					"kind": 64,
 					"flags": {},
 					"signatures": [
 						{
-							"id": 482,
+							"id": 483,
 							"name": "inferStudioAssetKind",
 							"variant": "signature",
 							"kind": 4096,
@@ -9353,7 +9392,7 @@
 										"kind": "inline-tag",
 										"tag": "@link",
 										"text": "inferAssetKind",
-										"target": 450
+										"target": 451
 									},
 									{
 										"kind": "text",
@@ -9371,7 +9410,7 @@
 							},
 							"parameters": [
 								{
-									"id": 483,
+									"id": 484,
 									"name": "entry",
 									"variant": "param",
 									"kind": 32768,
@@ -9436,21 +9475,21 @@
 					]
 				},
 				{
-					"id": 462,
+					"id": 463,
 					"name": "resolveAssets",
 					"variant": "declaration",
 					"kind": 64,
 					"flags": {},
 					"signatures": [
 						{
-							"id": 463,
+							"id": 464,
 							"name": "resolveAssets",
 							"variant": "signature",
 							"kind": 4096,
 							"flags": {},
 							"parameters": [
 								{
-									"id": 464,
+									"id": 465,
 									"name": "ir",
 									"variant": "param",
 									"kind": 32768,
@@ -9467,7 +9506,7 @@
 									}
 								},
 								{
-									"id": 465,
+									"id": 466,
 									"name": "resolver",
 									"variant": "param",
 									"kind": 32768,
@@ -9730,21 +9769,21 @@
 					]
 				},
 				{
-					"id": 485,
+					"id": 486,
 					"name": "validateUploadResult",
 					"variant": "declaration",
 					"kind": 64,
 					"flags": {},
 					"signatures": [
 						{
-							"id": 486,
+							"id": 487,
 							"name": "validateUploadResult",
 							"variant": "signature",
 							"kind": 4096,
 							"flags": {},
 							"parameters": [
 								{
-									"id": 487,
+									"id": 488,
 									"name": "result",
 									"variant": "param",
 									"kind": 32768,
@@ -9757,14 +9796,14 @@
 									}
 								},
 								{
-									"id": 488,
+									"id": 489,
 									"name": "options",
 									"variant": "param",
 									"kind": 32768,
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"target": 484,
+										"target": 485,
 										"name": "ValidateUploadResultOptions",
 										"package": "@anvilkit/plugin-asset-manager"
 									},
@@ -9785,9 +9824,9 @@
 				{
 					"title": "Classes",
 					"children": [
-						415,
-						426,
-						441
+						416,
+						427,
+						442
 					]
 				},
 				{
@@ -9809,16 +9848,16 @@
 						100,
 						106,
 						127,
-						455,
-						466,
+						456,
+						467,
 						76,
 						268,
-						399,
-						403,
-						407,
+						400,
+						404,
+						408,
 						371,
-						386,
-						393,
+						387,
+						394,
 						363,
 						365
 					]
@@ -9828,15 +9867,15 @@
 					"children": [
 						290,
 						345,
-						413,
-						253,
 						414,
+						253,
+						415,
 						254,
 						216,
 						267,
 						231,
 						358,
-						484
+						485
 					]
 				},
 				{
@@ -9844,19 +9883,19 @@
 					"children": [
 						83,
 						87,
-						453,
-						459,
-						478,
+						454,
+						460,
+						479,
 						78,
 						90,
-						410,
-						450,
-						481,
+						411,
+						451,
+						482,
 						81,
-						462,
+						463,
 						271,
 						94,
-						485
+						486
 					]
 				}
 			]
@@ -10233,14 +10272,14 @@
 			"flags": {},
 			"children": [
 				{
-					"id": 489,
+					"id": 490,
 					"name": "AssetBrowserProps",
 					"variant": "declaration",
 					"kind": 256,
 					"flags": {},
 					"children": [
 						{
-							"id": 508,
+							"id": 509,
 							"name": "aboveFilters",
 							"variant": "declaration",
 							"kind": 1024,
@@ -10269,7 +10308,7 @@
 							}
 						},
 						{
-							"id": 490,
+							"id": 491,
 							"name": "assets",
 							"variant": "declaration",
 							"kind": 1024,
@@ -10291,7 +10330,7 @@
 							}
 						},
 						{
-							"id": 509,
+							"id": 510,
 							"name": "draggableRows",
 							"variant": "declaration",
 							"kind": 1024,
@@ -10337,7 +10376,7 @@
 							}
 						},
 						{
-							"id": 512,
+							"id": 513,
 							"name": "itemHeight",
 							"variant": "declaration",
 							"kind": 1024,
@@ -10375,7 +10414,7 @@
 							}
 						},
 						{
-							"id": 513,
+							"id": 514,
 							"name": "maxHeight",
 							"variant": "declaration",
 							"kind": 1024,
@@ -10397,7 +10436,7 @@
 							}
 						},
 						{
-							"id": 495,
+							"id": 496,
 							"name": "onDelete",
 							"variant": "declaration",
 							"kind": 1024,
@@ -10424,21 +10463,21 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 496,
+									"id": 497,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 497,
+											"id": 498,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
 											"flags": {},
 											"parameters": [
 												{
-													"id": 498,
+													"id": 499,
 													"name": "asset",
 													"variant": "param",
 													"kind": 32768,
@@ -10461,7 +10500,7 @@
 							}
 						},
 						{
-							"id": 503,
+							"id": 504,
 							"name": "onEdit",
 							"variant": "declaration",
 							"kind": 1024,
@@ -10488,21 +10527,21 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 504,
+									"id": 505,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 505,
+											"id": 506,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
 											"flags": {},
 											"parameters": [
 												{
-													"id": 506,
+													"id": 507,
 													"name": "asset",
 													"variant": "param",
 													"kind": 32768,
@@ -10525,7 +10564,7 @@
 							}
 						},
 						{
-							"id": 491,
+							"id": 492,
 							"name": "onInsert",
 							"variant": "declaration",
 							"kind": 1024,
@@ -10535,21 +10574,21 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 492,
+									"id": 493,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 493,
+											"id": 494,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
 											"flags": {},
 											"parameters": [
 												{
-													"id": 494,
+													"id": 495,
 													"name": "asset",
 													"variant": "param",
 													"kind": 32768,
@@ -10572,7 +10611,7 @@
 							}
 						},
 						{
-							"id": 499,
+							"id": 500,
 							"name": "onReplace",
 							"variant": "declaration",
 							"kind": 1024,
@@ -10599,21 +10638,21 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 500,
+									"id": 501,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 501,
+											"id": 502,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
 											"flags": {},
 											"parameters": [
 												{
-													"id": 502,
+													"id": 503,
 													"name": "asset",
 													"variant": "param",
 													"kind": 32768,
@@ -10636,7 +10675,7 @@
 							}
 						},
 						{
-							"id": 510,
+							"id": 511,
 							"name": "pageSize",
 							"variant": "declaration",
 							"kind": 1024,
@@ -10658,7 +10697,7 @@
 							}
 						},
 						{
-							"id": 507,
+							"id": 508,
 							"name": "searchEnabled",
 							"variant": "declaration",
 							"kind": 1024,
@@ -10688,7 +10727,7 @@
 							}
 						},
 						{
-							"id": 511,
+							"id": 512,
 							"name": "virtualizeThreshold",
 							"variant": "declaration",
 							"kind": 1024,
@@ -10722,31 +10761,31 @@
 						{
 							"title": "Properties",
 							"children": [
-								508,
-								490,
 								509,
-								512,
-								513,
-								495,
-								503,
 								491,
-								499,
 								510,
-								507,
-								511
+								513,
+								514,
+								496,
+								504,
+								492,
+								500,
+								511,
+								508,
+								512
 							]
 						}
 					]
 				},
 				{
-					"id": 517,
+					"id": 518,
 					"name": "AssetCommandPaletteProps",
 					"variant": "declaration",
 					"kind": 256,
 					"flags": {},
 					"children": [
 						{
-							"id": 528,
+							"id": 529,
 							"name": "maxResults",
 							"variant": "declaration",
 							"kind": 1024,
@@ -10768,7 +10807,7 @@
 							}
 						},
 						{
-							"id": 520,
+							"id": 521,
 							"name": "onOpenChange",
 							"variant": "declaration",
 							"kind": 1024,
@@ -10786,21 +10825,21 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 521,
+									"id": 522,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 522,
+											"id": 523,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
 											"flags": {},
 											"parameters": [
 												{
-													"id": 523,
+													"id": 524,
 													"name": "open",
 													"variant": "param",
 													"kind": 32768,
@@ -10821,7 +10860,7 @@
 							}
 						},
 						{
-							"id": 524,
+							"id": 525,
 							"name": "onSelect",
 							"variant": "declaration",
 							"kind": 1024,
@@ -10847,21 +10886,21 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 525,
+									"id": 526,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 526,
+											"id": 527,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
 											"flags": {},
 											"parameters": [
 												{
-													"id": 527,
+													"id": 528,
 													"name": "asset",
 													"variant": "param",
 													"kind": 32768,
@@ -10884,7 +10923,7 @@
 							}
 						},
 						{
-							"id": 519,
+							"id": 520,
 							"name": "open",
 							"variant": "declaration",
 							"kind": 1024,
@@ -10913,7 +10952,7 @@
 							}
 						},
 						{
-							"id": 518,
+							"id": 519,
 							"name": "registry",
 							"variant": "declaration",
 							"kind": 1024,
@@ -10940,24 +10979,24 @@
 						{
 							"title": "Properties",
 							"children": [
-								528,
+								529,
+								521,
+								525,
 								520,
-								524,
-								519,
-								518
+								519
 							]
 						}
 					]
 				},
 				{
-					"id": 532,
+					"id": 533,
 					"name": "AssetManagerUIProps",
 					"variant": "declaration",
 					"kind": 256,
 					"flags": {},
 					"children": [
 						{
-							"id": 540,
+							"id": 541,
 							"name": "aboveFilters",
 							"variant": "declaration",
 							"kind": 1024,
@@ -11002,7 +11041,7 @@
 							}
 						},
 						{
-							"id": 545,
+							"id": 546,
 							"name": "acceptedMimeTypes",
 							"variant": "declaration",
 							"kind": 1024,
@@ -11031,7 +11070,7 @@
 							}
 						},
 						{
-							"id": 543,
+							"id": 544,
 							"name": "allowMixedScriptHostnames",
 							"variant": "declaration",
 							"kind": 1024,
@@ -11077,7 +11116,7 @@
 							}
 						},
 						{
-							"id": 542,
+							"id": 543,
 							"name": "dataUrlAllowlistOptIn",
 							"variant": "declaration",
 							"kind": 1024,
@@ -11155,7 +11194,7 @@
 							}
 						},
 						{
-							"id": 541,
+							"id": 542,
 							"name": "draggableRows",
 							"variant": "declaration",
 							"kind": 1024,
@@ -11185,7 +11224,7 @@
 							}
 						},
 						{
-							"id": 544,
+							"id": 545,
 							"name": "maxFileSize",
 							"variant": "declaration",
 							"kind": 1024,
@@ -11207,7 +11246,7 @@
 							}
 						},
 						{
-							"id": 535,
+							"id": 536,
 							"name": "onAssetInserted",
 							"variant": "declaration",
 							"kind": 1024,
@@ -11218,21 +11257,21 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 536,
+									"id": 537,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 537,
+											"id": 538,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
 											"flags": {},
 											"parameters": [
 												{
-													"id": 538,
+													"id": 539,
 													"name": "asset",
 													"variant": "param",
 													"kind": 32768,
@@ -11255,7 +11294,7 @@
 							}
 						},
 						{
-							"id": 534,
+							"id": 535,
 							"name": "registry",
 							"variant": "declaration",
 							"kind": 1024,
@@ -11270,7 +11309,7 @@
 							}
 						},
 						{
-							"id": 539,
+							"id": 540,
 							"name": "searchEnabled",
 							"variant": "declaration",
 							"kind": 1024,
@@ -11324,7 +11363,7 @@
 							}
 						},
 						{
-							"id": 533,
+							"id": 534,
 							"name": "uploader",
 							"variant": "declaration",
 							"kind": 1024,
@@ -11359,16 +11398,16 @@
 						{
 							"title": "Properties",
 							"children": [
-								540,
-								545,
+								541,
+								546,
+								544,
 								543,
 								542,
-								541,
-								544,
+								545,
+								536,
 								535,
-								534,
-								539,
-								533
+								540,
+								534
 							]
 						}
 					],
@@ -11415,14 +11454,14 @@
 					]
 				},
 				{
-					"id": 549,
+					"id": 550,
 					"name": "DeleteAssetDialogProps",
 					"variant": "declaration",
 					"kind": 256,
 					"flags": {},
 					"children": [
 						{
-							"id": 550,
+							"id": 551,
 							"name": "asset",
 							"variant": "declaration",
 							"kind": 1024,
@@ -11462,7 +11501,7 @@
 							}
 						},
 						{
-							"id": 555,
+							"id": 556,
 							"name": "onCancel",
 							"variant": "declaration",
 							"kind": 1024,
@@ -11472,14 +11511,14 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 556,
+									"id": 557,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 557,
+											"id": 558,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
@@ -11494,7 +11533,7 @@
 							}
 						},
 						{
-							"id": 551,
+							"id": 552,
 							"name": "onConfirm",
 							"variant": "declaration",
 							"kind": 1024,
@@ -11512,21 +11551,21 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 552,
+									"id": 553,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 553,
+											"id": 554,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
 											"flags": {},
 											"parameters": [
 												{
-													"id": 554,
+													"id": 555,
 													"name": "asset",
 													"variant": "param",
 													"kind": 32768,
@@ -11570,7 +11609,7 @@
 							}
 						},
 						{
-							"id": 558,
+							"id": 559,
 							"name": "referenceCount",
 							"variant": "declaration",
 							"kind": 1024,
@@ -11596,23 +11635,23 @@
 						{
 							"title": "Properties",
 							"children": [
-								550,
-								555,
 								551,
-								558
+								556,
+								552,
+								559
 							]
 						}
 					]
 				},
 				{
-					"id": 562,
+					"id": 563,
 					"name": "DeleteFolderDialogProps",
 					"variant": "declaration",
 					"kind": 256,
 					"flags": {},
 					"children": [
 						{
-							"id": 563,
+							"id": 564,
 							"name": "folder",
 							"variant": "declaration",
 							"kind": 1024,
@@ -11652,7 +11691,7 @@
 							}
 						},
 						{
-							"id": 569,
+							"id": 570,
 							"name": "onCancel",
 							"variant": "declaration",
 							"kind": 1024,
@@ -11662,14 +11701,14 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 570,
+									"id": 571,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 571,
+											"id": 572,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
@@ -11684,7 +11723,7 @@
 							}
 						},
 						{
-							"id": 564,
+							"id": 565,
 							"name": "onConfirm",
 							"variant": "declaration",
 							"kind": 1024,
@@ -11718,21 +11757,21 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 565,
+									"id": 566,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 566,
+											"id": 567,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
 											"flags": {},
 											"parameters": [
 												{
-													"id": 567,
+													"id": 568,
 													"name": "folder",
 													"variant": "param",
 													"kind": 32768,
@@ -11745,7 +11784,7 @@
 													}
 												},
 												{
-													"id": 568,
+													"id": 569,
 													"name": "cascade",
 													"variant": "param",
 													"kind": 32768,
@@ -11791,22 +11830,22 @@
 						{
 							"title": "Properties",
 							"children": [
-								563,
-								569,
-								564
+								564,
+								570,
+								565
 							]
 						}
 					]
 				},
 				{
-					"id": 575,
+					"id": 576,
 					"name": "EmptyFolderStateProps",
 					"variant": "declaration",
 					"kind": 256,
 					"flags": {},
 					"children": [
 						{
-							"id": 579,
+							"id": 580,
 							"name": "message",
 							"variant": "declaration",
 							"kind": 1024,
@@ -11820,7 +11859,7 @@
 							}
 						},
 						{
-							"id": 576,
+							"id": 577,
 							"name": "onUpload",
 							"variant": "declaration",
 							"kind": 1024,
@@ -11831,14 +11870,14 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 577,
+									"id": 578,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 578,
+											"id": 579,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
@@ -11857,21 +11896,21 @@
 						{
 							"title": "Properties",
 							"children": [
-								579,
-								576
+								580,
+								577
 							]
 						}
 					]
 				},
 				{
-					"id": 583,
+					"id": 584,
 					"name": "FolderBreadcrumbProps",
 					"variant": "declaration",
 					"kind": 256,
 					"flags": {},
 					"children": [
 						{
-							"id": 585,
+							"id": 586,
 							"name": "onNavigate",
 							"variant": "declaration",
 							"kind": 1024,
@@ -11881,21 +11920,21 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 586,
+									"id": 587,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 587,
+											"id": 588,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
 											"flags": {},
 											"parameters": [
 												{
-													"id": 588,
+													"id": 589,
 													"name": "folderId",
 													"variant": "param",
 													"kind": 32768,
@@ -11925,7 +11964,7 @@
 							}
 						},
 						{
-							"id": 584,
+							"id": 585,
 							"name": "path",
 							"variant": "declaration",
 							"kind": 1024,
@@ -11955,7 +11994,7 @@
 							}
 						},
 						{
-							"id": 589,
+							"id": 590,
 							"name": "rootLabel",
 							"variant": "declaration",
 							"kind": 1024,
@@ -11973,15 +12012,15 @@
 						{
 							"title": "Properties",
 							"children": [
+								586,
 								585,
-								584,
-								589
+								590
 							]
 						}
 					]
 				},
 				{
-					"id": 593,
+					"id": 594,
 					"name": "FolderNameDialogProps",
 					"variant": "declaration",
 					"kind": 256,
@@ -12020,7 +12059,7 @@
 					},
 					"children": [
 						{
-							"id": 605,
+							"id": 606,
 							"name": "initialName",
 							"variant": "declaration",
 							"kind": 1024,
@@ -12034,7 +12073,7 @@
 							}
 						},
 						{
-							"id": 595,
+							"id": 596,
 							"name": "onOpenChange",
 							"variant": "declaration",
 							"kind": 1024,
@@ -12044,21 +12083,21 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 596,
+									"id": 597,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 597,
+											"id": 598,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
 											"flags": {},
 											"parameters": [
 												{
-													"id": 598,
+													"id": 599,
 													"name": "open",
 													"variant": "param",
 													"kind": 32768,
@@ -12079,7 +12118,7 @@
 							}
 						},
 						{
-							"id": 599,
+							"id": 600,
 							"name": "onSubmit",
 							"variant": "declaration",
 							"kind": 1024,
@@ -12089,21 +12128,21 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 600,
+									"id": 601,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 601,
+											"id": 602,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
 											"flags": {},
 											"parameters": [
 												{
-													"id": 602,
+													"id": 603,
 													"name": "name",
 													"variant": "param",
 													"kind": 32768,
@@ -12145,7 +12184,7 @@
 							}
 						},
 						{
-							"id": 594,
+							"id": 595,
 							"name": "open",
 							"variant": "declaration",
 							"kind": 1024,
@@ -12158,7 +12197,7 @@
 							}
 						},
 						{
-							"id": 604,
+							"id": 605,
 							"name": "submitLabel",
 							"variant": "declaration",
 							"kind": 1024,
@@ -12172,7 +12211,7 @@
 							}
 						},
 						{
-							"id": 603,
+							"id": 604,
 							"name": "title",
 							"variant": "declaration",
 							"kind": 1024,
@@ -12190,25 +12229,25 @@
 						{
 							"title": "Properties",
 							"children": [
-								605,
+								606,
+								596,
+								600,
 								595,
-								599,
-								594,
-								604,
-								603
+								605,
+								604
 							]
 						}
 					]
 				},
 				{
-					"id": 611,
+					"id": 612,
 					"name": "FolderTreeProps",
 					"variant": "declaration",
 					"kind": 256,
 					"flags": {},
 					"children": [
 						{
-							"id": 613,
+							"id": 614,
 							"name": "currentFolderId",
 							"variant": "declaration",
 							"kind": 1024,
@@ -12230,7 +12269,7 @@
 							}
 						},
 						{
-							"id": 612,
+							"id": 613,
 							"name": "folders",
 							"variant": "declaration",
 							"kind": 1024,
@@ -12260,7 +12299,7 @@
 							}
 						},
 						{
-							"id": 618,
+							"id": 619,
 							"name": "onDropAssets",
 							"variant": "declaration",
 							"kind": 1024,
@@ -12279,21 +12318,21 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 619,
+									"id": 620,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 620,
+											"id": 621,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
 											"flags": {},
 											"parameters": [
 												{
-													"id": 621,
+													"id": 622,
 													"name": "assetIds",
 													"variant": "param",
 													"kind": 32768,
@@ -12311,7 +12350,7 @@
 													}
 												},
 												{
-													"id": 622,
+													"id": 623,
 													"name": "folderId",
 													"variant": "param",
 													"kind": 32768,
@@ -12341,7 +12380,7 @@
 							}
 						},
 						{
-							"id": 614,
+							"id": 615,
 							"name": "onNavigate",
 							"variant": "declaration",
 							"kind": 1024,
@@ -12351,21 +12390,21 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 615,
+									"id": 616,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 616,
+											"id": 617,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
 											"flags": {},
 											"parameters": [
 												{
-													"id": 617,
+													"id": 618,
 													"name": "folderId",
 													"variant": "param",
 													"kind": 32768,
@@ -12399,23 +12438,23 @@
 						{
 							"title": "Properties",
 							"children": [
+								614,
 								613,
-								612,
-								618,
-								614
+								619,
+								615
 							]
 						}
 					]
 				},
 				{
-					"id": 627,
+					"id": 628,
 					"name": "MetadataPanelProps",
 					"variant": "declaration",
 					"kind": 256,
 					"flags": {},
 					"children": [
 						{
-							"id": 628,
+							"id": 629,
 							"name": "asset",
 							"variant": "declaration",
 							"kind": 1024,
@@ -12463,7 +12502,7 @@
 							}
 						},
 						{
-							"id": 637,
+							"id": 638,
 							"name": "onCancel",
 							"variant": "declaration",
 							"kind": 1024,
@@ -12473,14 +12512,14 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 638,
+									"id": 639,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 639,
+											"id": 640,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
@@ -12495,7 +12534,7 @@
 							}
 						},
 						{
-							"id": 629,
+							"id": 630,
 							"name": "onConfirm",
 							"variant": "declaration",
 							"kind": 1024,
@@ -12513,21 +12552,21 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 630,
+									"id": 631,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 631,
+											"id": 632,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
 											"flags": {},
 											"parameters": [
 												{
-													"id": 632,
+													"id": 633,
 													"name": "asset",
 													"variant": "param",
 													"kind": 32768,
@@ -12540,7 +12579,7 @@
 													}
 												},
 												{
-													"id": 633,
+													"id": 634,
 													"name": "next",
 													"variant": "param",
 													"kind": 32768,
@@ -12548,14 +12587,14 @@
 													"type": {
 														"type": "reflection",
 														"declaration": {
-															"id": 634,
+															"id": 635,
 															"name": "__type",
 															"variant": "declaration",
 															"kind": 65536,
 															"flags": {},
 															"children": [
 																{
-																	"id": 635,
+																	"id": 636,
 																	"name": "name",
 																	"variant": "declaration",
 																	"kind": 1024,
@@ -12568,7 +12607,7 @@
 																	}
 																},
 																{
-																	"id": 636,
+																	"id": 637,
 																	"name": "tags",
 																	"variant": "declaration",
 																	"kind": 1024,
@@ -12592,8 +12631,8 @@
 																{
 																	"title": "Properties",
 																	"children": [
-																		635,
-																		636
+																		636,
+																		637
 																	]
 																}
 															]
@@ -12636,15 +12675,15 @@
 						{
 							"title": "Properties",
 							"children": [
-								628,
-								637,
-								629
+								629,
+								638,
+								630
 							]
 						}
 					]
 				},
 				{
-					"id": 643,
+					"id": 644,
 					"name": "MoveTargetPickerProps",
 					"variant": "declaration",
 					"kind": 256,
@@ -12683,7 +12722,7 @@
 					},
 					"children": [
 						{
-							"id": 649,
+							"id": 650,
 							"name": "folders",
 							"variant": "declaration",
 							"kind": 1024,
@@ -12705,7 +12744,7 @@
 							}
 						},
 						{
-							"id": 645,
+							"id": 646,
 							"name": "onOpenChange",
 							"variant": "declaration",
 							"kind": 1024,
@@ -12715,21 +12754,21 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 646,
+									"id": 647,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 647,
+											"id": 648,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
 											"flags": {},
 											"parameters": [
 												{
-													"id": 648,
+													"id": 649,
 													"name": "open",
 													"variant": "param",
 													"kind": 32768,
@@ -12750,7 +12789,7 @@
 							}
 						},
 						{
-							"id": 650,
+							"id": 651,
 							"name": "onPick",
 							"variant": "declaration",
 							"kind": 1024,
@@ -12760,21 +12799,21 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 651,
+									"id": 652,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 652,
+											"id": 653,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
 											"flags": {},
 											"parameters": [
 												{
-													"id": 653,
+													"id": 654,
 													"name": "folderId",
 													"variant": "param",
 													"kind": 32768,
@@ -12825,7 +12864,7 @@
 							}
 						},
 						{
-							"id": 644,
+							"id": 645,
 							"name": "open",
 							"variant": "declaration",
 							"kind": 1024,
@@ -12838,7 +12877,7 @@
 							}
 						},
 						{
-							"id": 654,
+							"id": 655,
 							"name": "rootLabel",
 							"variant": "declaration",
 							"kind": 1024,
@@ -12856,24 +12895,24 @@
 						{
 							"title": "Properties",
 							"children": [
-								649,
-								645,
 								650,
-								644,
-								654
+								646,
+								651,
+								645,
+								655
 							]
 						}
 					]
 				},
 				{
-					"id": 658,
+					"id": 659,
 					"name": "ReplaceAssetDialogProps",
 					"variant": "declaration",
 					"kind": 256,
 					"flags": {},
 					"children": [
 						{
-							"id": 669,
+							"id": 670,
 							"name": "acceptedMimeTypes",
 							"variant": "declaration",
 							"kind": 1024,
@@ -12902,7 +12941,7 @@
 							}
 						},
 						{
-							"id": 659,
+							"id": 660,
 							"name": "asset",
 							"variant": "declaration",
 							"kind": 1024,
@@ -12942,7 +12981,7 @@
 							}
 						},
 						{
-							"id": 668,
+							"id": 669,
 							"name": "maxFileSize",
 							"variant": "declaration",
 							"kind": 1024,
@@ -12964,7 +13003,7 @@
 							}
 						},
 						{
-							"id": 665,
+							"id": 666,
 							"name": "onCancel",
 							"variant": "declaration",
 							"kind": 1024,
@@ -12974,14 +13013,14 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 666,
+									"id": 667,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 667,
+											"id": 668,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
@@ -12996,7 +13035,7 @@
 							}
 						},
 						{
-							"id": 660,
+							"id": 661,
 							"name": "onConfirm",
 							"variant": "declaration",
 							"kind": 1024,
@@ -13030,21 +13069,21 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 661,
+									"id": 662,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 662,
+											"id": 663,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
 											"flags": {},
 											"parameters": [
 												{
-													"id": 663,
+													"id": 664,
 													"name": "asset",
 													"variant": "param",
 													"kind": 32768,
@@ -13057,7 +13096,7 @@
 													}
 												},
 												{
-													"id": 664,
+													"id": 665,
 													"name": "file",
 													"variant": "param",
 													"kind": 32768,
@@ -13109,11 +13148,11 @@
 						{
 							"title": "Properties",
 							"children": [
+								670,
+								660,
 								669,
-								659,
-								668,
-								665,
-								660
+								666,
+								661
 							]
 						}
 					],
@@ -13152,14 +13191,14 @@
 					]
 				},
 				{
-					"id": 673,
+					"id": 674,
 					"name": "UnsplashPanelProps",
 					"variant": "declaration",
 					"kind": 256,
 					"flags": {},
 					"children": [
 						{
-							"id": 675,
+							"id": 676,
 							"name": "activeThemeId",
 							"variant": "declaration",
 							"kind": 1024,
@@ -13173,7 +13212,7 @@
 							}
 						},
 						{
-							"id": 691,
+							"id": 692,
 							"name": "onLoadMore",
 							"variant": "declaration",
 							"kind": 1024,
@@ -13184,14 +13223,14 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 692,
+									"id": 693,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 693,
+											"id": 694,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
@@ -13206,7 +13245,7 @@
 							}
 						},
 						{
-							"id": 687,
+							"id": 688,
 							"name": "onPick",
 							"variant": "declaration",
 							"kind": 1024,
@@ -13224,21 +13263,21 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 688,
+									"id": 689,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 689,
+											"id": 690,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
 											"flags": {},
 											"parameters": [
 												{
-													"id": 690,
+													"id": 691,
 													"name": "id",
 													"variant": "param",
 													"kind": 32768,
@@ -13280,7 +13319,7 @@
 							}
 						},
 						{
-							"id": 681,
+							"id": 682,
 							"name": "onQueryChange",
 							"variant": "declaration",
 							"kind": 1024,
@@ -13290,21 +13329,21 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 682,
+									"id": 683,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 683,
+											"id": 684,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
 											"flags": {},
 											"parameters": [
 												{
-													"id": 684,
+													"id": 685,
 													"name": "query",
 													"variant": "param",
 													"kind": 32768,
@@ -13325,7 +13364,7 @@
 							}
 						},
 						{
-							"id": 676,
+							"id": 677,
 							"name": "onThemeChange",
 							"variant": "declaration",
 							"kind": 1024,
@@ -13335,21 +13374,21 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 677,
+									"id": 678,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 678,
+											"id": 679,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
 											"flags": {},
 											"parameters": [
 												{
-													"id": 679,
+													"id": 680,
 													"name": "themeId",
 													"variant": "param",
 													"kind": 32768,
@@ -13379,7 +13418,7 @@
 							}
 						},
 						{
-							"id": 680,
+							"id": 681,
 							"name": "query",
 							"variant": "declaration",
 							"kind": 1024,
@@ -13392,7 +13431,7 @@
 							}
 						},
 						{
-							"id": 685,
+							"id": 686,
 							"name": "results",
 							"variant": "declaration",
 							"kind": 1024,
@@ -13406,7 +13445,7 @@
 									"type": "array",
 									"elementType": {
 										"type": "reference",
-										"target": 700,
+										"target": 701,
 										"name": "UnsplashResult",
 										"package": "@anvilkit/plugin-asset-manager"
 									}
@@ -13414,7 +13453,7 @@
 							}
 						},
 						{
-							"id": 698,
+							"id": 699,
 							"name": "skeletonCount",
 							"variant": "declaration",
 							"kind": 1024,
@@ -13436,7 +13475,7 @@
 							}
 						},
 						{
-							"id": 686,
+							"id": 687,
 							"name": "status",
 							"variant": "declaration",
 							"kind": 1024,
@@ -13445,13 +13484,13 @@
 							},
 							"type": {
 								"type": "reference",
-								"target": 699,
+								"target": 700,
 								"name": "UnsplashPanelStatus",
 								"package": "@anvilkit/plugin-asset-manager"
 							}
 						},
 						{
-							"id": 694,
+							"id": 695,
 							"name": "themeLabel",
 							"variant": "declaration",
 							"kind": 1024,
@@ -13470,21 +13509,21 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 695,
+									"id": 696,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 696,
+											"id": 697,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
 											"flags": {},
 											"parameters": [
 												{
-													"id": 697,
+													"id": 698,
 													"name": "key",
 													"variant": "param",
 													"kind": 32768,
@@ -13505,7 +13544,7 @@
 							}
 						},
 						{
-							"id": 674,
+							"id": 675,
 							"name": "themes",
 							"variant": "declaration",
 							"kind": 1024,
@@ -13531,23 +13570,23 @@
 						{
 							"title": "Properties",
 							"children": [
-								675,
-								691,
-								687,
-								681,
 								676,
-								680,
-								685,
-								698,
+								692,
+								688,
+								682,
+								677,
+								681,
 								686,
-								694,
-								674
+								699,
+								687,
+								695,
+								675
 							]
 						}
 					]
 				},
 				{
-					"id": 700,
+					"id": 701,
 					"name": "UnsplashResult",
 					"variant": "declaration",
 					"kind": 256,
@@ -13562,7 +13601,7 @@
 					},
 					"children": [
 						{
-							"id": 701,
+							"id": 702,
 							"name": "id",
 							"variant": "declaration",
 							"kind": 1024,
@@ -13575,7 +13614,7 @@
 							}
 						},
 						{
-							"id": 703,
+							"id": 704,
 							"name": "photographerName",
 							"variant": "declaration",
 							"kind": 1024,
@@ -13588,7 +13627,7 @@
 							}
 						},
 						{
-							"id": 704,
+							"id": 705,
 							"name": "photographerUrl",
 							"variant": "declaration",
 							"kind": 1024,
@@ -13601,7 +13640,7 @@
 							}
 						},
 						{
-							"id": 702,
+							"id": 703,
 							"name": "thumbnailUrl",
 							"variant": "declaration",
 							"kind": 1024,
@@ -13614,7 +13653,7 @@
 							}
 						},
 						{
-							"id": 705,
+							"id": 706,
 							"name": "unsplashUrl",
 							"variant": "declaration",
 							"kind": 1024,
@@ -13631,24 +13670,24 @@
 						{
 							"title": "Properties",
 							"children": [
-								701,
-								703,
-								704,
 								702,
-								705
+								704,
+								705,
+								703,
+								706
 							]
 						}
 					]
 				},
 				{
-					"id": 709,
+					"id": 710,
 					"name": "UploadButtonProps",
 					"variant": "declaration",
 					"kind": 256,
 					"flags": {},
 					"children": [
 						{
-							"id": 726,
+							"id": 727,
 							"name": "acceptedMimeTypes",
 							"variant": "declaration",
 							"kind": 1024,
@@ -13677,7 +13716,7 @@
 							}
 						},
 						{
-							"id": 724,
+							"id": 725,
 							"name": "allowMixedScriptHostnames",
 							"variant": "declaration",
 							"kind": 1024,
@@ -13723,7 +13762,7 @@
 							}
 						},
 						{
-							"id": 723,
+							"id": 724,
 							"name": "dataUrlAllowlistOptIn",
 							"variant": "declaration",
 							"kind": 1024,
@@ -13801,7 +13840,7 @@
 							}
 						},
 						{
-							"id": 725,
+							"id": 726,
 							"name": "maxFileSize",
 							"variant": "declaration",
 							"kind": 1024,
@@ -13823,7 +13862,7 @@
 							}
 						},
 						{
-							"id": 715,
+							"id": 716,
 							"name": "onError",
 							"variant": "declaration",
 							"kind": 1024,
@@ -13834,21 +13873,21 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 716,
+									"id": 717,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 717,
+											"id": 718,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
 											"flags": {},
 											"parameters": [
 												{
-													"id": 718,
+													"id": 719,
 													"name": "error",
 													"variant": "param",
 													"kind": 32768,
@@ -13869,7 +13908,7 @@
 							}
 						},
 						{
-							"id": 719,
+							"id": 720,
 							"name": "onProgress",
 							"variant": "declaration",
 							"kind": 1024,
@@ -13912,21 +13951,21 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 720,
+									"id": 721,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 721,
+											"id": 722,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
 											"flags": {},
 											"parameters": [
 												{
-													"id": 722,
+													"id": 723,
 													"name": "snapshot",
 													"variant": "param",
 													"kind": 32768,
@@ -13936,7 +13975,7 @@
 														"types": [
 															{
 																"type": "reference",
-																"target": 727,
+																"target": 728,
 																"name": "UploadProgressSnapshot",
 																"package": "@anvilkit/plugin-asset-manager"
 															},
@@ -13958,7 +13997,7 @@
 							}
 						},
 						{
-							"id": 711,
+							"id": 712,
 							"name": "onUploaded",
 							"variant": "declaration",
 							"kind": 1024,
@@ -13969,21 +14008,21 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 712,
+									"id": 713,
 									"name": "__type",
 									"variant": "declaration",
 									"kind": 65536,
 									"flags": {},
 									"signatures": [
 										{
-											"id": 713,
+											"id": 714,
 											"name": "__type",
 											"variant": "signature",
 											"kind": 4096,
 											"flags": {},
 											"parameters": [
 												{
-													"id": 714,
+													"id": 715,
 													"name": "asset",
 													"variant": "param",
 													"kind": 32768,
@@ -14006,7 +14045,7 @@
 							}
 						},
 						{
-							"id": 710,
+							"id": 711,
 							"name": "uploader",
 							"variant": "declaration",
 							"kind": 1024,
@@ -14049,14 +14088,14 @@
 						{
 							"title": "Properties",
 							"children": [
-								726,
-								724,
-								723,
+								727,
 								725,
-								715,
-								719,
-								711,
-								710
+								724,
+								726,
+								716,
+								720,
+								712,
+								711
 							]
 						}
 					],
@@ -14103,14 +14142,14 @@
 					]
 				},
 				{
-					"id": 727,
+					"id": 728,
 					"name": "UploadProgressSnapshot",
 					"variant": "declaration",
 					"kind": 256,
 					"flags": {},
 					"children": [
 						{
-							"id": 728,
+							"id": 729,
 							"name": "completed",
 							"variant": "declaration",
 							"kind": 1024,
@@ -14123,7 +14162,7 @@
 							}
 						},
 						{
-							"id": 729,
+							"id": 730,
 							"name": "total",
 							"variant": "declaration",
 							"kind": 1024,
@@ -14140,14 +14179,14 @@
 						{
 							"title": "Properties",
 							"children": [
-								728,
-								729
+								729,
+								730
 							]
 						}
 					]
 				},
 				{
-					"id": 699,
+					"id": 700,
 					"name": "UnsplashPanelStatus",
 					"variant": "declaration",
 					"kind": 2097152,
@@ -14179,7 +14218,7 @@
 					}
 				},
 				{
-					"id": 623,
+					"id": 624,
 					"name": "ASSET_DRAG_MIME",
 					"variant": "declaration",
 					"kind": 32,
@@ -14201,28 +14240,28 @@
 					"defaultValue": "\"application/x-anvilkit-assets\""
 				},
 				{
-					"id": 514,
+					"id": 515,
 					"name": "AssetBrowser",
 					"variant": "declaration",
 					"kind": 64,
 					"flags": {},
 					"signatures": [
 						{
-							"id": 515,
+							"id": 516,
 							"name": "AssetBrowser",
 							"variant": "signature",
 							"kind": 4096,
 							"flags": {},
 							"parameters": [
 								{
-									"id": 516,
+									"id": 517,
 									"name": "__namedParameters",
 									"variant": "param",
 									"kind": 32768,
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"target": 489,
+										"target": 490,
 										"name": "AssetBrowserProps",
 										"package": "@anvilkit/plugin-asset-manager"
 									}
@@ -14243,28 +14282,28 @@
 					]
 				},
 				{
-					"id": 529,
+					"id": 530,
 					"name": "AssetCommandPalette",
 					"variant": "declaration",
 					"kind": 64,
 					"flags": {},
 					"signatures": [
 						{
-							"id": 530,
+							"id": 531,
 							"name": "AssetCommandPalette",
 							"variant": "signature",
 							"kind": 4096,
 							"flags": {},
 							"parameters": [
 								{
-									"id": 531,
+									"id": 532,
 									"name": "__namedParameters",
 									"variant": "param",
 									"kind": 32768,
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"target": 517,
+										"target": 518,
 										"name": "AssetCommandPaletteProps",
 										"package": "@anvilkit/plugin-asset-manager"
 									}
@@ -14285,28 +14324,28 @@
 					]
 				},
 				{
-					"id": 546,
+					"id": 547,
 					"name": "AssetManagerUI",
 					"variant": "declaration",
 					"kind": 64,
 					"flags": {},
 					"signatures": [
 						{
-							"id": 547,
+							"id": 548,
 							"name": "AssetManagerUI",
 							"variant": "signature",
 							"kind": 4096,
 							"flags": {},
 							"parameters": [
 								{
-									"id": 548,
+									"id": 549,
 									"name": "__namedParameters",
 									"variant": "param",
 									"kind": 32768,
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"target": 532,
+										"target": 533,
 										"name": "AssetManagerUIProps",
 										"package": "@anvilkit/plugin-asset-manager"
 									}
@@ -14327,28 +14366,28 @@
 					]
 				},
 				{
-					"id": 559,
+					"id": 560,
 					"name": "DeleteAssetDialog",
 					"variant": "declaration",
 					"kind": 64,
 					"flags": {},
 					"signatures": [
 						{
-							"id": 560,
+							"id": 561,
 							"name": "DeleteAssetDialog",
 							"variant": "signature",
 							"kind": 4096,
 							"flags": {},
 							"parameters": [
 								{
-									"id": 561,
+									"id": 562,
 									"name": "__namedParameters",
 									"variant": "param",
 									"kind": 32768,
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"target": 549,
+										"target": 550,
 										"name": "DeleteAssetDialogProps",
 										"package": "@anvilkit/plugin-asset-manager"
 									}
@@ -14369,28 +14408,28 @@
 					]
 				},
 				{
-					"id": 572,
+					"id": 573,
 					"name": "DeleteFolderDialog",
 					"variant": "declaration",
 					"kind": 64,
 					"flags": {},
 					"signatures": [
 						{
-							"id": 573,
+							"id": 574,
 							"name": "DeleteFolderDialog",
 							"variant": "signature",
 							"kind": 4096,
 							"flags": {},
 							"parameters": [
 								{
-									"id": 574,
+									"id": 575,
 									"name": "__namedParameters",
 									"variant": "param",
 									"kind": 32768,
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"target": 562,
+										"target": 563,
 										"name": "DeleteFolderDialogProps",
 										"package": "@anvilkit/plugin-asset-manager"
 									}
@@ -14411,28 +14450,28 @@
 					]
 				},
 				{
-					"id": 580,
+					"id": 581,
 					"name": "EmptyFolderState",
 					"variant": "declaration",
 					"kind": 64,
 					"flags": {},
 					"signatures": [
 						{
-							"id": 581,
+							"id": 582,
 							"name": "EmptyFolderState",
 							"variant": "signature",
 							"kind": 4096,
 							"flags": {},
 							"parameters": [
 								{
-									"id": 582,
+									"id": 583,
 									"name": "__namedParameters",
 									"variant": "param",
 									"kind": 32768,
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"target": 575,
+										"target": 576,
 										"name": "EmptyFolderStateProps",
 										"package": "@anvilkit/plugin-asset-manager"
 									}
@@ -14453,28 +14492,28 @@
 					]
 				},
 				{
-					"id": 590,
+					"id": 591,
 					"name": "FolderBreadcrumb",
 					"variant": "declaration",
 					"kind": 64,
 					"flags": {},
 					"signatures": [
 						{
-							"id": 591,
+							"id": 592,
 							"name": "FolderBreadcrumb",
 							"variant": "signature",
 							"kind": 4096,
 							"flags": {},
 							"parameters": [
 								{
-									"id": 592,
+									"id": 593,
 									"name": "__namedParameters",
 									"variant": "param",
 									"kind": 32768,
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"target": 583,
+										"target": 584,
 										"name": "FolderBreadcrumbProps",
 										"package": "@anvilkit/plugin-asset-manager"
 									}
@@ -14495,28 +14534,28 @@
 					]
 				},
 				{
-					"id": 606,
+					"id": 607,
 					"name": "FolderNameDialog",
 					"variant": "declaration",
 					"kind": 64,
 					"flags": {},
 					"signatures": [
 						{
-							"id": 607,
+							"id": 608,
 							"name": "FolderNameDialog",
 							"variant": "signature",
 							"kind": 4096,
 							"flags": {},
 							"parameters": [
 								{
-									"id": 608,
+									"id": 609,
 									"name": "__namedParameters",
 									"variant": "param",
 									"kind": 32768,
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"target": 593,
+										"target": 594,
 										"name": "FolderNameDialogProps",
 										"package": "@anvilkit/plugin-asset-manager"
 									}
@@ -14537,28 +14576,28 @@
 					]
 				},
 				{
-					"id": 624,
+					"id": 625,
 					"name": "FolderTree",
 					"variant": "declaration",
 					"kind": 64,
 					"flags": {},
 					"signatures": [
 						{
-							"id": 625,
+							"id": 626,
 							"name": "FolderTree",
 							"variant": "signature",
 							"kind": 4096,
 							"flags": {},
 							"parameters": [
 								{
-									"id": 626,
+									"id": 627,
 									"name": "__namedParameters",
 									"variant": "param",
 									"kind": 32768,
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"target": 611,
+										"target": 612,
 										"name": "FolderTreeProps",
 										"package": "@anvilkit/plugin-asset-manager"
 									}
@@ -14588,28 +14627,28 @@
 					]
 				},
 				{
-					"id": 640,
+					"id": 641,
 					"name": "MetadataPanel",
 					"variant": "declaration",
 					"kind": 64,
 					"flags": {},
 					"signatures": [
 						{
-							"id": 641,
+							"id": 642,
 							"name": "MetadataPanel",
 							"variant": "signature",
 							"kind": 4096,
 							"flags": {},
 							"parameters": [
 								{
-									"id": 642,
+									"id": 643,
 									"name": "__namedParameters",
 									"variant": "param",
 									"kind": 32768,
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"target": 627,
+										"target": 628,
 										"name": "MetadataPanelProps",
 										"package": "@anvilkit/plugin-asset-manager"
 									}
@@ -14630,28 +14669,28 @@
 					]
 				},
 				{
-					"id": 655,
+					"id": 656,
 					"name": "MoveTargetPicker",
 					"variant": "declaration",
 					"kind": 64,
 					"flags": {},
 					"signatures": [
 						{
-							"id": 656,
+							"id": 657,
 							"name": "MoveTargetPicker",
 							"variant": "signature",
 							"kind": 4096,
 							"flags": {},
 							"parameters": [
 								{
-									"id": 657,
+									"id": 658,
 									"name": "__namedParameters",
 									"variant": "param",
 									"kind": 32768,
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"target": 643,
+										"target": 644,
 										"name": "MoveTargetPickerProps",
 										"package": "@anvilkit/plugin-asset-manager"
 									}
@@ -14672,28 +14711,28 @@
 					]
 				},
 				{
-					"id": 670,
+					"id": 671,
 					"name": "ReplaceAssetDialog",
 					"variant": "declaration",
 					"kind": 64,
 					"flags": {},
 					"signatures": [
 						{
-							"id": 671,
+							"id": 672,
 							"name": "ReplaceAssetDialog",
 							"variant": "signature",
 							"kind": 4096,
 							"flags": {},
 							"parameters": [
 								{
-									"id": 672,
+									"id": 673,
 									"name": "__namedParameters",
 									"variant": "param",
 									"kind": 32768,
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"target": 658,
+										"target": 659,
 										"name": "ReplaceAssetDialogProps",
 										"package": "@anvilkit/plugin-asset-manager"
 									}
@@ -14714,28 +14753,28 @@
 					]
 				},
 				{
-					"id": 706,
+					"id": 707,
 					"name": "UnsplashPanel",
 					"variant": "declaration",
 					"kind": 64,
 					"flags": {},
 					"signatures": [
 						{
-							"id": 707,
+							"id": 708,
 							"name": "UnsplashPanel",
 							"variant": "signature",
 							"kind": 4096,
 							"flags": {},
 							"parameters": [
 								{
-									"id": 708,
+									"id": 709,
 									"name": "__namedParameters",
 									"variant": "param",
 									"kind": 32768,
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"target": 673,
+										"target": 674,
 										"name": "UnsplashPanelProps",
 										"package": "@anvilkit/plugin-asset-manager"
 									}
@@ -14756,28 +14795,28 @@
 					]
 				},
 				{
-					"id": 730,
+					"id": 731,
 					"name": "UploadButton",
 					"variant": "declaration",
 					"kind": 64,
 					"flags": {},
 					"signatures": [
 						{
-							"id": 731,
+							"id": 732,
 							"name": "UploadButton",
 							"variant": "signature",
 							"kind": 4096,
 							"flags": {},
 							"parameters": [
 								{
-									"id": 732,
+									"id": 733,
 									"name": "__namedParameters",
 									"variant": "param",
 									"kind": 32768,
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"target": 709,
+										"target": 710,
 										"name": "UploadButtonProps",
 										"package": "@anvilkit/plugin-asset-manager"
 									}
@@ -14798,80 +14837,80 @@
 					]
 				},
 				{
-					"id": 609,
+					"id": 610,
 					"name": "CreateFolderDialog",
 					"variant": "reference",
 					"kind": 4194304,
 					"flags": {},
-					"target": 606
+					"target": 607
 				},
 				{
-					"id": 610,
+					"id": 611,
 					"name": "RenameFolderDialog",
 					"variant": "reference",
 					"kind": 4194304,
 					"flags": {},
-					"target": 606
+					"target": 607
 				}
 			],
 			"groups": [
 				{
 					"title": "Interfaces",
 					"children": [
-						489,
-						517,
-						532,
-						549,
-						562,
-						575,
-						583,
-						593,
-						611,
-						627,
-						643,
-						658,
-						673,
-						700,
-						709,
-						727
+						490,
+						518,
+						533,
+						550,
+						563,
+						576,
+						584,
+						594,
+						612,
+						628,
+						644,
+						659,
+						674,
+						701,
+						710,
+						728
 					]
 				},
 				{
 					"title": "Type Aliases",
 					"children": [
-						699
+						700
 					]
 				},
 				{
 					"title": "Variables",
 					"children": [
-						623
+						624
 					]
 				},
 				{
 					"title": "Functions",
 					"children": [
-						514,
-						529,
-						546,
-						559,
-						572,
-						580,
-						590,
-						606,
-						624,
-						640,
-						655,
-						670,
-						706,
-						730
+						515,
+						530,
+						547,
+						560,
+						573,
+						581,
+						591,
+						607,
+						625,
+						641,
+						656,
+						671,
+						707,
+						731
 					]
 				},
 				{
 					"title": "References",
 					"children": [
-						609,
-						610
+						610,
+						611
 					]
 				}
 			]
@@ -17502,12 +17541,12 @@
 		"380": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/types/unsplash.ts",
-			"qualifiedName": "UnsplashSourceOptions.fetch"
+			"qualifiedName": "UnsplashSourceOptions.requestTimeoutMs"
 		},
 		"381": {
-			"packageName": "typescript",
-			"packagePath": "lib/lib.dom.d.ts",
-			"qualifiedName": "fetch"
+			"packageName": "@anvilkit/plugin-asset-manager",
+			"packagePath": "src/types/unsplash.ts",
+			"qualifiedName": "UnsplashSourceOptions.fetch"
 		},
 		"382": {
 			"packageName": "typescript",
@@ -17517,142 +17556,142 @@
 		"383": {
 			"packageName": "typescript",
 			"packagePath": "lib/lib.dom.d.ts",
-			"qualifiedName": "input"
+			"qualifiedName": "fetch"
 		},
 		"384": {
 			"packageName": "typescript",
 			"packagePath": "lib/lib.dom.d.ts",
-			"qualifiedName": "init"
+			"qualifiedName": "input"
 		},
 		"385": {
-			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types/unsplash.ts",
-			"qualifiedName": "UnsplashSourceOptions.rehostOnPick"
+			"packageName": "typescript",
+			"packagePath": "lib/lib.dom.d.ts",
+			"qualifiedName": "init"
 		},
 		"386": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/types/unsplash.ts",
-			"qualifiedName": "UnsplashTheme"
+			"qualifiedName": "UnsplashSourceOptions.rehostOnPick"
 		},
 		"387": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/types/unsplash.ts",
-			"qualifiedName": "UnsplashTheme.id"
+			"qualifiedName": "UnsplashTheme"
 		},
 		"388": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/types/unsplash.ts",
-			"qualifiedName": "UnsplashTheme.label"
+			"qualifiedName": "UnsplashTheme.id"
 		},
 		"389": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/types/unsplash.ts",
-			"qualifiedName": "UnsplashTheme.topicSlugs"
+			"qualifiedName": "UnsplashTheme.label"
 		},
 		"390": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/types/unsplash.ts",
-			"qualifiedName": "UnsplashTheme.query"
+			"qualifiedName": "UnsplashTheme.topicSlugs"
 		},
 		"391": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/types/unsplash.ts",
-			"qualifiedName": "UnsplashTheme.orientation"
+			"qualifiedName": "UnsplashTheme.query"
 		},
 		"392": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/types/unsplash.ts",
-			"qualifiedName": "UnsplashTheme.contentFilter"
+			"qualifiedName": "UnsplashTheme.orientation"
 		},
 		"393": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/types/unsplash.ts",
-			"qualifiedName": "UnsplashThemeConfig"
+			"qualifiedName": "UnsplashTheme.contentFilter"
 		},
 		"394": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/types/unsplash.ts",
-			"qualifiedName": "UnsplashThemeConfig.themes"
+			"qualifiedName": "UnsplashThemeConfig"
 		},
 		"395": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/types/unsplash.ts",
-			"qualifiedName": "UnsplashThemeConfig.additionalThemes"
+			"qualifiedName": "UnsplashThemeConfig.themes"
 		},
 		"396": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/types/unsplash.ts",
-			"qualifiedName": "UnsplashThemeConfig.excludeThemes"
+			"qualifiedName": "UnsplashThemeConfig.additionalThemes"
 		},
 		"397": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/types/unsplash.ts",
-			"qualifiedName": "UnsplashThemeConfig.defaultThemeId"
+			"qualifiedName": "UnsplashThemeConfig.excludeThemes"
 		},
 		"398": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/types/unsplash.ts",
-			"qualifiedName": "UnsplashThemeConfig.allowFreeSearch"
+			"qualifiedName": "UnsplashThemeConfig.defaultThemeId"
 		},
 		"399": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/utils/csp.ts",
-			"qualifiedName": "RequiredCsp"
+			"packagePath": "src/types/unsplash.ts",
+			"qualifiedName": "UnsplashThemeConfig.allowFreeSearch"
 		},
 		"400": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/csp.ts",
-			"qualifiedName": "RequiredCsp.connectSrc"
+			"qualifiedName": "RequiredCsp"
 		},
 		"401": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/csp.ts",
-			"qualifiedName": "RequiredCsp.imgSrc"
+			"qualifiedName": "RequiredCsp.connectSrc"
 		},
 		"402": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/csp.ts",
-			"qualifiedName": "RequiredCsp.mediaSrc"
+			"qualifiedName": "RequiredCsp.imgSrc"
 		},
 		"403": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/csp.ts",
-			"qualifiedName": "RequiredCspOptions"
+			"qualifiedName": "RequiredCsp.mediaSrc"
 		},
 		"404": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/csp.ts",
-			"qualifiedName": "RequiredCspOptions.dataUrl"
+			"qualifiedName": "RequiredCspOptions"
 		},
 		"405": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/csp.ts",
-			"qualifiedName": "RequiredCspOptions.inMemory"
+			"qualifiedName": "RequiredCspOptions.dataUrl"
 		},
 		"406": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/csp.ts",
-			"qualifiedName": "RequiredCspOptions.s3"
+			"qualifiedName": "RequiredCspOptions.inMemory"
 		},
 		"407": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/csp.ts",
-			"qualifiedName": "S3CspOptions"
+			"qualifiedName": "RequiredCspOptions.s3"
 		},
 		"408": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/csp.ts",
-			"qualifiedName": "S3CspOptions.presignEndpoint"
+			"qualifiedName": "S3CspOptions"
 		},
 		"409": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/csp.ts",
-			"qualifiedName": "S3CspOptions.publicHost"
+			"qualifiedName": "S3CspOptions.presignEndpoint"
 		},
 		"410": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/csp.ts",
-			"qualifiedName": "getRequiredCsp"
+			"qualifiedName": "S3CspOptions.publicHost"
 		},
 		"411": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -17662,197 +17701,197 @@
 		"412": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/csp.ts",
-			"qualifiedName": "options"
+			"qualifiedName": "getRequiredCsp"
 		},
 		"413": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "AssetResolutionErrorCode"
+			"packagePath": "src/utils/csp.ts",
+			"qualifiedName": "options"
 		},
 		"414": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "AssetSourceErrorCode"
+			"qualifiedName": "AssetResolutionErrorCode"
 		},
 		"415": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "AssetResolutionError"
+			"qualifiedName": "AssetSourceErrorCode"
 		},
 		"416": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "AssetResolutionError.__constructor"
+			"qualifiedName": "AssetResolutionError"
 		},
 		"417": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "AssetResolutionError"
+			"qualifiedName": "AssetResolutionError.__constructor"
 		},
 		"418": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "assetId"
+			"qualifiedName": "AssetResolutionError"
 		},
 		"419": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "code"
+			"qualifiedName": "assetId"
 		},
 		"420": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "message"
+			"qualifiedName": "code"
 		},
 		"421": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "options"
+			"qualifiedName": "message"
 		},
 		"422": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "__type"
+			"qualifiedName": "options"
 		},
 		"423": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "__type.cause"
+			"qualifiedName": "__type"
 		},
 		"424": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "AssetResolutionError.assetId"
+			"qualifiedName": "__type.cause"
 		},
 		"425": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "AssetResolutionError.code"
+			"qualifiedName": "AssetResolutionError.assetId"
 		},
 		"426": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "AssetSourceError"
+			"qualifiedName": "AssetResolutionError.code"
 		},
 		"427": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "AssetSourceError.__constructor"
+			"qualifiedName": "AssetSourceError"
 		},
 		"428": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "AssetSourceError"
+			"qualifiedName": "AssetSourceError.__constructor"
 		},
 		"429": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "code"
+			"qualifiedName": "AssetSourceError"
 		},
 		"430": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "message"
+			"qualifiedName": "code"
 		},
 		"431": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "options"
+			"qualifiedName": "message"
 		},
 		"432": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "__type"
+			"qualifiedName": "options"
 		},
 		"433": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "__type.cause"
+			"qualifiedName": "__type"
 		},
 		"434": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "__type.retryable"
+			"qualifiedName": "__type.cause"
 		},
 		"435": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "__type.status"
+			"qualifiedName": "__type.retryable"
 		},
 		"436": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "__type.retryAfterMs"
+			"qualifiedName": "__type.status"
 		},
 		"437": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "AssetSourceError.code"
+			"qualifiedName": "__type.retryAfterMs"
 		},
 		"438": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "AssetSourceError.retryable"
+			"qualifiedName": "AssetSourceError.code"
 		},
 		"439": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "AssetSourceError.status"
+			"qualifiedName": "AssetSourceError.retryable"
 		},
 		"440": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "AssetSourceError.retryAfterMs"
+			"qualifiedName": "AssetSourceError.status"
 		},
 		"441": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "AssetValidationError"
+			"qualifiedName": "AssetSourceError.retryAfterMs"
 		},
 		"442": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "AssetValidationError.__constructor"
+			"qualifiedName": "AssetValidationError"
 		},
 		"443": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "AssetValidationError"
+			"qualifiedName": "AssetValidationError.__constructor"
 		},
 		"444": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "code"
+			"qualifiedName": "AssetValidationError"
 		},
 		"445": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "message"
+			"qualifiedName": "code"
 		},
 		"446": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "options"
+			"qualifiedName": "message"
 		},
 		"447": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "__type"
+			"qualifiedName": "options"
 		},
 		"448": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "__type.cause"
+			"qualifiedName": "__type"
 		},
 		"449": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/errors.ts",
-			"qualifiedName": "AssetValidationError.code"
+			"qualifiedName": "__type.cause"
 		},
 		"450": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/utils/infer-kind.ts",
-			"qualifiedName": "inferAssetKind"
+			"packagePath": "src/utils/errors.ts",
+			"qualifiedName": "AssetValidationError.code"
 		},
 		"451": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -17862,12 +17901,12 @@
 		"452": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/infer-kind.ts",
-			"qualifiedName": "entry"
+			"qualifiedName": "inferAssetKind"
 		},
 		"453": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/utils/registry.ts",
-			"qualifiedName": "createAssetRegistry"
+			"packagePath": "src/utils/infer-kind.ts",
+			"qualifiedName": "entry"
 		},
 		"454": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -17876,28 +17915,28 @@
 		},
 		"455": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/utils/resolver.ts",
-			"qualifiedName": "CreateIRAssetResolverOptions"
+			"packagePath": "src/utils/registry.ts",
+			"qualifiedName": "createAssetRegistry"
 		},
 		"456": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/resolver.ts",
-			"qualifiedName": "CreateIRAssetResolverOptions.registry"
+			"qualifiedName": "CreateIRAssetResolverOptions"
 		},
 		"457": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/resolver.ts",
-			"qualifiedName": "CreateIRAssetResolverOptions.dataUrlAllowlistOptIn"
+			"qualifiedName": "CreateIRAssetResolverOptions.registry"
 		},
 		"458": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/resolver.ts",
-			"qualifiedName": "CreateIRAssetResolverOptions.allowMixedScriptHostnames"
+			"qualifiedName": "CreateIRAssetResolverOptions.dataUrlAllowlistOptIn"
 		},
 		"459": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/resolver.ts",
-			"qualifiedName": "createIRAssetResolver"
+			"qualifiedName": "CreateIRAssetResolverOptions.allowMixedScriptHostnames"
 		},
 		"460": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -17907,12 +17946,12 @@
 		"461": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/resolver.ts",
-			"qualifiedName": "options"
+			"qualifiedName": "createIRAssetResolver"
 		},
 		"462": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/resolver.ts",
-			"qualifiedName": "resolveAssets"
+			"qualifiedName": "options"
 		},
 		"463": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -17922,32 +17961,32 @@
 		"464": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/resolver.ts",
-			"qualifiedName": "ir"
+			"qualifiedName": "resolveAssets"
 		},
 		"465": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/resolver.ts",
-			"qualifiedName": "resolver"
+			"qualifiedName": "ir"
 		},
 		"466": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/utils/studio-asset-source.ts",
-			"qualifiedName": "CreateStudioAssetSourceOptions"
+			"packagePath": "src/utils/resolver.ts",
+			"qualifiedName": "resolver"
 		},
 		"467": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/studio-asset-source.ts",
-			"qualifiedName": "CreateStudioAssetSourceOptions.registry"
+			"qualifiedName": "CreateStudioAssetSourceOptions"
 		},
 		"468": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/studio-asset-source.ts",
-			"qualifiedName": "CreateStudioAssetSourceOptions.upload"
+			"qualifiedName": "CreateStudioAssetSourceOptions.registry"
 		},
 		"469": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/studio-asset-source.ts",
-			"qualifiedName": "__type"
+			"qualifiedName": "CreateStudioAssetSourceOptions.upload"
 		},
 		"470": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -17957,22 +17996,22 @@
 		"471": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/studio-asset-source.ts",
-			"qualifiedName": "file"
+			"qualifiedName": "__type"
 		},
 		"472": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/studio-asset-source.ts",
-			"qualifiedName": "options"
+			"qualifiedName": "file"
 		},
 		"473": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/studio-asset-source.ts",
-			"qualifiedName": "CreateStudioAssetSourceOptions.getThumbnail"
+			"qualifiedName": "options"
 		},
 		"474": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/studio-asset-source.ts",
-			"qualifiedName": "__type"
+			"qualifiedName": "CreateStudioAssetSourceOptions.getThumbnail"
 		},
 		"475": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -17982,17 +18021,17 @@
 		"476": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/studio-asset-source.ts",
-			"qualifiedName": "entry"
+			"qualifiedName": "__type"
 		},
 		"477": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/studio-asset-source.ts",
-			"qualifiedName": "CreateStudioAssetSourceOptions.maxConcurrentUploads"
+			"qualifiedName": "entry"
 		},
 		"478": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/studio-asset-source.ts",
-			"qualifiedName": "createStudioAssetSource"
+			"qualifiedName": "CreateStudioAssetSourceOptions.maxConcurrentUploads"
 		},
 		"479": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18002,12 +18041,12 @@
 		"480": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/studio-asset-source.ts",
-			"qualifiedName": "options"
+			"qualifiedName": "createStudioAssetSource"
 		},
 		"481": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/studio-asset-source.ts",
-			"qualifiedName": "inferStudioAssetKind"
+			"qualifiedName": "options"
 		},
 		"482": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18017,17 +18056,17 @@
 		"483": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/studio-asset-source.ts",
-			"qualifiedName": "entry"
+			"qualifiedName": "inferStudioAssetKind"
 		},
 		"484": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/utils/validate-upload-result.ts",
-			"qualifiedName": "ValidateUploadResultOptions"
+			"packagePath": "src/utils/studio-asset-source.ts",
+			"qualifiedName": "entry"
 		},
 		"485": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/validate-upload-result.ts",
-			"qualifiedName": "validateUploadResult"
+			"qualifiedName": "ValidateUploadResultOptions"
 		},
 		"486": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18037,32 +18076,32 @@
 		"487": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/validate-upload-result.ts",
-			"qualifiedName": "result"
+			"qualifiedName": "validateUploadResult"
 		},
 		"488": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/utils/validate-upload-result.ts",
-			"qualifiedName": "options"
+			"qualifiedName": "result"
 		},
 		"489": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/ui/AssetBrowser.tsx",
-			"qualifiedName": "AssetBrowserProps"
+			"packagePath": "src/utils/validate-upload-result.ts",
+			"qualifiedName": "options"
 		},
 		"490": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetBrowser.tsx",
-			"qualifiedName": "AssetBrowserProps.assets"
+			"qualifiedName": "AssetBrowserProps"
 		},
 		"491": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetBrowser.tsx",
-			"qualifiedName": "AssetBrowserProps.onInsert"
+			"qualifiedName": "AssetBrowserProps.assets"
 		},
 		"492": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetBrowser.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "AssetBrowserProps.onInsert"
 		},
 		"493": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18072,17 +18111,17 @@
 		"494": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetBrowser.tsx",
-			"qualifiedName": "asset"
+			"qualifiedName": "__type"
 		},
 		"495": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetBrowser.tsx",
-			"qualifiedName": "AssetBrowserProps.onDelete"
+			"qualifiedName": "asset"
 		},
 		"496": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetBrowser.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "AssetBrowserProps.onDelete"
 		},
 		"497": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18092,17 +18131,17 @@
 		"498": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetBrowser.tsx",
-			"qualifiedName": "asset"
+			"qualifiedName": "__type"
 		},
 		"499": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetBrowser.tsx",
-			"qualifiedName": "AssetBrowserProps.onReplace"
+			"qualifiedName": "asset"
 		},
 		"500": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetBrowser.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "AssetBrowserProps.onReplace"
 		},
 		"501": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18112,17 +18151,17 @@
 		"502": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetBrowser.tsx",
-			"qualifiedName": "asset"
+			"qualifiedName": "__type"
 		},
 		"503": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetBrowser.tsx",
-			"qualifiedName": "AssetBrowserProps.onEdit"
+			"qualifiedName": "asset"
 		},
 		"504": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetBrowser.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "AssetBrowserProps.onEdit"
 		},
 		"505": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18132,47 +18171,47 @@
 		"506": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetBrowser.tsx",
-			"qualifiedName": "asset"
+			"qualifiedName": "__type"
 		},
 		"507": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetBrowser.tsx",
-			"qualifiedName": "AssetBrowserProps.searchEnabled"
+			"qualifiedName": "asset"
 		},
 		"508": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetBrowser.tsx",
-			"qualifiedName": "AssetBrowserProps.aboveFilters"
+			"qualifiedName": "AssetBrowserProps.searchEnabled"
 		},
 		"509": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetBrowser.tsx",
-			"qualifiedName": "AssetBrowserProps.draggableRows"
+			"qualifiedName": "AssetBrowserProps.aboveFilters"
 		},
 		"510": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetBrowser.tsx",
-			"qualifiedName": "AssetBrowserProps.pageSize"
+			"qualifiedName": "AssetBrowserProps.draggableRows"
 		},
 		"511": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetBrowser.tsx",
-			"qualifiedName": "AssetBrowserProps.virtualizeThreshold"
+			"qualifiedName": "AssetBrowserProps.pageSize"
 		},
 		"512": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetBrowser.tsx",
-			"qualifiedName": "AssetBrowserProps.itemHeight"
+			"qualifiedName": "AssetBrowserProps.virtualizeThreshold"
 		},
 		"513": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetBrowser.tsx",
-			"qualifiedName": "AssetBrowserProps.maxHeight"
+			"qualifiedName": "AssetBrowserProps.itemHeight"
 		},
 		"514": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetBrowser.tsx",
-			"qualifiedName": "AssetBrowser"
+			"qualifiedName": "AssetBrowserProps.maxHeight"
 		},
 		"515": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18182,32 +18221,32 @@
 		"516": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetBrowser.tsx",
-			"qualifiedName": "__0"
+			"qualifiedName": "AssetBrowser"
 		},
 		"517": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/ui/AssetCommandPalette.tsx",
-			"qualifiedName": "AssetCommandPaletteProps"
+			"packagePath": "src/ui/AssetBrowser.tsx",
+			"qualifiedName": "__0"
 		},
 		"518": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetCommandPalette.tsx",
-			"qualifiedName": "AssetCommandPaletteProps.registry"
+			"qualifiedName": "AssetCommandPaletteProps"
 		},
 		"519": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetCommandPalette.tsx",
-			"qualifiedName": "AssetCommandPaletteProps.open"
+			"qualifiedName": "AssetCommandPaletteProps.registry"
 		},
 		"520": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetCommandPalette.tsx",
-			"qualifiedName": "AssetCommandPaletteProps.onOpenChange"
+			"qualifiedName": "AssetCommandPaletteProps.open"
 		},
 		"521": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetCommandPalette.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "AssetCommandPaletteProps.onOpenChange"
 		},
 		"522": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18217,17 +18256,17 @@
 		"523": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetCommandPalette.tsx",
-			"qualifiedName": "open"
+			"qualifiedName": "__type"
 		},
 		"524": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetCommandPalette.tsx",
-			"qualifiedName": "AssetCommandPaletteProps.onSelect"
+			"qualifiedName": "open"
 		},
 		"525": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetCommandPalette.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "AssetCommandPaletteProps.onSelect"
 		},
 		"526": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18237,17 +18276,17 @@
 		"527": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetCommandPalette.tsx",
-			"qualifiedName": "asset"
+			"qualifiedName": "__type"
 		},
 		"528": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetCommandPalette.tsx",
-			"qualifiedName": "AssetCommandPaletteProps.maxResults"
+			"qualifiedName": "asset"
 		},
 		"529": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetCommandPalette.tsx",
-			"qualifiedName": "AssetCommandPalette"
+			"qualifiedName": "AssetCommandPaletteProps.maxResults"
 		},
 		"530": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18257,32 +18296,32 @@
 		"531": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetCommandPalette.tsx",
-			"qualifiedName": "__0"
+			"qualifiedName": "AssetCommandPalette"
 		},
 		"532": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/ui/AssetManagerUI.tsx",
-			"qualifiedName": "AssetManagerUIProps"
+			"packagePath": "src/ui/AssetCommandPalette.tsx",
+			"qualifiedName": "__0"
 		},
 		"533": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetManagerUI.tsx",
-			"qualifiedName": "AssetManagerUIProps.uploader"
+			"qualifiedName": "AssetManagerUIProps"
 		},
 		"534": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetManagerUI.tsx",
-			"qualifiedName": "AssetManagerUIProps.registry"
+			"qualifiedName": "AssetManagerUIProps.uploader"
 		},
 		"535": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetManagerUI.tsx",
-			"qualifiedName": "AssetManagerUIProps.onAssetInserted"
+			"qualifiedName": "AssetManagerUIProps.registry"
 		},
 		"536": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetManagerUI.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "AssetManagerUIProps.onAssetInserted"
 		},
 		"537": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18292,47 +18331,47 @@
 		"538": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetManagerUI.tsx",
-			"qualifiedName": "asset"
+			"qualifiedName": "__type"
 		},
 		"539": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetManagerUI.tsx",
-			"qualifiedName": "AssetManagerUIProps.searchEnabled"
+			"qualifiedName": "asset"
 		},
 		"540": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetManagerUI.tsx",
-			"qualifiedName": "AssetManagerUIProps.aboveFilters"
+			"qualifiedName": "AssetManagerUIProps.searchEnabled"
 		},
 		"541": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetManagerUI.tsx",
-			"qualifiedName": "AssetManagerUIProps.draggableRows"
+			"qualifiedName": "AssetManagerUIProps.aboveFilters"
 		},
 		"542": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types/options.ts",
-			"qualifiedName": "dataUrlAllowlistOptIn"
+			"packagePath": "src/ui/AssetManagerUI.tsx",
+			"qualifiedName": "AssetManagerUIProps.draggableRows"
 		},
 		"543": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/types/options.ts",
-			"qualifiedName": "allowMixedScriptHostnames"
+			"qualifiedName": "dataUrlAllowlistOptIn"
 		},
 		"544": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/types/options.ts",
-			"qualifiedName": "maxFileSize"
+			"qualifiedName": "allowMixedScriptHostnames"
 		},
 		"545": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/types/options.ts",
-			"qualifiedName": "acceptedMimeTypes"
+			"qualifiedName": "maxFileSize"
 		},
 		"546": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/ui/AssetManagerUI.tsx",
-			"qualifiedName": "AssetManagerUI"
+			"packagePath": "src/types/options.ts",
+			"qualifiedName": "acceptedMimeTypes"
 		},
 		"547": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18342,27 +18381,27 @@
 		"548": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/AssetManagerUI.tsx",
-			"qualifiedName": "__0"
+			"qualifiedName": "AssetManagerUI"
 		},
 		"549": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/ui/DeleteAssetDialog.tsx",
-			"qualifiedName": "DeleteAssetDialogProps"
+			"packagePath": "src/ui/AssetManagerUI.tsx",
+			"qualifiedName": "__0"
 		},
 		"550": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/DeleteAssetDialog.tsx",
-			"qualifiedName": "DeleteAssetDialogProps.asset"
+			"qualifiedName": "DeleteAssetDialogProps"
 		},
 		"551": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/DeleteAssetDialog.tsx",
-			"qualifiedName": "DeleteAssetDialogProps.onConfirm"
+			"qualifiedName": "DeleteAssetDialogProps.asset"
 		},
 		"552": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/DeleteAssetDialog.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "DeleteAssetDialogProps.onConfirm"
 		},
 		"553": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18372,17 +18411,17 @@
 		"554": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/DeleteAssetDialog.tsx",
-			"qualifiedName": "asset"
+			"qualifiedName": "__type"
 		},
 		"555": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/DeleteAssetDialog.tsx",
-			"qualifiedName": "DeleteAssetDialogProps.onCancel"
+			"qualifiedName": "asset"
 		},
 		"556": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/DeleteAssetDialog.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "DeleteAssetDialogProps.onCancel"
 		},
 		"557": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18392,12 +18431,12 @@
 		"558": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/DeleteAssetDialog.tsx",
-			"qualifiedName": "DeleteAssetDialogProps.referenceCount"
+			"qualifiedName": "__type"
 		},
 		"559": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/DeleteAssetDialog.tsx",
-			"qualifiedName": "DeleteAssetDialog"
+			"qualifiedName": "DeleteAssetDialogProps.referenceCount"
 		},
 		"560": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18407,27 +18446,27 @@
 		"561": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/DeleteAssetDialog.tsx",
-			"qualifiedName": "__0"
+			"qualifiedName": "DeleteAssetDialog"
 		},
 		"562": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/ui/DeleteFolderDialog.tsx",
-			"qualifiedName": "DeleteFolderDialogProps"
+			"packagePath": "src/ui/DeleteAssetDialog.tsx",
+			"qualifiedName": "__0"
 		},
 		"563": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/DeleteFolderDialog.tsx",
-			"qualifiedName": "DeleteFolderDialogProps.folder"
+			"qualifiedName": "DeleteFolderDialogProps"
 		},
 		"564": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/DeleteFolderDialog.tsx",
-			"qualifiedName": "DeleteFolderDialogProps.onConfirm"
+			"qualifiedName": "DeleteFolderDialogProps.folder"
 		},
 		"565": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/DeleteFolderDialog.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "DeleteFolderDialogProps.onConfirm"
 		},
 		"566": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18437,22 +18476,22 @@
 		"567": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/DeleteFolderDialog.tsx",
-			"qualifiedName": "folder"
+			"qualifiedName": "__type"
 		},
 		"568": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/DeleteFolderDialog.tsx",
-			"qualifiedName": "cascade"
+			"qualifiedName": "folder"
 		},
 		"569": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/DeleteFolderDialog.tsx",
-			"qualifiedName": "DeleteFolderDialogProps.onCancel"
+			"qualifiedName": "cascade"
 		},
 		"570": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/DeleteFolderDialog.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "DeleteFolderDialogProps.onCancel"
 		},
 		"571": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18462,7 +18501,7 @@
 		"572": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/DeleteFolderDialog.tsx",
-			"qualifiedName": "DeleteFolderDialog"
+			"qualifiedName": "__type"
 		},
 		"573": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18472,22 +18511,22 @@
 		"574": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/DeleteFolderDialog.tsx",
-			"qualifiedName": "__0"
+			"qualifiedName": "DeleteFolderDialog"
 		},
 		"575": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/ui/EmptyFolderState.tsx",
-			"qualifiedName": "EmptyFolderStateProps"
+			"packagePath": "src/ui/DeleteFolderDialog.tsx",
+			"qualifiedName": "__0"
 		},
 		"576": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/EmptyFolderState.tsx",
-			"qualifiedName": "EmptyFolderStateProps.onUpload"
+			"qualifiedName": "EmptyFolderStateProps"
 		},
 		"577": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/EmptyFolderState.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "EmptyFolderStateProps.onUpload"
 		},
 		"578": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18497,12 +18536,12 @@
 		"579": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/EmptyFolderState.tsx",
-			"qualifiedName": "EmptyFolderStateProps.message"
+			"qualifiedName": "__type"
 		},
 		"580": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/EmptyFolderState.tsx",
-			"qualifiedName": "EmptyFolderState"
+			"qualifiedName": "EmptyFolderStateProps.message"
 		},
 		"581": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18512,27 +18551,27 @@
 		"582": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/EmptyFolderState.tsx",
-			"qualifiedName": "__0"
+			"qualifiedName": "EmptyFolderState"
 		},
 		"583": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/ui/FolderBreadcrumb.tsx",
-			"qualifiedName": "FolderBreadcrumbProps"
+			"packagePath": "src/ui/EmptyFolderState.tsx",
+			"qualifiedName": "__0"
 		},
 		"584": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/FolderBreadcrumb.tsx",
-			"qualifiedName": "FolderBreadcrumbProps.path"
+			"qualifiedName": "FolderBreadcrumbProps"
 		},
 		"585": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/FolderBreadcrumb.tsx",
-			"qualifiedName": "FolderBreadcrumbProps.onNavigate"
+			"qualifiedName": "FolderBreadcrumbProps.path"
 		},
 		"586": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/FolderBreadcrumb.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "FolderBreadcrumbProps.onNavigate"
 		},
 		"587": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18542,17 +18581,17 @@
 		"588": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/FolderBreadcrumb.tsx",
-			"qualifiedName": "folderId"
+			"qualifiedName": "__type"
 		},
 		"589": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/FolderBreadcrumb.tsx",
-			"qualifiedName": "FolderBreadcrumbProps.rootLabel"
+			"qualifiedName": "folderId"
 		},
 		"590": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/FolderBreadcrumb.tsx",
-			"qualifiedName": "FolderBreadcrumb"
+			"qualifiedName": "FolderBreadcrumbProps.rootLabel"
 		},
 		"591": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18562,27 +18601,27 @@
 		"592": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/FolderBreadcrumb.tsx",
-			"qualifiedName": "__0"
+			"qualifiedName": "FolderBreadcrumb"
 		},
 		"593": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/ui/FolderNameDialog.tsx",
-			"qualifiedName": "FolderNameDialogProps"
+			"packagePath": "src/ui/FolderBreadcrumb.tsx",
+			"qualifiedName": "__0"
 		},
 		"594": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/FolderNameDialog.tsx",
-			"qualifiedName": "FolderNameDialogProps.open"
+			"qualifiedName": "FolderNameDialogProps"
 		},
 		"595": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/FolderNameDialog.tsx",
-			"qualifiedName": "FolderNameDialogProps.onOpenChange"
+			"qualifiedName": "FolderNameDialogProps.open"
 		},
 		"596": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/FolderNameDialog.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "FolderNameDialogProps.onOpenChange"
 		},
 		"597": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18592,17 +18631,17 @@
 		"598": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/FolderNameDialog.tsx",
-			"qualifiedName": "open"
+			"qualifiedName": "__type"
 		},
 		"599": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/FolderNameDialog.tsx",
-			"qualifiedName": "FolderNameDialogProps.onSubmit"
+			"qualifiedName": "open"
 		},
 		"600": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/FolderNameDialog.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "FolderNameDialogProps.onSubmit"
 		},
 		"601": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18612,27 +18651,27 @@
 		"602": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/FolderNameDialog.tsx",
-			"qualifiedName": "name"
+			"qualifiedName": "__type"
 		},
 		"603": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/FolderNameDialog.tsx",
-			"qualifiedName": "FolderNameDialogProps.title"
+			"qualifiedName": "name"
 		},
 		"604": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/FolderNameDialog.tsx",
-			"qualifiedName": "FolderNameDialogProps.submitLabel"
+			"qualifiedName": "FolderNameDialogProps.title"
 		},
 		"605": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/FolderNameDialog.tsx",
-			"qualifiedName": "FolderNameDialogProps.initialName"
+			"qualifiedName": "FolderNameDialogProps.submitLabel"
 		},
 		"606": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/FolderNameDialog.tsx",
-			"qualifiedName": "FolderNameDialog"
+			"qualifiedName": "FolderNameDialogProps.initialName"
 		},
 		"607": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18642,42 +18681,42 @@
 		"608": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/FolderNameDialog.tsx",
-			"qualifiedName": "__0"
+			"qualifiedName": "FolderNameDialog"
 		},
 		"609": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/ui/index.ts",
-			"qualifiedName": "CreateFolderDialog"
+			"packagePath": "src/ui/FolderNameDialog.tsx",
+			"qualifiedName": "__0"
 		},
 		"610": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/index.ts",
-			"qualifiedName": "RenameFolderDialog"
+			"qualifiedName": "CreateFolderDialog"
 		},
 		"611": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/ui/FolderTree.tsx",
-			"qualifiedName": "FolderTreeProps"
+			"packagePath": "src/ui/index.ts",
+			"qualifiedName": "RenameFolderDialog"
 		},
 		"612": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/FolderTree.tsx",
-			"qualifiedName": "FolderTreeProps.folders"
+			"qualifiedName": "FolderTreeProps"
 		},
 		"613": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/FolderTree.tsx",
-			"qualifiedName": "FolderTreeProps.currentFolderId"
+			"qualifiedName": "FolderTreeProps.folders"
 		},
 		"614": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/FolderTree.tsx",
-			"qualifiedName": "FolderTreeProps.onNavigate"
+			"qualifiedName": "FolderTreeProps.currentFolderId"
 		},
 		"615": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/FolderTree.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "FolderTreeProps.onNavigate"
 		},
 		"616": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18687,17 +18726,17 @@
 		"617": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/FolderTree.tsx",
-			"qualifiedName": "folderId"
+			"qualifiedName": "__type"
 		},
 		"618": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/FolderTree.tsx",
-			"qualifiedName": "FolderTreeProps.onDropAssets"
+			"qualifiedName": "folderId"
 		},
 		"619": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/FolderTree.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "FolderTreeProps.onDropAssets"
 		},
 		"620": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18707,22 +18746,22 @@
 		"621": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/FolderTree.tsx",
-			"qualifiedName": "assetIds"
+			"qualifiedName": "__type"
 		},
 		"622": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/FolderTree.tsx",
-			"qualifiedName": "folderId"
+			"qualifiedName": "assetIds"
 		},
 		"623": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/FolderTree.tsx",
-			"qualifiedName": "ASSET_DRAG_MIME"
+			"qualifiedName": "folderId"
 		},
 		"624": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/FolderTree.tsx",
-			"qualifiedName": "FolderTree"
+			"qualifiedName": "ASSET_DRAG_MIME"
 		},
 		"625": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18732,27 +18771,27 @@
 		"626": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/FolderTree.tsx",
-			"qualifiedName": "__0"
+			"qualifiedName": "FolderTree"
 		},
 		"627": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/ui/MetadataPanel.tsx",
-			"qualifiedName": "MetadataPanelProps"
+			"packagePath": "src/ui/FolderTree.tsx",
+			"qualifiedName": "__0"
 		},
 		"628": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/MetadataPanel.tsx",
-			"qualifiedName": "MetadataPanelProps.asset"
+			"qualifiedName": "MetadataPanelProps"
 		},
 		"629": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/MetadataPanel.tsx",
-			"qualifiedName": "MetadataPanelProps.onConfirm"
+			"qualifiedName": "MetadataPanelProps.asset"
 		},
 		"630": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/MetadataPanel.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "MetadataPanelProps.onConfirm"
 		},
 		"631": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18762,37 +18801,37 @@
 		"632": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/MetadataPanel.tsx",
-			"qualifiedName": "asset"
+			"qualifiedName": "__type"
 		},
 		"633": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/MetadataPanel.tsx",
-			"qualifiedName": "next"
+			"qualifiedName": "asset"
 		},
 		"634": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/MetadataPanel.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "next"
 		},
 		"635": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/MetadataPanel.tsx",
-			"qualifiedName": "__type.name"
+			"qualifiedName": "__type"
 		},
 		"636": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/MetadataPanel.tsx",
-			"qualifiedName": "__type.tags"
+			"qualifiedName": "__type.name"
 		},
 		"637": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/MetadataPanel.tsx",
-			"qualifiedName": "MetadataPanelProps.onCancel"
+			"qualifiedName": "__type.tags"
 		},
 		"638": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/MetadataPanel.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "MetadataPanelProps.onCancel"
 		},
 		"639": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18802,7 +18841,7 @@
 		"640": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/MetadataPanel.tsx",
-			"qualifiedName": "MetadataPanel"
+			"qualifiedName": "__type"
 		},
 		"641": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18812,27 +18851,27 @@
 		"642": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/MetadataPanel.tsx",
-			"qualifiedName": "__0"
+			"qualifiedName": "MetadataPanel"
 		},
 		"643": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/ui/MoveTargetPicker.tsx",
-			"qualifiedName": "MoveTargetPickerProps"
+			"packagePath": "src/ui/MetadataPanel.tsx",
+			"qualifiedName": "__0"
 		},
 		"644": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/MoveTargetPicker.tsx",
-			"qualifiedName": "MoveTargetPickerProps.open"
+			"qualifiedName": "MoveTargetPickerProps"
 		},
 		"645": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/MoveTargetPicker.tsx",
-			"qualifiedName": "MoveTargetPickerProps.onOpenChange"
+			"qualifiedName": "MoveTargetPickerProps.open"
 		},
 		"646": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/MoveTargetPicker.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "MoveTargetPickerProps.onOpenChange"
 		},
 		"647": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18842,22 +18881,22 @@
 		"648": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/MoveTargetPicker.tsx",
-			"qualifiedName": "open"
+			"qualifiedName": "__type"
 		},
 		"649": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/MoveTargetPicker.tsx",
-			"qualifiedName": "MoveTargetPickerProps.folders"
+			"qualifiedName": "open"
 		},
 		"650": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/MoveTargetPicker.tsx",
-			"qualifiedName": "MoveTargetPickerProps.onPick"
+			"qualifiedName": "MoveTargetPickerProps.folders"
 		},
 		"651": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/MoveTargetPicker.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "MoveTargetPickerProps.onPick"
 		},
 		"652": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18867,17 +18906,17 @@
 		"653": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/MoveTargetPicker.tsx",
-			"qualifiedName": "folderId"
+			"qualifiedName": "__type"
 		},
 		"654": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/MoveTargetPicker.tsx",
-			"qualifiedName": "MoveTargetPickerProps.rootLabel"
+			"qualifiedName": "folderId"
 		},
 		"655": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/MoveTargetPicker.tsx",
-			"qualifiedName": "MoveTargetPicker"
+			"qualifiedName": "MoveTargetPickerProps.rootLabel"
 		},
 		"656": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18887,27 +18926,27 @@
 		"657": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/MoveTargetPicker.tsx",
-			"qualifiedName": "__0"
+			"qualifiedName": "MoveTargetPicker"
 		},
 		"658": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/ui/ReplaceAssetDialog.tsx",
-			"qualifiedName": "ReplaceAssetDialogProps"
+			"packagePath": "src/ui/MoveTargetPicker.tsx",
+			"qualifiedName": "__0"
 		},
 		"659": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/ReplaceAssetDialog.tsx",
-			"qualifiedName": "ReplaceAssetDialogProps.asset"
+			"qualifiedName": "ReplaceAssetDialogProps"
 		},
 		"660": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/ReplaceAssetDialog.tsx",
-			"qualifiedName": "ReplaceAssetDialogProps.onConfirm"
+			"qualifiedName": "ReplaceAssetDialogProps.asset"
 		},
 		"661": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/ReplaceAssetDialog.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "ReplaceAssetDialogProps.onConfirm"
 		},
 		"662": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18917,22 +18956,22 @@
 		"663": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/ReplaceAssetDialog.tsx",
-			"qualifiedName": "asset"
+			"qualifiedName": "__type"
 		},
 		"664": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/ReplaceAssetDialog.tsx",
-			"qualifiedName": "file"
+			"qualifiedName": "asset"
 		},
 		"665": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/ReplaceAssetDialog.tsx",
-			"qualifiedName": "ReplaceAssetDialogProps.onCancel"
+			"qualifiedName": "file"
 		},
 		"666": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/ReplaceAssetDialog.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "ReplaceAssetDialogProps.onCancel"
 		},
 		"667": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18941,18 +18980,18 @@
 		},
 		"668": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types/options.ts",
-			"qualifiedName": "maxFileSize"
+			"packagePath": "src/ui/ReplaceAssetDialog.tsx",
+			"qualifiedName": "__type"
 		},
 		"669": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/types/options.ts",
-			"qualifiedName": "acceptedMimeTypes"
+			"qualifiedName": "maxFileSize"
 		},
 		"670": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/ui/ReplaceAssetDialog.tsx",
-			"qualifiedName": "ReplaceAssetDialog"
+			"packagePath": "src/types/options.ts",
+			"qualifiedName": "acceptedMimeTypes"
 		},
 		"671": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18962,32 +19001,32 @@
 		"672": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/ReplaceAssetDialog.tsx",
-			"qualifiedName": "__0"
+			"qualifiedName": "ReplaceAssetDialog"
 		},
 		"673": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/ui/UnsplashPanel.tsx",
-			"qualifiedName": "UnsplashPanelProps"
+			"packagePath": "src/ui/ReplaceAssetDialog.tsx",
+			"qualifiedName": "__0"
 		},
 		"674": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UnsplashPanel.tsx",
-			"qualifiedName": "UnsplashPanelProps.themes"
+			"qualifiedName": "UnsplashPanelProps"
 		},
 		"675": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UnsplashPanel.tsx",
-			"qualifiedName": "UnsplashPanelProps.activeThemeId"
+			"qualifiedName": "UnsplashPanelProps.themes"
 		},
 		"676": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UnsplashPanel.tsx",
-			"qualifiedName": "UnsplashPanelProps.onThemeChange"
+			"qualifiedName": "UnsplashPanelProps.activeThemeId"
 		},
 		"677": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UnsplashPanel.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "UnsplashPanelProps.onThemeChange"
 		},
 		"678": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -18997,22 +19036,22 @@
 		"679": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UnsplashPanel.tsx",
-			"qualifiedName": "themeId"
+			"qualifiedName": "__type"
 		},
 		"680": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UnsplashPanel.tsx",
-			"qualifiedName": "UnsplashPanelProps.query"
+			"qualifiedName": "themeId"
 		},
 		"681": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UnsplashPanel.tsx",
-			"qualifiedName": "UnsplashPanelProps.onQueryChange"
+			"qualifiedName": "UnsplashPanelProps.query"
 		},
 		"682": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UnsplashPanel.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "UnsplashPanelProps.onQueryChange"
 		},
 		"683": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -19022,27 +19061,27 @@
 		"684": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UnsplashPanel.tsx",
-			"qualifiedName": "query"
+			"qualifiedName": "__type"
 		},
 		"685": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UnsplashPanel.tsx",
-			"qualifiedName": "UnsplashPanelProps.results"
+			"qualifiedName": "query"
 		},
 		"686": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UnsplashPanel.tsx",
-			"qualifiedName": "UnsplashPanelProps.status"
+			"qualifiedName": "UnsplashPanelProps.results"
 		},
 		"687": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UnsplashPanel.tsx",
-			"qualifiedName": "UnsplashPanelProps.onPick"
+			"qualifiedName": "UnsplashPanelProps.status"
 		},
 		"688": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UnsplashPanel.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "UnsplashPanelProps.onPick"
 		},
 		"689": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -19052,17 +19091,17 @@
 		"690": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UnsplashPanel.tsx",
-			"qualifiedName": "id"
+			"qualifiedName": "__type"
 		},
 		"691": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UnsplashPanel.tsx",
-			"qualifiedName": "UnsplashPanelProps.onLoadMore"
+			"qualifiedName": "id"
 		},
 		"692": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UnsplashPanel.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "UnsplashPanelProps.onLoadMore"
 		},
 		"693": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -19072,12 +19111,12 @@
 		"694": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UnsplashPanel.tsx",
-			"qualifiedName": "UnsplashPanelProps.themeLabel"
+			"qualifiedName": "__type"
 		},
 		"695": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UnsplashPanel.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "UnsplashPanelProps.themeLabel"
 		},
 		"696": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -19087,52 +19126,52 @@
 		"697": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UnsplashPanel.tsx",
-			"qualifiedName": "key"
+			"qualifiedName": "__type"
 		},
 		"698": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UnsplashPanel.tsx",
-			"qualifiedName": "UnsplashPanelProps.skeletonCount"
+			"qualifiedName": "key"
 		},
 		"699": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UnsplashPanel.tsx",
-			"qualifiedName": "UnsplashPanelStatus"
+			"qualifiedName": "UnsplashPanelProps.skeletonCount"
 		},
 		"700": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UnsplashPanel.tsx",
-			"qualifiedName": "UnsplashResult"
+			"qualifiedName": "UnsplashPanelStatus"
 		},
 		"701": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UnsplashPanel.tsx",
-			"qualifiedName": "UnsplashResult.id"
+			"qualifiedName": "UnsplashResult"
 		},
 		"702": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UnsplashPanel.tsx",
-			"qualifiedName": "UnsplashResult.thumbnailUrl"
+			"qualifiedName": "UnsplashResult.id"
 		},
 		"703": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UnsplashPanel.tsx",
-			"qualifiedName": "UnsplashResult.photographerName"
+			"qualifiedName": "UnsplashResult.thumbnailUrl"
 		},
 		"704": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UnsplashPanel.tsx",
-			"qualifiedName": "UnsplashResult.photographerUrl"
+			"qualifiedName": "UnsplashResult.photographerName"
 		},
 		"705": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UnsplashPanel.tsx",
-			"qualifiedName": "UnsplashResult.unsplashUrl"
+			"qualifiedName": "UnsplashResult.photographerUrl"
 		},
 		"706": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UnsplashPanel.tsx",
-			"qualifiedName": "UnsplashPanel"
+			"qualifiedName": "UnsplashResult.unsplashUrl"
 		},
 		"707": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -19142,27 +19181,27 @@
 		"708": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UnsplashPanel.tsx",
-			"qualifiedName": "__0"
+			"qualifiedName": "UnsplashPanel"
 		},
 		"709": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/ui/UploadButton.tsx",
-			"qualifiedName": "UploadButtonProps"
+			"packagePath": "src/ui/UnsplashPanel.tsx",
+			"qualifiedName": "__0"
 		},
 		"710": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UploadButton.tsx",
-			"qualifiedName": "UploadButtonProps.uploader"
+			"qualifiedName": "UploadButtonProps"
 		},
 		"711": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UploadButton.tsx",
-			"qualifiedName": "UploadButtonProps.onUploaded"
+			"qualifiedName": "UploadButtonProps.uploader"
 		},
 		"712": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UploadButton.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "UploadButtonProps.onUploaded"
 		},
 		"713": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -19172,17 +19211,17 @@
 		"714": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UploadButton.tsx",
-			"qualifiedName": "asset"
+			"qualifiedName": "__type"
 		},
 		"715": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UploadButton.tsx",
-			"qualifiedName": "UploadButtonProps.onError"
+			"qualifiedName": "asset"
 		},
 		"716": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UploadButton.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "UploadButtonProps.onError"
 		},
 		"717": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -19192,17 +19231,17 @@
 		"718": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UploadButton.tsx",
-			"qualifiedName": "error"
+			"qualifiedName": "__type"
 		},
 		"719": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UploadButton.tsx",
-			"qualifiedName": "UploadButtonProps.onProgress"
+			"qualifiedName": "error"
 		},
 		"720": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UploadButton.tsx",
-			"qualifiedName": "__type"
+			"qualifiedName": "UploadButtonProps.onProgress"
 		},
 		"721": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -19212,47 +19251,47 @@
 		"722": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UploadButton.tsx",
-			"qualifiedName": "snapshot"
+			"qualifiedName": "__type"
 		},
 		"723": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/types/options.ts",
-			"qualifiedName": "dataUrlAllowlistOptIn"
+			"packagePath": "src/ui/UploadButton.tsx",
+			"qualifiedName": "snapshot"
 		},
 		"724": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/types/options.ts",
-			"qualifiedName": "allowMixedScriptHostnames"
+			"qualifiedName": "dataUrlAllowlistOptIn"
 		},
 		"725": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/types/options.ts",
-			"qualifiedName": "maxFileSize"
+			"qualifiedName": "allowMixedScriptHostnames"
 		},
 		"726": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/types/options.ts",
-			"qualifiedName": "acceptedMimeTypes"
+			"qualifiedName": "maxFileSize"
 		},
 		"727": {
 			"packageName": "@anvilkit/plugin-asset-manager",
-			"packagePath": "src/ui/UploadButton.tsx",
-			"qualifiedName": "UploadProgressSnapshot"
+			"packagePath": "src/types/options.ts",
+			"qualifiedName": "acceptedMimeTypes"
 		},
 		"728": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UploadButton.tsx",
-			"qualifiedName": "UploadProgressSnapshot.completed"
+			"qualifiedName": "UploadProgressSnapshot"
 		},
 		"729": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UploadButton.tsx",
-			"qualifiedName": "UploadProgressSnapshot.total"
+			"qualifiedName": "UploadProgressSnapshot.completed"
 		},
 		"730": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UploadButton.tsx",
-			"qualifiedName": "UploadButton"
+			"qualifiedName": "UploadProgressSnapshot.total"
 		},
 		"731": {
 			"packageName": "@anvilkit/plugin-asset-manager",
@@ -19262,14 +19301,19 @@
 		"732": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/ui/UploadButton.tsx",
-			"qualifiedName": "__0"
+			"qualifiedName": "UploadButton"
 		},
 		"733": {
+			"packageName": "@anvilkit/plugin-asset-manager",
+			"packagePath": "src/ui/UploadButton.tsx",
+			"qualifiedName": "__0"
+		},
+		"734": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/adapters/s3-presigned.ts",
 			"qualifiedName": "RetryOptions"
 		},
-		"734": {
+		"735": {
 			"packageName": "@anvilkit/plugin-asset-manager",
 			"packagePath": "src/adapters/s3-presigned.ts",
 			"qualifiedName": "RetryableError"
