@@ -1,6 +1,6 @@
 # @anvilkit/plugin-asset-manager
 
-> **Alpha (`0.1.6`).** Public surface may still shift before `v1.0`. Bundle budgets enforced in CI: headless ≤ 6 KB gzip, UI subpath ≤ 12 KB gzip.
+> **Alpha (`0.1.6`).** Public surface may still shift before `v1.0`. Bundle budgets enforced in CI: headless entry ≤ 8 KB gzip, UI subpath ≤ 12 KB gzip, Unsplash subpath ≤ 4 KB gzip.
 
 Headless asset manager plugin for Anvilkit Studio. The host provides the upload backend; the plugin handles validation, registration, search, IR-time resolution, CSP guidance, and (optionally) a React UI for the upload + browse experience. Designed for pluggable production backends (S3, GCS, custom HTTP) with strict trust-boundary enforcement on every adapter response.
 
@@ -15,34 +15,36 @@ Non-optional peers: `react >=19.0.0`, `react-dom >=19.0.0`, `@puckeditor/core ^0
 Subpath imports:
 
 - `@anvilkit/plugin-asset-manager` — plugin factory, validation, adapters, CSP advisor, errors.
-- `@anvilkit/plugin-asset-manager/ui` — React UI components.
+- `@anvilkit/plugin-asset-manager/ui` — React UI components (browser + folders + Unsplash panel).
 - `@anvilkit/plugin-asset-manager/retry` — generic `RetryableError` + `withRetry()`.
 - `@anvilkit/plugin-asset-manager/adapters/s3` — production `s3PresignedAdapter`.
+- `@anvilkit/plugin-asset-manager/providers/unsplash` — the lazy, dependency-free Unsplash provider.
 - `@anvilkit/plugin-asset-manager/testing` — fixtures for downstream plugin tests.
 
 ## Quickstart
 
 ```ts
-import {
-  createAssetManagerPlugin,
-  dataUrlUploader,
-} from "@anvilkit/plugin-asset-manager";
+import { createAssetManagerPlugin } from "@anvilkit/plugin-asset-manager";
 import { Studio } from "@anvilkit/core";
 
-const assetManager = createAssetManagerPlugin({
-  uploader: dataUrlUploader(),
-});
+// Zero-config: an in-memory library with folders enabled. Every option is optional.
+const assetManager = createAssetManagerPlugin();
 
 <Studio puckConfig={puckConfig} plugins={[assetManager]} />;
 ```
 
-`dataUrlUploader` is dev-only — files are converted to in-memory `data:` URLs (1 MB cap by default). For production, swap in `s3PresignedAdapter` or a custom `UploadAdapter`.
+For real uploads pass an `uploader`. `dataUrlUploader` is dev-only — files are converted to in-memory `data:` URLs (1 MB cap by default). For production, swap in `s3PresignedAdapter` or a custom `UploadAdapter`. The default Studio sidebar's **Images** rail renders the library, folder breadcrumb/tree, source tabs and (when configured) the Unsplash picker with no extra wiring.
 
 ## Core features
 
 - **Pluggable upload adapters** — `dataUrlUploader`, `inMemoryUploader`, and `s3PresignedAdapter` ship in-box; custom adapters implement the `UploadAdapter` function signature.
 - **Strict trust model** — every adapter response is validated through `validateUploadResult`: scheme allowlist, path-traversal guard, IDN homoglyph guard. `javascript:` / `vbscript:` are hard-blocked. `data:` is opt-in.
 - **In-memory asset registry** — search (`query` / `kinds` / `tags`), opaque cursor pagination, auto-derived tags, rename / retag / replace / delete.
+- **Zero required config** — `createAssetManagerPlugin()` (no args) yields a working in-memory library with folders; wire only the `dataSource` operations you need.
+- **Folders** — tree management (create / rename / move / remove with reparent-or-cascade); membership is library metadata, never IR, so moves never change a rendered page.
+- **Host-backed data source** — optional async `AssetDataSource` (list returns assets + folder tree); per-plane fallback to the in-memory default for omitted methods.
+- **Unsplash** — built-in, lazy, proxy-first source with multiple themes, attribution + mandatory download-trigger; never enters the headless chunk.
+- **Categories & faceted filtering** — kind / tags / folder / source axes (AND-composed) plus host-defined categories & facets; federates across sources with a composite cursor.
 - **IR-time resolution** — `createIRAssetResolver` + `resolveAssets` turn `asset://<id>` references into validated URLs at export / render time.
 - **CSP advisor** — `getRequiredCsp` computes the minimum `connect-src` / `img-src` / `media-src` directives the configured adapters need.
 - **Production-ready S3 adapter** — `s3PresignedAdapter` POST-then-PUT with exponential-backoff retry on 5xx + network failures (4xx fails fast).
@@ -57,14 +59,20 @@ const assetManager = createAssetManagerPlugin({
 function createAssetManagerPlugin(options: AssetManagerOptions): StudioPlugin;
 ```
 
-| Field                       | Type                                           | Default    | Purpose                                                                   |
-| --------------------------- | ---------------------------------------------- | ---------- | ------------------------------------------------------------------------- |
-| `uploader`                  | `UploadAdapter`                                | _required_ | Upload backend.                                                           |
-| `maxFileSize`               | `number`                                       | none       | Bytes. Enforced before the adapter runs.                                  |
-| `acceptedMimeTypes`         | `readonly string[]`                            | none       | Allowlist. Enforced before the adapter runs.                              |
-| `dataUrlAllowlistOptIn`     | `boolean`                                      | `false`    | When `true`, `data:` URLs are valid output.                               |
-| `allowMixedScriptHostnames` | `boolean`                                      | `false`    | When `true`, hostnames mixing Latin with a confusable script are allowed. |
-| `getThumbnail`              | `(entry: UploadResult) => string \| undefined` | none       | Optional override for the displayed thumbnail.                            |
+| Field                       | Type                                           | Default   | Purpose                                                                      |
+| --------------------------- | ---------------------------------------------- | --------- | ---------------------------------------------------------------------------- |
+| `uploader`                  | `UploadAdapter`                                | in-memory | Binary ingest backend (optional; defaults to an in-memory uploader).         |
+| `dataSource`                | `AssetDataSource`                              | in-memory | Host-backed catalog (list / remove / replace / rename / move + folders).     |
+| `folders`                   | `boolean \| FolderOptions`                     | `true`    | Folder management; `false` for a flat library, or `{ maxDepth, allowMove }`. |
+| `providers`                 | `readonly AssetSourceProvider[]`               | `[]`      | Extra read-only sources, federated alongside the local library.              |
+| `unsplash`                  | `UnsplashSourceOptions`                        | none      | Built-in Unsplash source (proxy-first; no bundled key).                      |
+| `categories`                | `readonly AssetCategory[]`                     | none      | Saved-view chips beside the kind filters.                                    |
+| `facets`                    | `readonly AssetFacetDefinition[]`              | none      | Custom faceted filters (local `valueOf` or remote).                          |
+| `maxFileSize`               | `number`                                       | none      | Bytes. Enforced before the adapter runs.                                     |
+| `acceptedMimeTypes`         | `readonly string[]`                            | none      | Allowlist. Enforced before the adapter runs.                                 |
+| `dataUrlAllowlistOptIn`     | `boolean`                                      | `false`   | When `true`, `data:` URLs are valid output.                                  |
+| `allowMixedScriptHostnames` | `boolean`                                      | `false`   | When `true`, hostnames mixing Latin with a confusable script are allowed.    |
+| `getThumbnail`              | `(entry: UploadResult) => string \| undefined` | none      | Optional override for the displayed thumbnail.                               |
 
 ### Imperative API on the plugin context
 
