@@ -38,7 +38,10 @@ describe("UnsplashPanel", () => {
 				onPick={vi.fn()}
 			/>,
 		);
-		expect(screen.getByTestId("ak-unsplash-disabled")).toBeTruthy();
+		const disabled = screen.getByTestId("ak-unsplash-disabled");
+		expect(disabled).toBeTruthy();
+		// Announced to assistive tech, like the error/rate-limit states.
+		expect(disabled.getAttribute("role")).toBe("status");
 	});
 
 	it("renders results with attribution and picks on click", async () => {
@@ -76,6 +79,10 @@ describe("UnsplashPanel", () => {
 			/>,
 		);
 		expect(screen.getByTestId("ak-unsplash-skeletons")).toBeTruthy();
+		// Loading is announced via a visually-hidden live region.
+		expect(screen.getByTestId("ak-unsplash-status").textContent).toContain(
+			"Loading",
+		);
 	});
 
 	it("toggles a theme and forwards search input", () => {

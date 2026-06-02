@@ -44,8 +44,13 @@ export function FolderTree({
 	};
 
 	if (folders.length === 0) return null;
+	const droppable = onDropAssets !== undefined;
 	return (
-		<ul data-testid="ak-folder-tree" className="flex flex-col gap-1">
+		<ul
+			aria-label="Folders"
+			data-testid="ak-folder-tree"
+			className="flex flex-col gap-1"
+		>
 			{folders.map((folder) => (
 				<li key={folder.id}>
 					<Button
@@ -55,6 +60,14 @@ export function FolderTree({
 						className="w-full justify-start"
 						data-folder-id={folder.id}
 						data-drop-target={dropTarget === folder.id ? "" : undefined}
+						// Native HTML5 DnD has no reliable AT affordance; the title
+						// surfaces the drop equivalence. The sanctioned keyboard path
+						// is the MoveTargetPicker dialog.
+						title={
+							droppable
+								? `Open ${folder.name} — or drop assets here to move them in`
+								: undefined
+						}
 						onClick={() => onNavigate(folder.id)}
 						onDragOver={
 							onDropAssets

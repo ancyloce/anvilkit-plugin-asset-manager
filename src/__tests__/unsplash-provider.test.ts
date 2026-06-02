@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
 	createUnsplashProvider,
+	UNSPLASH_THEME_FACET,
 	unsplashEnabled,
 } from "../sources/unsplash/index.js";
 
@@ -97,6 +98,33 @@ describe("createUnsplashProvider — search projection", () => {
 		expect(
 			fetchMock.mock.calls.some((c) =>
 				String(c[0]).includes("/topics/nature/photos"),
+			),
+		).toBe(true);
+	});
+
+	it("routes a per-request facet (filter.facets[unsplash:theme]) to that theme's topic", async () => {
+		// The remote-facet delegation path: a theme selected at query time via
+		// AssetFilter.facets (not just the configured defaultThemeId) must drive
+		// the topic endpoint (PRD 0002 §9 — facets match remote).
+		const fetchMock = routingFetch();
+		const provider = createUnsplashProvider({
+			appName: "demo",
+			accessKey: "K",
+			fetch: fetchMock,
+			themes: {
+				themes: [
+					{ id: "business", label: "Business", topicSlugs: ["business"] },
+				],
+				allowFreeSearch: false,
+			},
+		});
+		await provider.search(
+			{ facets: { [UNSPLASH_THEME_FACET]: ["business"] } },
+			undefined,
+		);
+		expect(
+			fetchMock.mock.calls.some((c) =>
+				String(c[0]).includes("/topics/business/photos"),
 			),
 		).toBe(true);
 	});

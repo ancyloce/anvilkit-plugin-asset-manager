@@ -114,6 +114,45 @@ describe("asset mutations", () => {
 		expect(result.url).toBe("blob:shot.png");
 	});
 
+	it("replace re-checks the abort signal AFTER upload and never mutates the registry", async () => {
+		// Disposal safety (PRD 0002 §6): a replace cancelled while the upload is
+		// in flight must throw AbortError before touching the registry.
+		const reg = createAssetRegistry();
+		reg.register({ id: "a1", url: "https://x/a1.png" });
+		const replaceSpy = vi.spyOn(reg, "replace");
+		const controller = new AbortController();
+		const abortingUpload: UploadFn = async (file) => {
+			controller.abort(); // cancel after the await resolves, before the write
+			return { id: `up-${file.name}`, url: `blob:${file.name}` };
+		};
+		const aborted = createInMemoryDataSource({
+			registry: reg,
+			upload: abortingUpload,
+			folderStore: createFolderStore({ now: () => 1 }),
+		});
+		await expect(
+			aborted.replace(
+				"a1",
+				new File(["d"], "s.png", { type: "image/png" }),
+				controller.signal,
+			),
+		).rejects.toMatchObject({ name: "AbortError" });
+		expect(replaceSpy).not.toHaveBeenCalled();
+	});
+
+	it("folder membership survives a registry freeze round-trip (rename + setTags)", async () => {
+		// Membership is an asset→folder SIDE-INDEX, never a field on
+		// UploadResult, so the freeze-allowlist rebuild on rename/setTags
+		// (registry.ts) cannot strip it (PRD 0002 §7, folders.ts header).
+		const f = folders.createFolder(null, "F");
+		folders.moveAsset("a1", f.id);
+		registry.rename("a1", "renamed");
+		registry.setTags("a1", ["hero"]);
+		expect(folders.folderOf("a1")).toBe(f.id);
+		const page = await ds.list({ folderId: f.id });
+		expect(page.items.map((i) => i.id)).toContain("a1");
+	});
+
 	it("move places an asset into a folder", async () => {
 		const f = folders.createFolder(null, "F");
 		await ds.move("a1", f.id);

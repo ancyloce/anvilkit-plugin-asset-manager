@@ -39,6 +39,24 @@ describe("createAssetManagerPlugin", () => {
 		expect(getAssetRegistry(ctx)).toBeUndefined();
 	});
 
+	it("registers zero-config (no args) — binds a registry + asset resolver through the lifecycle", async () => {
+		// Backward-compat (PRD §4.1): `createAssetManagerPlugin()` with no
+		// uploader must resolve the in-memory default and register exactly like
+		// the explicit `{ uploader }` form.
+		const plugin = createAssetManagerPlugin();
+		const ctx = createFakeStudioContext();
+
+		const harness = await registerPlugin(plugin, { ctx });
+		expect(getAssetRegistry(ctx)).toBeUndefined();
+
+		await harness.runInit();
+		expect(getAssetRegistry(ctx)).toBeDefined();
+		expect(ctx._mocks.assetResolvers).toHaveLength(1);
+
+		await harness.runDestroy();
+		expect(getAssetRegistry(ctx)).toBeUndefined();
+	});
+
 	it("persists successful uploads into Puck data that puckDataToIR preserves", async () => {
 		let currentData = { root: { props: {} }, content: [], zones: {} } as Data;
 		const ctx = createFakeStudioContext({

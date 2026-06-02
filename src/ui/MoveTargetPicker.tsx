@@ -13,7 +13,9 @@ import type { AssetFolder } from "../types/folders.js";
 
 /**
  * Keyboard-accessible move-target picker — the a11y fallback for drag-to-folder.
- * Renders a `role="listbox"` of folders plus a root option.
+ * Renders, inside a focus-trapping `<Dialog>`, a labelled `<ul>` of Tab-focusable
+ * folder `<Button>`s plus a root option (no roving-tabindex listbox; each option
+ * is an individually focusable, Enter/Space-activatable button).
  */
 export interface MoveTargetPickerProps {
 	readonly open: boolean;

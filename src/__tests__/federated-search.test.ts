@@ -57,6 +57,17 @@ describe("composite cursor", () => {
 		expect(decodeCompositeCursor(undefined)).toEqual({});
 		expect(decodeCompositeCursor("!!not-base64!!")).toEqual({});
 	});
+
+	it("emits a URL-safe token (no +, /, or = padding) and round-trips it", () => {
+		// Sub-cursors can contain chars that standard base64 maps to +, /, =.
+		// The composite cursor is embedded in URLs, so it must use the base64url
+		// alphabet with padding stripped (PRD 0002 §9.3). A plain-btoa regression
+		// would keep the symmetric round-trip green, so assert the alphabet too.
+		const sub = { local: "p/2+offset?", unsplash: "a/b+c==" };
+		const token = encodeCompositeCursor(sub);
+		expect(token).not.toMatch(/[+/=]/);
+		expect(decodeCompositeCursor(token)).toEqual(sub);
+	});
 });
 
 describe("providerCanSatisfy", () => {
@@ -66,6 +77,16 @@ describe("providerCanSatisfy", () => {
 		expect(providerCanSatisfy(local, { folderId: "f" })).toBe(true);
 		expect(providerCanSatisfy(remote, { folderId: "f" })).toBe(false);
 		expect(providerCanSatisfy(remote, {})).toBe(true);
+	});
+
+	it("treats root scope (folderId === null) as a set folder scope", () => {
+		// `null` (root) is `!== undefined`, so it must also drop a folders:false
+		// provider — otherwise hotlinked remote results leak into the root local
+		// folder. This is the exact production query the root view passes.
+		const local = fakeProvider("local", [A], { folders: true });
+		const remote = fakeProvider("unsplash", [B]);
+		expect(providerCanSatisfy(remote, { folderId: null })).toBe(false);
+		expect(providerCanSatisfy(local, { folderId: null })).toBe(true);
 	});
 });
 

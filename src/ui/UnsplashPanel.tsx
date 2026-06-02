@@ -56,6 +56,7 @@ export function UnsplashPanel({
 	if (status === "disabled") {
 		return (
 			<div
+				role="status"
 				data-testid="ak-unsplash-disabled"
 				className="flex flex-col items-center gap-2 p-6 text-center text-sm text-[var(--ak-studio-muted-fg)]"
 			>
@@ -66,6 +67,23 @@ export function UnsplashPanel({
 
 	return (
 		<div data-testid="ak-unsplash-panel" className="flex flex-col gap-2">
+			{/* Visually-hidden live region so screen readers hear loading the same
+			    way they hear the error / rate-limit alerts below. */}
+			<span
+				role="status"
+				aria-live="polite"
+				data-testid="ak-unsplash-status"
+				style={{
+					position: "absolute",
+					width: 1,
+					height: 1,
+					overflow: "hidden",
+					clip: "rect(0 0 0 0)",
+					whiteSpace: "nowrap",
+				}}
+			>
+				{status === "loading" ? "Loading photos…" : ""}
+			</span>
 			<Input
 				value={query}
 				placeholder="Search Unsplash…"

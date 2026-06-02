@@ -88,6 +88,36 @@ describe("resolveDataSource — per-plane ladder", () => {
 		expect(host.createFolder).toHaveBeenCalledOnce();
 	});
 
+	it("warns and falls back for a PARTIAL folder plane (whole plane → in-memory)", async () => {
+		// Symmetric to the partial-asset-plane case: a host that implements only
+		// SOME folder methods gets the WHOLE folder plane served by the in-memory
+		// default, with one warning (PRD 0002 §5 per-plane ladder).
+		const registry = createAssetRegistry();
+		const warn = vi.fn();
+		const host: AssetDataSource = {
+			createFolder: vi.fn(async () => ({
+				id: "f",
+				name: "F",
+				parentId: null,
+				createdAt: 0,
+				updatedAt: 0,
+				counts: { assets: 0, folders: 0 },
+			})),
+		};
+		const resolved = resolveDataSource({
+			registry,
+			upload,
+			hostDataSource: host,
+			warn,
+		});
+		const folder = await resolved.createFolder(null, "F");
+		expect(warn).toHaveBeenCalledOnce();
+		expect(warn.mock.calls[0]?.[0]).toMatch(/partial folder method set/i);
+		// host.createFolder ignored; the in-memory store created the folder.
+		expect(host.createFolder).not.toHaveBeenCalled();
+		expect(folder.name).toBe("F");
+	});
+
 	it("prefers a host subscribeStatus when provided", () => {
 		const registry = createAssetRegistry();
 		const subscribeStatus = vi.fn(() => () => undefined);
