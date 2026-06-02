@@ -12653,15 +12653,31 @@
 						"summary": [
 							{
 								"kind": "text",
-								"text": "Keyboard-accessible move-target picker — the a11y fallback for drag-to-folder.\nRenders a "
+								"text": "Keyboard-accessible move-target picker — the a11y fallback for drag-to-folder.\nRenders, inside a focus-trapping "
 							},
 							{
 								"kind": "code",
-								"text": "`role=\"listbox\"`"
+								"text": "`<Dialog>`"
 							},
 							{
 								"kind": "text",
-								"text": " of folders plus a root option."
+								"text": ", a labelled "
+							},
+							{
+								"kind": "code",
+								"text": "`<ul>`"
+							},
+							{
+								"kind": "text",
+								"text": " of Tab-focusable\nfolder "
+							},
+							{
+								"kind": "code",
+								"text": "`<Button>`"
+							},
+							{
+								"kind": "text",
+								"text": "s plus a root option (no roving-tabindex listbox; each option\nis an individually focusable, Enter/Space-activatable button)."
 							}
 						]
 					},
