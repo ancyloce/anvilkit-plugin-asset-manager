@@ -73,12 +73,20 @@ export function createCompositeAssetSource(
 
 	const project = (entry: UploadResult): StudioAsset => {
 		const attribution = entry.meta?.attribution;
+		// External providers (e.g. Unsplash) are HOTLINKED, not registry-backed:
+		// keep their real, directly-usable URL so a dragged or clicked result
+		// renders immediately. Wrapping them in an `asset://<id>` reference — what
+		// `toStudioAsset` applies by default for local, rehostable uploads — would
+		// render as a broken image, because that reference is only resolved by the
+		// export/IR pipeline, never in the live editor or at render time.
+		const isExternal = entry.id.startsWith("unsplash:");
 		return {
 			...toStudioAsset(entry, getThumbnail),
+			...(isExternal ? { url: entry.url } : {}),
 			// Enrich with folder membership (from the side-index) + provenance so the
 			// sidebar can show which folder/source an asset belongs to.
 			folderId: source.folders.folderOf(entry.id),
-			source: entry.id.startsWith("unsplash:") ? "unsplash" : "local",
+			source: isExternal ? "unsplash" : "local",
 			...(attribution
 				? {
 						attribution: {

@@ -47,6 +47,14 @@ export interface UnsplashSourceOptions {
 	readonly minRequestIntervalMs?: number;
 	/** Result LRU TTL. Default 300_000. */
 	readonly cacheTtlMs?: number;
+	/**
+	 * Per-request timeout for search / topic / photo lookups (ms). A request
+	 * that exceeds it aborts and surfaces as a retryable `PROVIDER_NETWORK`
+	 * error, so a blocked or flaky network path (e.g. a VPN/proxy black-holing
+	 * `api.unsplash.com`) lets the sidebar fall back to "Unsplash unavailable"
+	 * instead of spinning. Default 15_000. Ignored if not a positive number.
+	 */
+	readonly requestTimeoutMs?: number;
 	/** Injectable fetch for tests / SSR. */
 	readonly fetch?: typeof globalThis.fetch;
 	/** Opt-in re-host instead of hotlinking. Default false. */

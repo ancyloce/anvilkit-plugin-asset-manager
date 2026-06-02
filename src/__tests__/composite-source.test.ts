@@ -196,9 +196,14 @@ describe("Phase-2 page pass-through + enrichment", () => {
 			url: "asset://unsplash:p1",
 			source: "unsplash",
 		});
-		// Registered (so asset://unsplash:p1 resolves) + attribution projected.
+		// Registered (for the export/IR pipeline) + attribution projected.
 		expect(registry.get("unsplash:p1")).toBeDefined();
 		expect(result?.source).toBe("unsplash");
 		expect(result?.attribution?.photographerName).toBe("Jane");
+		// External (hotlinked) results keep their REAL url — never an
+		// `asset://<id>` reference — so a clicked/dragged Unsplash image renders
+		// directly (it has no live-editor / render-time resolver).
+		expect(result?.url).toBe("https://images.unsplash.com/p1");
+		expect(result?.url.startsWith("asset://")).toBe(false);
 	});
 });

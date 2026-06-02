@@ -50,6 +50,13 @@ export function createUnsplashProvider(
 			? { accessKey: options.accessKey }
 			: {}),
 		...(options.fetch !== undefined ? { fetch: options.fetch } : {}),
+		// Forward only a sane positive timeout; a stray 0/NaN would make every
+		// request abort instantly, so fall back to the client default instead.
+		...(typeof options.requestTimeoutMs === "number" &&
+		Number.isFinite(options.requestTimeoutMs) &&
+		options.requestTimeoutMs > 0
+			? { timeoutMs: options.requestTimeoutMs }
+			: {}),
 	});
 	const utm = `utm_source=${encodeURIComponent(options.appName)}&utm_medium=referral`;
 	const themes = resolveThemes(options.themes);
