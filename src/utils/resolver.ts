@@ -100,8 +100,13 @@ export async function resolveAssets(
 	const rewriteMap = new Map<string, AssetResolution>();
 	const assetUrls = collectAssetUrls(ir);
 
-	for (const url of assetUrls) {
-		const resolution = await resolver(url);
+	// Resolve every URL concurrently — each lookup is independent and the
+	// results land in a Map keyed by URL, so order does not matter. A serial
+	// await-in-loop would pay each resolver's latency back-to-back.
+	const resolutions = await Promise.all(
+		Array.from(assetUrls, async (url) => [url, await resolver(url)] as const),
+	);
+	for (const [url, resolution] of resolutions) {
 		if (resolution !== null) {
 			rewriteMap.set(url, resolution);
 		}
