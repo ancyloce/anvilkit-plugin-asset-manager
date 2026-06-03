@@ -58,20 +58,31 @@ export function AssetCommandPalette({
 		[registry, maxResults],
 	);
 
-	// Mirror the live query into a ref so the registry subscription can
-	// read it without being a dependency (which would resubscribe on
-	// every keystroke).
-	const queryRef = React.useRef(query);
-	queryRef.current = query;
+	// Re-run the *current* query when the registry mutates, via an Effect
+	// Event so the subscription is not torn down and rebuilt on every parent
+	// render — it reads the latest query + refresh without being a dependency.
+	const onRegistryChange = React.useEffectEvent(() => {
+		refresh(query);
+	});
 
-	// Reset the query and focus the input when the palette opens.
+	// Focus the input when the palette opens. The query is cleared on close
+	// (emitOpenChange) instead of being reset here, so this effect never
+	// adjusts state purely because the `open` prop changed.
 	React.useEffect(() => {
 		if (!open) return;
-		setQuery("");
 		queueMicrotask(() => {
 			inputRef.current?.focus();
 		});
 	}, [open]);
+
+	// Single close path so the query resets on dismiss/select without a
+	// prop-reactive effect — reopening always starts from an empty search.
+	function emitOpenChange(nextOpen: boolean) {
+		if (!nextOpen) {
+			setQuery("");
+		}
+		onOpenChange(nextOpen);
+	}
 
 	// Re-run the search synchronously whenever the query changes.
 	React.useEffect(() => {
@@ -80,14 +91,11 @@ export function AssetCommandPalette({
 	}, [open, query, refresh]);
 
 	// Subscribe to registry mutations once per open session — not per
-	// keystroke — re-running the *current* query via the ref.
+	// keystroke.
 	React.useEffect(() => {
 		if (!open) return;
-		const unsubscribe = registry.subscribe(() => {
-			refresh(queryRef.current);
-		});
-		return unsubscribe;
-	}, [open, registry, refresh]);
+		return registry.subscribe(onRegistryChange);
+	}, [open, registry]);
 
 	function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
 		if (event.key === "ArrowDown") {
@@ -107,13 +115,13 @@ export function AssetCommandPalette({
 			const picked = results[activeIndex];
 			if (picked !== undefined) {
 				onSelect(picked);
-				onOpenChange(false);
+				emitOpenChange(false);
 			}
 		}
 	}
 
 	return (
-		<Dialog open={open} onOpenChange={onOpenChange}>
+		<Dialog open={open} onOpenChange={emitOpenChange}>
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>Find an asset</DialogTitle>
@@ -151,7 +159,7 @@ export function AssetCommandPalette({
 									data-active={index === activeIndex ? "true" : undefined}
 									onClick={() => {
 										onSelect(asset);
-										onOpenChange(false);
+										emitOpenChange(false);
 									}}
 									onMouseEnter={() => {
 										setActiveIndex(index);
