@@ -177,12 +177,15 @@ export function createCompositeAssetSource(
 		async listThemes() {
 			// Aggregate the themes of every external (non-local) provider; empty
 			// when only the local library is present (sidebar shows no theme chips).
-			const themes: StudioAssetTheme[] = [];
-			for (const provider of providers) {
-				if (provider.id === "local") continue;
-				themes.push(...(await provider.listThemes()));
-			}
-			return themes;
+			// Fetch every external provider's themes concurrently (preserving
+			// provider order) in a single pass instead of awaiting each in
+			// sequence.
+			const themeLists = await Promise.all(
+				providers.flatMap((provider) =>
+					provider.id === "local" ? [] : [provider.listThemes()],
+				),
+			);
+			return themeLists.flat();
 		},
 	};
 }
