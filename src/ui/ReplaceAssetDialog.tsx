@@ -45,14 +45,13 @@ export function ReplaceAssetDialog({
 		[acceptedMimeTypes],
 	);
 
-	// Reset state whenever the dialog reopens for a different asset.
-	React.useEffect(() => {
-		if (asset === null) {
-			setSelectedFile(null);
-			setError(null);
-			setBusy(false);
-		}
-	}, [asset]);
+	// Clear the transient picker state on every close path (cancel, dismiss,
+	// successful replace) so reopening for another asset starts fresh — without
+	// reacting to the `asset` prop inside an effect.
+	function resetPicker() {
+		setSelectedFile(null);
+		setError(null);
+	}
 
 	function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
 		const file = event.target.files?.[0];
@@ -77,6 +76,7 @@ export function ReplaceAssetDialog({
 		setBusy(true);
 		try {
 			await onConfirm(asset, selectedFile);
+			resetPicker();
 		} catch (err) {
 			setError(err instanceof Error ? err.message : String(err));
 		} finally {
@@ -84,9 +84,14 @@ export function ReplaceAssetDialog({
 		}
 	}
 
+	function handleCancel() {
+		resetPicker();
+		onCancel();
+	}
+
 	function handleOpenChange(nextOpen: boolean) {
 		if (!nextOpen && !busy) {
-			onCancel();
+			handleCancel();
 		}
 	}
 
@@ -137,7 +142,7 @@ export function ReplaceAssetDialog({
 					<Button
 						type="button"
 						variant="outline"
-						onClick={onCancel}
+						onClick={handleCancel}
 						disabled={busy}
 					>
 						Cancel
