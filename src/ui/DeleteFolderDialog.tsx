@@ -57,7 +57,7 @@ export function DeleteFolderDialog({
 					<DialogTitle>Delete folder?</DialogTitle>
 					<DialogDescription>
 						“{folder?.name}” will be removed. By default its contents move up to
-						the parent folder — nothing is deleted. Choose “Delete contents” to
+						the parent folder, so nothing is deleted. Choose “Delete contents” to
 						remove its {assetCount} {assetCount === 1 ? "asset" : "assets"} too.
 					</DialogDescription>
 				</DialogHeader>
