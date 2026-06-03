@@ -60,7 +60,7 @@ export function UnsplashPanel({
 				data-testid="ak-unsplash-disabled"
 				className="flex flex-col items-center gap-2 p-6 text-center text-sm text-[var(--ak-studio-muted-fg)]"
 			>
-				<p>Connect Unsplash — add an access key via a server proxy.</p>
+				<p>Connect Unsplash by adding an access key via a server proxy.</p>
 			</div>
 		);
 	}
@@ -114,7 +114,7 @@ export function UnsplashPanel({
 					data-testid="ak-unsplash-rate-limited"
 					className="text-sm"
 				>
-					Unsplash rate limit reached — try again shortly.
+					Unsplash rate limit reached. Try again shortly.
 				</p>
 			) : null}
 			{status === "error" ? (
@@ -154,9 +154,12 @@ export function UnsplashPanel({
 								className="overflow-hidden rounded"
 								onClick={() => void onPick(result.id)}
 							>
+								{/* Decorative: the wrapping button already carries the
+								    "Insert photo by <name>" accessible name, so an alt
+								    here would double-announce. */}
 								<img
 									src={result.thumbnailUrl}
-									alt={`Photo by ${result.photographerName}`}
+									alt=""
 									className="aspect-square w-full object-cover"
 									loading="lazy"
 								/>
