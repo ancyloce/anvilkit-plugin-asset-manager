@@ -162,9 +162,11 @@ export function assetMatchesSearch(
 		return false;
 	}
 	if (options.tags && options.tags.length > 0) {
-		const tagFilter = options.tags
-			.map((t) => t.trim().toLowerCase())
-			.filter((t) => t !== "");
+		const tagFilter: string[] = [];
+		for (const raw of options.tags) {
+			const tag = raw.trim().toLowerCase();
+			if (tag !== "") tagFilter.push(tag);
+		}
 		if (tagFilter.length > 0 && !matchesAllTags(entry, tagFilter)) return false;
 	}
 	return true;
