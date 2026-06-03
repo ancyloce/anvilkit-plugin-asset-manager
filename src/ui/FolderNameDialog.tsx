@@ -36,13 +36,21 @@ export function FolderNameDialog({
 	const [busy, setBusy] = React.useState(false);
 	const [error, setError] = React.useState<string | null>(null);
 
-	// Re-seed when the dialog (re)opens for a different folder.
+	// Re-seed the name when the dialog (re)opens for a different folder. The
+	// transient `error` is cleared on close (requestClose) rather than reset
+	// here, so the effect only ever sets state that derives from `initialName`.
 	React.useEffect(() => {
 		if (open) {
 			setName(initialName);
-			setError(null);
 		}
 	}, [open, initialName]);
+
+	// Close the dialog and drop any stale error so the next open is clean —
+	// done in the close handler instead of a prop-reactive effect.
+	function requestClose() {
+		setError(null);
+		onOpenChange(false);
+	}
 
 	async function handleSubmit() {
 		const trimmed = name.trim();
@@ -65,7 +73,12 @@ export function FolderNameDialog({
 		<Dialog
 			open={open}
 			onOpenChange={(next) => {
-				if (!busy) onOpenChange(next);
+				if (busy) return;
+				if (next) {
+					onOpenChange(true);
+				} else {
+					requestClose();
+				}
 			}}
 		>
 			<DialogContent>
@@ -94,7 +107,7 @@ export function FolderNameDialog({
 						type="button"
 						variant="outline"
 						disabled={busy}
-						onClick={() => onOpenChange(false)}
+						onClick={requestClose}
 					>
 						Cancel
 					</Button>
