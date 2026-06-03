@@ -44,14 +44,16 @@ export function MetadataPanel({
 	const [tags, setTags] = React.useState<readonly string[]>([]);
 	const [busy, setBusy] = React.useState(false);
 
+	// Seed the editable name + tag set from the asset being edited. Only these
+	// two derive from `asset`; the in-progress `tagInput` is cleared on close
+	// (handleCancel) rather than reset here, so the effect never adjusts
+	// unrelated state purely because the prop changed.
 	React.useEffect(() => {
 		if (asset === null) {
 			return;
 		}
 		setName(asset.name ?? "");
 		setTags(asset.tags ?? []);
-		setTagInput("");
-		setBusy(false);
 	}, [asset]);
 
 	function commitTagInput(): readonly string[] {
@@ -91,9 +93,15 @@ export function MetadataPanel({
 		}
 	}
 
+	function handleCancel() {
+		// Drop any half-typed tag so the next asset opens with a clean input.
+		setTagInput("");
+		onCancel();
+	}
+
 	function handleOpenChange(nextOpen: boolean) {
 		if (!nextOpen && !busy) {
-			onCancel();
+			handleCancel();
 		}
 	}
 
@@ -123,7 +131,7 @@ export function MetadataPanel({
 					/>
 					<div data-asset-manager-tag-editor>
 						<Label htmlFor="asset-metadata-tag-input">Tags</Label>
-						<ul aria-label="Current tags" role="list">
+						<ul aria-label="Current tags">
 							{tags.map((tag) => (
 								<li key={tag}>
 									<span>{tag}</span>
@@ -158,7 +166,7 @@ export function MetadataPanel({
 				<DialogFooter>
 					<Button
 						disabled={busy}
-						onClick={onCancel}
+						onClick={handleCancel}
 						type="button"
 						variant="outline"
 					>
