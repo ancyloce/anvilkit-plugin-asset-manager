@@ -89,6 +89,201 @@ const DEFAULT_ITEM_HEIGHT = 56;
 const DEFAULT_MAX_HEIGHT = 400;
 const DEFAULT_PAGE_SIZE = 100;
 
+interface AssetFilterRowProps {
+	readonly query: string;
+	readonly onQueryChange: (value: string) => void;
+	readonly activeKinds: readonly AssetKind[];
+	readonly onToggleKind: (kind: AssetKind) => void;
+}
+
+/**
+ * Search input + kind-filter chip row. Purely presentational — query text,
+ * active kinds, and the page-size reset all live in the parent `AssetBrowser`.
+ */
+function AssetFilterRow({
+	query,
+	onQueryChange,
+	activeKinds,
+	onToggleKind,
+}: AssetFilterRowProps) {
+	return (
+		<div data-asset-manager-filters>
+			<Input
+				aria-label="Search assets"
+				onChange={(event) => {
+					onQueryChange(event.target.value);
+				}}
+				placeholder="Search by name, tag, or MIME"
+				value={query}
+			/>
+			<div aria-label="Asset kind filters" role="group">
+				{KIND_FILTERS.map((kind) => {
+					const active = activeKinds.includes(kind);
+					return (
+						<Button
+							aria-label={`Filter ${kind} assets`}
+							aria-pressed={active}
+							data-asset-kind-filter={kind}
+							key={kind}
+							onClick={() => {
+								onToggleKind(kind);
+							}}
+							type="button"
+							variant={active ? "secondary" : "ghost"}
+							size="sm"
+						>
+							{kind}
+						</Button>
+					);
+				})}
+			</div>
+		</div>
+	);
+}
+
+interface AssetRowProps {
+	readonly asset: UploadResult;
+	readonly index: number;
+	readonly activeIndex: number;
+	readonly total: number;
+	readonly draggableRows: boolean;
+	readonly onInsert: (asset: UploadResult) => void;
+	readonly onEdit?: (asset: UploadResult) => void;
+	readonly onReplace?: (asset: UploadResult) => void;
+	readonly onDelete?: (asset: UploadResult) => void;
+	readonly onFocusRow: (index: number) => void;
+	readonly onMoveFocus: (nextIndex: number) => void;
+	readonly registerRow: (index: number, node: HTMLButtonElement | null) => void;
+}
+
+/**
+ * One asset row: the insert button (drag payload + roving-tabindex keyboard
+ * nav) plus the optional Edit / Replace / Delete actions. Focus bookkeeping
+ * stays in the parent via `registerRow` / `onMoveFocus` so the row-ref array
+ * keeps a single owner.
+ */
+function AssetRow({
+	asset,
+	index,
+	activeIndex,
+	total,
+	draggableRows,
+	onInsert,
+	onEdit,
+	onReplace,
+	onDelete,
+	onFocusRow,
+	onMoveFocus,
+	registerRow,
+}: AssetRowProps) {
+	return (
+		<>
+			<button
+				aria-label={`Insert asset ${asset.id}`}
+				draggable={draggableRows}
+				data-asset-draggable={draggableRows ? "" : undefined}
+				onDragStart={
+					draggableRows
+						? (event) => {
+								event.dataTransfer.setData(
+									ASSET_DRAG_MIME,
+									JSON.stringify([asset.id]),
+								);
+								event.dataTransfer.effectAllowed = "move";
+							}
+						: undefined
+				}
+				onClick={() => {
+					onInsert(asset);
+				}}
+				onFocus={() => {
+					onFocusRow(index);
+				}}
+				onKeyDown={(event) => {
+					if (event.key === "ArrowDown") {
+						event.preventDefault();
+						onMoveFocus(index + 1);
+						return;
+					}
+
+					if (event.key === "ArrowUp") {
+						event.preventDefault();
+						onMoveFocus(index - 1);
+						return;
+					}
+
+					if (event.key === "Home") {
+						event.preventDefault();
+						onMoveFocus(0);
+						return;
+					}
+
+					if (event.key === "End") {
+						event.preventDefault();
+						onMoveFocus(total - 1);
+						return;
+					}
+
+					if (event.key === "Enter" || event.key === " ") {
+						event.preventDefault();
+						onInsert(asset);
+					}
+				}}
+				ref={(node) => {
+					registerRow(index, node);
+				}}
+				tabIndex={activeIndex === index ? 0 : -1}
+				type="button"
+			>
+				<span>{asset.id}</span>
+				<span>{asset.meta?.mimeType ?? "unknown type"}</span>
+			</button>
+			{onEdit !== undefined ? (
+				<Button
+					aria-label={`Edit asset ${asset.id}`}
+					data-asset-action="edit"
+					onClick={() => {
+						onEdit(asset);
+					}}
+					type="button"
+					variant="ghost"
+					size="sm"
+				>
+					Edit
+				</Button>
+			) : null}
+			{onReplace !== undefined ? (
+				<Button
+					aria-label={`Replace asset ${asset.id}`}
+					data-asset-action="replace"
+					onClick={() => {
+						onReplace(asset);
+					}}
+					type="button"
+					variant="ghost"
+					size="sm"
+				>
+					Replace
+				</Button>
+			) : null}
+			{onDelete !== undefined ? (
+				<Button
+					aria-label={`Delete asset ${asset.id}`}
+					data-asset-action="delete"
+					onClick={() => {
+						onDelete(asset);
+					}}
+					type="button"
+					variant="ghost"
+					size="sm"
+				>
+					Delete
+				</Button>
+			) : null}
+		</>
+	);
+}
+
 export function AssetBrowser({
 	assets,
 	onInsert,
@@ -110,7 +305,11 @@ export function AssetBrowser({
 	const [activeKinds, setActiveKinds] = React.useState<readonly AssetKind[]>(
 		[],
 	);
-	const [pageLimit, setPageLimit] = React.useState(pageSize);
+	// Track how many *extra* pages "Load more" has revealed rather than copying
+	// `pageSize` into state. The visible ceiling is then derived from the live
+	// `pageSize` prop below, so changing the prop never leaves a stale limit.
+	const [extraPages, setExtraPages] = React.useState(0);
+	const pageLimit = pageSize * (extraPages + 1);
 	const buttonRefs = React.useRef<Array<HTMLButtonElement | null>>([]);
 	// When a keyboard jump targets a row outside the current virtualized
 	// window the row is not mounted yet. We record the wanted index here;
@@ -144,9 +343,11 @@ export function AssetBrowser({
 		const lower = query.trim().toLowerCase();
 		const hasKindFilter = activeKinds.length > 0;
 		if (lower === "" && !hasKindFilter) return assets;
+		// O(1) membership instead of Array.includes() on every iteration.
+		const activeKindSet = hasKindFilter ? new Set<AssetKind>(activeKinds) : null;
 		const result: UploadResult[] = [];
 		for (const entry of searchIndex) {
-			if (hasKindFilter && !activeKinds.includes(entry.kind)) continue;
+			if (activeKindSet && !activeKindSet.has(entry.kind)) continue;
 			if (lower === "" || entry.haystack.includes(lower)) {
 				result.push(entry.asset);
 			}
@@ -199,164 +400,60 @@ export function AssetBrowser({
 		}
 	}
 
+	function registerRow(index: number, node: HTMLButtonElement | null) {
+		buttonRefs.current[index] = node;
+		// Focus an off-window target the moment it mounts after a
+		// scroll-into-view triggered by a keyboard jump.
+		if (node && pendingFocusRef.current === index) {
+			pendingFocusRef.current = null;
+			node.focus();
+		}
+	}
+
+	// Reset to the first page whenever the query or kind filter changes so the
+	// "Load more" cursor never points past a freshly-filtered, shorter list.
+	function changeQuery(value: string) {
+		setQuery(value);
+		setExtraPages(0);
+	}
+
 	function toggleKind(kind: AssetKind) {
 		setActiveKinds((current) =>
 			current.includes(kind)
 				? current.filter((entry) => entry !== kind)
 				: [...current, kind],
 		);
+		setExtraPages(0);
 	}
 
-	// `Windowed` (as="ul") owns the <ul>/<li> + aria-posinset/aria-setsize;
-	// this renders the row *content*. Roving tabindex + keyboard handlers stay
-	// here so focus management is unchanged.
+	// `Windowed` (as="ul") owns the <ul>/<li> + aria-posinset/aria-setsize; each
+	// row's content (button, roving tabindex, keyboard nav, actions) lives in
+	// `AssetRow`. Focus state stays here and is threaded down so behavior is
+	// unchanged.
 	const renderRow = (asset: UploadResult, index: number) => (
-		<>
-			<button
-				aria-label={`Insert asset ${asset.id}`}
-				draggable={draggableRows}
-				data-asset-draggable={draggableRows ? "" : undefined}
-				onDragStart={
-					draggableRows
-						? (event) => {
-								event.dataTransfer.setData(
-									ASSET_DRAG_MIME,
-									JSON.stringify([asset.id]),
-								);
-								event.dataTransfer.effectAllowed = "move";
-							}
-						: undefined
-				}
-				onClick={() => {
-					onInsert(asset);
-				}}
-				onFocus={() => {
-					setActiveIndex(index);
-				}}
-				onKeyDown={(event) => {
-					if (event.key === "ArrowDown") {
-						event.preventDefault();
-						moveFocus(index + 1);
-						return;
-					}
-
-					if (event.key === "ArrowUp") {
-						event.preventDefault();
-						moveFocus(index - 1);
-						return;
-					}
-
-					if (event.key === "Home") {
-						event.preventDefault();
-						moveFocus(0);
-						return;
-					}
-
-					if (event.key === "End") {
-						event.preventDefault();
-						moveFocus(total - 1);
-						return;
-					}
-
-					if (event.key === "Enter" || event.key === " ") {
-						event.preventDefault();
-						onInsert(asset);
-					}
-				}}
-				ref={(node) => {
-					buttonRefs.current[index] = node;
-					// Focus an off-window target the moment it mounts after a
-					// scroll-into-view triggered by a keyboard jump.
-					if (node && pendingFocusRef.current === index) {
-						pendingFocusRef.current = null;
-						node.focus();
-					}
-				}}
-				tabIndex={activeIndex === index ? 0 : -1}
-				type="button"
-			>
-				<span>{asset.id}</span>
-				<span>{asset.meta?.mimeType ?? "unknown type"}</span>
-			</button>
-			{onEdit !== undefined ? (
-				<Button
-					aria-label={`Edit asset ${asset.id}`}
-					data-asset-action="edit"
-					onClick={() => {
-						onEdit(asset);
-					}}
-					type="button"
-					variant="ghost"
-					size="sm"
-				>
-					Edit
-				</Button>
-			) : null}
-			{onReplace !== undefined ? (
-				<Button
-					aria-label={`Replace asset ${asset.id}`}
-					data-asset-action="replace"
-					onClick={() => {
-						onReplace(asset);
-					}}
-					type="button"
-					variant="ghost"
-					size="sm"
-				>
-					Replace
-				</Button>
-			) : null}
-			{onDelete !== undefined ? (
-				<Button
-					aria-label={`Delete asset ${asset.id}`}
-					data-asset-action="delete"
-					onClick={() => {
-						onDelete(asset);
-					}}
-					type="button"
-					variant="ghost"
-					size="sm"
-				>
-					Delete
-				</Button>
-			) : null}
-		</>
+		<AssetRow
+			activeIndex={activeIndex}
+			asset={asset}
+			draggableRows={draggableRows}
+			index={index}
+			onDelete={onDelete}
+			onEdit={onEdit}
+			onFocusRow={setActiveIndex}
+			onInsert={onInsert}
+			onMoveFocus={moveFocus}
+			onReplace={onReplace}
+			registerRow={registerRow}
+			total={total}
+		/>
 	);
 
 	const searchRow = searchEnabled ? (
-		<div data-asset-manager-filters>
-			<Input
-				aria-label="Search assets"
-				onChange={(event) => {
-					setQuery(event.target.value);
-					setPageLimit(pageSize);
-				}}
-				placeholder="Search by name, tag, or MIME"
-				value={query}
-			/>
-			<div aria-label="Asset kind filters" role="group">
-				{KIND_FILTERS.map((kind) => {
-					const active = activeKinds.includes(kind);
-					return (
-						<Button
-							aria-label={`Filter ${kind} assets`}
-							aria-pressed={active}
-							data-asset-kind-filter={kind}
-							key={kind}
-							onClick={() => {
-								toggleKind(kind);
-								setPageLimit(pageSize);
-							}}
-							type="button"
-							variant={active ? "secondary" : "ghost"}
-							size="sm"
-						>
-							{kind}
-						</Button>
-					);
-				})}
-			</div>
-		</div>
+		<AssetFilterRow
+			activeKinds={activeKinds}
+			onQueryChange={changeQuery}
+			onToggleKind={toggleKind}
+			query={query}
+		/>
 	) : null;
 
 	const filterRow = (
@@ -381,8 +478,8 @@ export function AssetBrowser({
 				</CardHeader>
 				<CardContent>
 					{filterRow}
-					<ul aria-label="Assets" role="list">
-						<li role="listitem">{emptyLabel}</li>
+					<ul aria-label="Assets">
+						<li>{emptyLabel}</li>
 					</ul>
 				</CardContent>
 			</Card>
@@ -415,7 +512,7 @@ export function AssetBrowser({
 					<Button
 						data-asset-action="load-more"
 						onClick={() => {
-							setPageLimit((current) => current + pageSize);
+							setExtraPages((current) => current + 1);
 						}}
 						type="button"
 						variant="outline"
