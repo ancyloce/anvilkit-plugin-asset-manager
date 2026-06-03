@@ -344,7 +344,9 @@ export function AssetBrowser({
 		const hasKindFilter = activeKinds.length > 0;
 		if (lower === "" && !hasKindFilter) return assets;
 		// O(1) membership instead of Array.includes() on every iteration.
-		const activeKindSet = hasKindFilter ? new Set<AssetKind>(activeKinds) : null;
+		const activeKindSet = hasKindFilter
+			? new Set<AssetKind>(activeKinds)
+			: null;
 		const result: UploadResult[] = [];
 		for (const entry of searchIndex) {
 			if (activeKindSet && !activeKindSet.has(entry.kind)) continue;
@@ -363,16 +365,16 @@ export function AssetBrowser({
 	const total = visibleSlice.length;
 	const hasMore = searchEnabled && filteredAssets.length > visibleSlice.length;
 
-	React.useEffect(() => {
-		if (total === 0) {
-			setActiveIndex(-1);
-			return;
-		}
-
-		setActiveIndex((currentIndex) =>
-			currentIndex >= 0 && currentIndex < total ? currentIndex : 0,
-		);
-	}, [total]);
+	// Clamp the stored index into the current list at render time instead of
+	// chasing `total` with an effect (which forced an extra render and could
+	// transiently desync). `setActiveIndex` still records raw user intent via
+	// focus/keyboard; this derived value is what the rows + `Windowed` read.
+	const effectiveActiveIndex =
+		total === 0
+			? -1
+			: activeIndex >= 0 && activeIndex < total
+				? activeIndex
+				: 0;
 
 	function focusRow(index: number): boolean {
 		const node = buttonRefs.current[index];
@@ -432,7 +434,7 @@ export function AssetBrowser({
 	// unchanged.
 	const renderRow = (asset: UploadResult, index: number) => (
 		<AssetRow
-			activeIndex={activeIndex}
+			activeIndex={effectiveActiveIndex}
 			asset={asset}
 			draggableRows={draggableRows}
 			index={index}
@@ -497,7 +499,9 @@ export function AssetBrowser({
 			<CardContent>
 				{filterRow}
 				<Windowed
-					activeIndex={activeIndex >= 0 ? activeIndex : undefined}
+					activeIndex={
+						effectiveActiveIndex >= 0 ? effectiveActiveIndex : undefined
+					}
 					aria-label="Assets"
 					as="ul"
 					data-testid="asset-browser-virtualized"
