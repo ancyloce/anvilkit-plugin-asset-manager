@@ -36,6 +36,16 @@ export interface UploadButtonProps
 	readonly onProgress?: (snapshot: UploadProgressSnapshot | null) => void;
 }
 
+// Hoisted: reads only its event argument, so it never closes over props or
+// state and need not be re-created on every render.
+function handleDragOver(event: React.DragEvent<HTMLDivElement>) {
+	event.preventDefault();
+	event.stopPropagation();
+	if (event.dataTransfer) {
+		event.dataTransfer.dropEffect = "copy";
+	}
+}
+
 export function UploadButton({
 	acceptedMimeTypes,
 	allowMixedScriptHostnames,
@@ -149,14 +159,6 @@ export function UploadButton({
 		}
 	}
 
-	function handleDragOver(event: React.DragEvent<HTMLDivElement>) {
-		event.preventDefault();
-		event.stopPropagation();
-		if (event.dataTransfer) {
-			event.dataTransfer.dropEffect = "copy";
-		}
-	}
-
 	function handleDragLeave(event: React.DragEvent<HTMLDivElement>) {
 		event.preventDefault();
 		event.stopPropagation();
@@ -193,6 +195,7 @@ export function UploadButton({
 		>
 			<input
 				accept={acceptAttr}
+				aria-label="Choose files to upload"
 				multiple
 				onChange={(event) => {
 					void handleChange(event);
