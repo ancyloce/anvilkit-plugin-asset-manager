@@ -9235,7 +9235,7 @@
 										"type": "reference",
 										"target": {
 											"packageName": "@anvilkit/core",
-											"packagePath": "src/types/plugin.ts",
+											"packagePath": "src/types/plugin-context.ts",
 											"qualifiedName": "StudioPluginContext"
 										},
 										"typeArguments": [
@@ -9694,7 +9694,7 @@
 										"type": "reference",
 										"target": {
 											"packageName": "@anvilkit/core",
-											"packagePath": "src/types/plugin.ts",
+											"packagePath": "src/types/plugin-context.ts",
 											"qualifiedName": "StudioPluginContext"
 										},
 										"typeArguments": [
