@@ -11742,7 +11742,7 @@
 									},
 									{
 										"kind": "text",
-										"text": " reparents children to the parent (default, safe);\n "
+										"text": " reparents children to the parent (default, safe);\r\n "
 									},
 									{
 										"kind": "code",
@@ -13920,7 +13920,7 @@
 								"summary": [
 									{
 										"kind": "text",
-										"text": "Fires whenever the in-flight batch advances. Emitted as\n"
+										"text": "Fires whenever the in-flight batch advances. Emitted as\r\n"
 									},
 									{
 										"kind": "code",
@@ -13936,7 +13936,7 @@
 									},
 									{
 										"kind": "text",
-										"text": " once the\nbatch settles. Used by "
+										"text": " once the\r\nbatch settles. Used by "
 									},
 									{
 										"kind": "code",
@@ -14056,7 +14056,7 @@
 								"summary": [
 									{
 										"kind": "text",
-										"text": "Binary uploader. Required at the UI boundary even though\n"
+										"text": "Binary uploader. Required at the UI boundary even though\r\n"
 									},
 									{
 										"kind": "code",
@@ -14064,7 +14064,7 @@
 									},
 									{
 										"kind": "text",
-										"text": " is optional — the plugin passes the\nresolved (defaulted) uploader, so the component never sees "
+										"text": " is optional — the plugin passes the\r\nresolved (defaulted) uploader, so the component never sees "
 									},
 									{
 										"kind": "code",
