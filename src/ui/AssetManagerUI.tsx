@@ -1,5 +1,6 @@
 "use client";
 
+import { useMsg } from "@anvilkit/core/i18n";
 import {
 	Card,
 	CardContent,
@@ -70,6 +71,7 @@ export function AssetManagerUI({
 	searchEnabled = true,
 	uploader,
 }: AssetManagerUIProps) {
+	const msg = useMsg();
 	const [assets, setAssets] = React.useState<readonly UploadResult[]>(() =>
 		registry.list(),
 	);
@@ -154,11 +156,8 @@ export function AssetManagerUI({
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Asset manager</CardTitle>
-				<CardDescription>
-					Upload via the configured adapter, then insert a validated asset
-					reference.
-				</CardDescription>
+				<CardTitle>{msg("assetManager.ui.title")}</CardTitle>
+				<CardDescription>{msg("assetManager.ui.subtitle")}</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<UploadButton
@@ -172,9 +171,14 @@ export function AssetManagerUI({
 				/>
 				{showProgress ? (
 					<div data-asset-manager-progress>
-						<Progress aria-label="Batch upload progress" value={percent} />
+						<Progress
+							aria-label={msg("assetManager.upload.progressLabel")}
+							value={percent}
+						/>
 						<p aria-live="polite" role="status">
-							Uploading {progress.completed} of {progress.total}
+							{msg("assetManager.upload.status")
+								.replace("{completed}", String(progress.completed))
+								.replace("{total}", String(progress.total))}
 						</p>
 					</div>
 				) : null}

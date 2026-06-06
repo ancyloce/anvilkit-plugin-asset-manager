@@ -1,5 +1,6 @@
 "use client";
 
+import { useMsg } from "@anvilkit/core/i18n";
 import {
 	Dialog,
 	DialogContent,
@@ -40,6 +41,7 @@ export function AssetCommandPalette({
 	onSelect,
 	maxResults = DEFAULT_MAX_RESULTS,
 }: AssetCommandPaletteProps) {
+	const msg = useMsg();
 	const [query, setQuery] = React.useState("");
 	const [results, setResults] = React.useState<readonly UploadResult[]>([]);
 	const [activeIndex, setActiveIndex] = React.useState(0);
@@ -124,29 +126,29 @@ export function AssetCommandPalette({
 		<Dialog open={open} onOpenChange={emitOpenChange}>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Find an asset</DialogTitle>
+					<DialogTitle>{msg("assetManager.palette.title")}</DialogTitle>
 					<DialogDescription>
-						Search by name, id, MIME type, or tag.
+						{msg("assetManager.palette.subtitle")}
 					</DialogDescription>
 				</DialogHeader>
 				<Input
-					aria-label="Asset search query"
+					aria-label={msg("assetManager.palette.searchLabel")}
 					onChange={(event) => {
 						setQuery(event.target.value);
 					}}
 					onKeyDown={handleKeyDown}
-					placeholder="Type to search…"
+					placeholder={msg("assetManager.palette.searchPlaceholder")}
 					ref={inputRef}
 					value={query}
 				/>
 				<ul
-					aria-label="Asset results"
+					aria-label={msg("assetManager.palette.resultsLabel")}
 					data-asset-manager-palette-results
 					ref={listRef}
 					role="listbox"
 				>
 					{results.length === 0 ? (
-						<li role="presentation">No matches.</li>
+						<li role="presentation">{msg("assetManager.palette.noMatches")}</li>
 					) : (
 						results.map((asset, index) => (
 							<li
@@ -155,7 +157,10 @@ export function AssetCommandPalette({
 								role="option"
 							>
 								<button
-									aria-label={`Insert asset ${asset.id}`}
+									aria-label={msg("assetManager.browser.insert").replace(
+										"{id}",
+										asset.id,
+									)}
 									data-active={index === activeIndex ? "true" : undefined}
 									onClick={() => {
 										onSelect(asset);

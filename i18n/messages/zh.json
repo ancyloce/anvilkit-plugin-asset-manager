@@ -1,0 +1,19 @@
+{
+	"assetManager.action.upload": "上传素材",
+	"assetManager.button.cancel": "取消",
+	"assetManager.button.delete": "删除",
+	"assetManager.button.replace": "替换",
+	"assetManager.button.create": "创建",
+	"assetManager.button.edit": "编辑",
+	"assetManager.button.save": "保存",
+	"assetManager.button.loadMore": "加载更多",
+	"assetManager.dialog.deleteTitle": "删除素材？",
+	"assetManager.dialog.replaceTitle": "替换素材？",
+	"assetManager.dialog.newFolderTitle": "新建文件夹",
+	"assetManager.browser.title": "素材浏览器",
+	"assetManager.browser.searchPlaceholder": "按名称、标签或 MIME 搜索",
+	"assetManager.browser.empty": "尚未上传素材。",
+	"assetManager.ui.title": "素材管理器",
+	"assetManager.folder.root": "全部素材",
+	"assetManager.unsplash.searchPlaceholder": "搜索 Unsplash…"
+}

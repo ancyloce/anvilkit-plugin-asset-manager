@@ -1,15 +1,8 @@
 /** @vitest-environment happy-dom */
 
-import {
-	cleanup,
-	fireEvent,
-	render,
-	screen,
-	waitFor,
-} from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-
 import { UploadButton } from "../UploadButton.js";
+import { cleanup, fireEvent, render, screen, waitFor } from "./test-utils.js";
 
 afterEach(() => {
 	cleanup();

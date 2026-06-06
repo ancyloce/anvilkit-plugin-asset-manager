@@ -1,17 +1,10 @@
 /** @vitest-environment happy-dom */
 
-import {
-	cleanup,
-	fireEvent,
-	render,
-	screen,
-	waitFor,
-} from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-
 import { AssetBrowser } from "../AssetBrowser.js";
 import { ASSET_DRAG_MIME } from "../FolderTree.js";
 import { UnsplashPanel, type UnsplashResult } from "../UnsplashPanel.js";
+import { cleanup, fireEvent, render, screen, waitFor } from "./test-utils.js";
 
 afterEach(() => {
 	cleanup();

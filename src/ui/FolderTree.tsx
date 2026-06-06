@@ -1,5 +1,6 @@
 "use client";
 
+import { useMsg } from "@anvilkit/core/i18n";
 import { Button } from "@anvilkit/ui/button";
 import * as React from "react";
 
@@ -26,6 +27,7 @@ export function FolderTree({
 	onNavigate,
 	onDropAssets,
 }: FolderTreeProps) {
+	const msg = useMsg();
 	const [dropTarget, setDropTarget] = React.useState<string | null>(null);
 
 	const handleDrop = (folderId: string) => (event: React.DragEvent) => {
@@ -47,7 +49,7 @@ export function FolderTree({
 	const droppable = onDropAssets !== undefined;
 	return (
 		<ul
-			aria-label="Folders"
+			aria-label={msg("assetManager.tree.label")}
 			data-testid="ak-folder-tree"
 			className="flex flex-col gap-1"
 		>
@@ -65,7 +67,10 @@ export function FolderTree({
 						// is the MoveTargetPicker dialog.
 						title={
 							droppable
-								? `Open ${folder.name} — or drop assets here to move them in`
+								? msg("assetManager.tree.dropHint").replace(
+										"{name}",
+										folder.name,
+									)
 								: undefined
 						}
 						onClick={() => onNavigate(folder.id)}

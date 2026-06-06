@@ -10,6 +10,7 @@ import { createElement } from "react";
 
 import config from "../meta/config.json" with { type: "json" };
 import { inMemoryUploader } from "./adapters/in-memory.js";
+import { ASSET_MANAGER_ENTRY } from "./i18n/entry.js";
 // Type-only: erased at build, so these lazy modules never enter the headless entry.
 import type { CompositeAssetSource } from "./sources/composite-source.js";
 import type { AssetSourceProvider } from "./sources/provider.js";
@@ -74,7 +75,10 @@ export function createAssetManagerPlugin<
 
 	return {
 		meta: META,
-		register(_ctx) {
+		register(ctx) {
+			// Contribute the `assetManager.*` message catalog so the in-chrome
+			// surfaces (header action, sidebar sources) localize via `useMsg`.
+			ctx.registerMessages(ASSET_MANAGER_ENTRY);
 			const registration: StudioPluginRegistration<UserConfig> = {
 				meta: META,
 				headerActions: [uploadAssetAction],

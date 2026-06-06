@@ -1,5 +1,6 @@
 "use client";
 
+import { useMsg } from "@anvilkit/core/i18n";
 import { Button } from "@anvilkit/ui/button";
 import {
 	Dialog,
@@ -39,6 +40,7 @@ export function MetadataPanel({
 	onCancel,
 	onConfirm,
 }: MetadataPanelProps) {
+	const msg = useMsg();
 	const [name, setName] = React.useState("");
 	const [tagInput, setTagInput] = React.useState("");
 	const [tags, setTags] = React.useState<readonly string[]>([]);
@@ -112,14 +114,16 @@ export function MetadataPanel({
 		<Dialog open={open} onOpenChange={handleOpenChange}>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Edit asset</DialogTitle>
+					<DialogTitle>{msg("assetManager.dialog.editTitle")}</DialogTitle>
 					<DialogDescription>
 						{asset?.id}
 						{mimeType ? ` (${mimeType})` : ""}
 					</DialogDescription>
 				</DialogHeader>
 				<div data-asset-manager-metadata>
-					<Label htmlFor="asset-metadata-name">Name</Label>
+					<Label htmlFor="asset-metadata-name">
+						{msg("assetManager.form.nameLabel")}
+					</Label>
 					<Input
 						id="asset-metadata-name"
 						value={name}
@@ -130,13 +134,18 @@ export function MetadataPanel({
 						disabled={busy}
 					/>
 					<div data-asset-manager-tag-editor>
-						<Label htmlFor="asset-metadata-tag-input">Tags</Label>
-						<ul aria-label="Current tags">
+						<Label htmlFor="asset-metadata-tag-input">
+							{msg("assetManager.form.tagsLabel")}
+						</Label>
+						<ul aria-label={msg("assetManager.form.tagsListLabel")}>
 							{tags.map((tag) => (
 								<li key={tag}>
 									<span>{tag}</span>
 									<Button
-										aria-label={`Remove tag ${tag}`}
+										aria-label={msg("assetManager.form.removeTag").replace(
+											"{tag}",
+											tag,
+										)}
 										data-asset-action="remove-tag"
 										disabled={busy}
 										onClick={() => {
@@ -158,7 +167,7 @@ export function MetadataPanel({
 								setTagInput(event.target.value);
 							}}
 							onKeyDown={handleTagKeyDown}
-							placeholder="Add a tag and press Enter"
+							placeholder={msg("assetManager.form.addTagPlaceholder")}
 							disabled={busy}
 						/>
 					</div>
@@ -170,14 +179,16 @@ export function MetadataPanel({
 						type="button"
 						variant="outline"
 					>
-						Cancel
+						{msg("assetManager.button.cancel")}
 					</Button>
 					<Button
 						disabled={busy || asset === null}
 						onClick={handleConfirm}
 						type="button"
 					>
-						{busy ? "Saving…" : "Save"}
+						{busy
+							? msg("assetManager.dialog.saveProgress")
+							: msg("assetManager.button.save")}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

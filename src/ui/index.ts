@@ -1,3 +1,6 @@
+// i18n provider for standalone mounts (outside `<Studio>`); see
+// `../i18n/provider.tsx`. In-chrome usage needs no wrapper.
+export { AssetManagerI18nProvider } from "../i18n/provider.js";
 export type { AssetBrowserProps } from "./AssetBrowser.js";
 export { AssetBrowser } from "./AssetBrowser.js";
 export type { AssetCommandPaletteProps } from "./AssetCommandPalette.js";

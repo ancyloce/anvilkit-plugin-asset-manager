@@ -1,14 +1,6 @@
 /** @vitest-environment happy-dom */
 
-import {
-	cleanup,
-	fireEvent,
-	render,
-	screen,
-	waitFor,
-} from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-
 import type { AssetFolder } from "../../types/folders.js";
 import { DeleteFolderDialog } from "../DeleteFolderDialog.js";
 import { EmptyFolderState } from "../EmptyFolderState.js";
@@ -16,6 +8,7 @@ import { FolderBreadcrumb } from "../FolderBreadcrumb.js";
 import { FolderNameDialog } from "../FolderNameDialog.js";
 import { ASSET_DRAG_MIME, FolderTree } from "../FolderTree.js";
 import { MoveTargetPicker } from "../MoveTargetPicker.js";
+import { cleanup, fireEvent, render, screen, waitFor } from "./test-utils.js";
 
 afterEach(() => {
 	cleanup();

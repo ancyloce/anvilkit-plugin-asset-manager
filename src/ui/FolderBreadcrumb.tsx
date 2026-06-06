@@ -1,5 +1,6 @@
 "use client";
 
+import { useMsg } from "@anvilkit/core/i18n";
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -22,16 +23,21 @@ export interface FolderBreadcrumbProps {
 export function FolderBreadcrumb({
 	path,
 	onNavigate,
-	rootLabel = "All assets",
+	rootLabel,
 }: FolderBreadcrumbProps) {
+	const msg = useMsg();
+	const resolvedRootLabel = rootLabel ?? msg("assetManager.folder.root");
 	const atRoot = path.length === 0;
 	return (
-		<Breadcrumb aria-label="Folders" data-testid="ak-folder-breadcrumb">
+		<Breadcrumb
+			aria-label={msg("assetManager.breadcrumb.label")}
+			data-testid="ak-folder-breadcrumb"
+		>
 			<BreadcrumbList>
 				<BreadcrumbItem>
 					{atRoot ? (
 						<BreadcrumbPage data-folder-crumb="root">
-							{rootLabel}
+							{resolvedRootLabel}
 						</BreadcrumbPage>
 					) : (
 						<Button
@@ -42,7 +48,7 @@ export function FolderBreadcrumb({
 							data-folder-crumb="root"
 							onClick={() => onNavigate(null)}
 						>
-							{rootLabel}
+							{resolvedRootLabel}
 						</Button>
 					)}
 				</BreadcrumbItem>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useMsg } from "@anvilkit/core/i18n";
 import { Button } from "@anvilkit/ui/button";
 import {
 	Dialog,
@@ -30,8 +31,10 @@ export function MoveTargetPicker({
 	onOpenChange,
 	folders,
 	onPick,
-	rootLabel = "All assets",
+	rootLabel,
 }: MoveTargetPickerProps) {
+	const msg = useMsg();
+	const resolvedRootLabel = rootLabel ?? msg("assetManager.folder.root");
 	const [busy, setBusy] = React.useState(false);
 
 	async function pick(folderId: string | null) {
@@ -54,10 +57,10 @@ export function MoveTargetPicker({
 		>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Move to folder</DialogTitle>
+					<DialogTitle>{msg("assetManager.dialog.moveTitle")}</DialogTitle>
 				</DialogHeader>
 				<ul
-					aria-label="Move to folder"
+					aria-label={msg("assetManager.dialog.moveTitle")}
 					data-testid="ak-move-target-picker"
 					className="flex max-h-72 flex-col gap-1 overflow-auto"
 				>
@@ -71,7 +74,7 @@ export function MoveTargetPicker({
 							disabled={busy}
 							onClick={() => void pick(null)}
 						>
-							{rootLabel}
+							{resolvedRootLabel}
 						</Button>
 					</li>
 					{folders.map((folder) => (

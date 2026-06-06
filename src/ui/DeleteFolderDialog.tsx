@@ -1,5 +1,6 @@
 "use client";
 
+import { useMsg } from "@anvilkit/core/i18n";
 import { Button } from "@anvilkit/ui/button";
 import {
 	Dialog,
@@ -30,6 +31,7 @@ export function DeleteFolderDialog({
 	onConfirm,
 	onCancel,
 }: DeleteFolderDialogProps) {
+	const msg = useMsg();
 	const [busy, setBusy] = React.useState(false);
 
 	async function confirm(cascade: boolean) {
@@ -54,11 +56,14 @@ export function DeleteFolderDialog({
 		>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Delete folder?</DialogTitle>
+					<DialogTitle>
+						{msg("assetManager.dialog.deleteFolderTitle")}
+					</DialogTitle>
 					<DialogDescription>
-						“{folder?.name}” will be removed. By default its contents move up to
-						the parent folder, so nothing is deleted. Choose “Delete contents” to
-						remove its {assetCount} {assetCount === 1 ? "asset" : "assets"} too.
+						{msg("assetManager.dialog.deleteFolderDescription")
+							.replace("{name}", folder?.name ?? "")
+							.replace("{count}", String(assetCount))
+							.replace("{assets}", assetCount === 1 ? "asset" : "assets")}
 					</DialogDescription>
 				</DialogHeader>
 				<DialogFooter>
@@ -68,7 +73,7 @@ export function DeleteFolderDialog({
 						disabled={busy}
 						onClick={onCancel}
 					>
-						Cancel
+						{msg("assetManager.button.cancel")}
 					</Button>
 					<Button
 						type="button"
@@ -76,7 +81,9 @@ export function DeleteFolderDialog({
 						disabled={busy || folder === null}
 						onClick={() => void confirm(false)}
 					>
-						{busy ? "Removing…" : "Remove folder"}
+						{busy
+							? msg("assetManager.dialog.removeProgress")
+							: msg("assetManager.dialog.removeFolder")}
 					</Button>
 					<Button
 						type="button"
@@ -84,7 +91,7 @@ export function DeleteFolderDialog({
 						disabled={busy || folder === null}
 						onClick={() => void confirm(true)}
 					>
-						Delete contents
+						{msg("assetManager.button.deleteContents")}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

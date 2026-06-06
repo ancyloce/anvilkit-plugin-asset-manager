@@ -1,5 +1,6 @@
 "use client";
 
+import { useMsg } from "@anvilkit/core/i18n";
 import { Button } from "@anvilkit/ui/button";
 import {
 	Dialog,
@@ -39,6 +40,7 @@ export function DeleteAssetDialog({
 	onConfirm,
 	referenceCount,
 }: DeleteAssetDialogProps) {
+	const msg = useMsg();
 	const [busy, setBusy] = React.useState(false);
 
 	async function handleConfirm() {
@@ -67,15 +69,15 @@ export function DeleteAssetDialog({
 		<Dialog open={open} onOpenChange={handleOpenChange}>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Delete asset?</DialogTitle>
+					<DialogTitle>{msg("assetManager.dialog.deleteTitle")}</DialogTitle>
 					<DialogDescription>
 						{label}
-						{mimeType ? ` (${mimeType})` : ""} will be removed from the
-						registry. References to it in the page will fail to resolve.
+						{mimeType ? ` (${mimeType})` : ""}{" "}
+						{msg("assetManager.dialog.deleteDescription")}
 						{typeof referenceCount === "number" && referenceCount > 0
-							? ` This asset is referenced in ${referenceCount} ${
-									referenceCount === 1 ? "node" : "nodes"
-								}.`
+							? ` ${msg("assetManager.dialog.deleteReferenced")
+									.replace("{count}", String(referenceCount))
+									.replace("{nodes}", referenceCount === 1 ? "node" : "nodes")}`
 							: ""}
 					</DialogDescription>
 				</DialogHeader>
@@ -86,7 +88,7 @@ export function DeleteAssetDialog({
 						onClick={onCancel}
 						disabled={busy}
 					>
-						Cancel
+						{msg("assetManager.button.cancel")}
 					</Button>
 					<Button
 						type="button"
@@ -94,7 +96,9 @@ export function DeleteAssetDialog({
 						onClick={handleConfirm}
 						disabled={busy || asset === null}
 					>
-						{busy ? "Deleting…" : "Delete"}
+						{busy
+							? msg("assetManager.dialog.deleteProgress")
+							: msg("assetManager.button.delete")}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

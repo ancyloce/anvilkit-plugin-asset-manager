@@ -1,5 +1,6 @@
 "use client";
 
+import { useMsg } from "@anvilkit/core/i18n";
 import { Button } from "@anvilkit/ui/button";
 import {
 	Card,
@@ -106,22 +107,26 @@ function AssetFilterRow({
 	activeKinds,
 	onToggleKind,
 }: AssetFilterRowProps) {
+	const msg = useMsg();
 	return (
 		<div data-asset-manager-filters>
 			<Input
-				aria-label="Search assets"
+				aria-label={msg("assetManager.browser.searchLabel")}
 				onChange={(event) => {
 					onQueryChange(event.target.value);
 				}}
-				placeholder="Search by name, tag, or MIME"
+				placeholder={msg("assetManager.browser.searchPlaceholder")}
 				value={query}
 			/>
-			<div aria-label="Asset kind filters" role="group">
+			<div aria-label={msg("assetManager.browser.filterLabel")} role="group">
 				{KIND_FILTERS.map((kind) => {
 					const active = activeKinds.includes(kind);
 					return (
 						<Button
-							aria-label={`Filter ${kind} assets`}
+							aria-label={msg("assetManager.browser.filterByKind").replace(
+								"{kind}",
+								kind,
+							)}
 							aria-pressed={active}
 							data-asset-kind-filter={kind}
 							key={kind}
@@ -132,7 +137,7 @@ function AssetFilterRow({
 							variant={active ? "secondary" : "ghost"}
 							size="sm"
 						>
-							{kind}
+							{msg(`assetManager.kind.${kind}`)}
 						</Button>
 					);
 				})}
@@ -176,10 +181,14 @@ function AssetRow({
 	onMoveFocus,
 	registerRow,
 }: AssetRowProps) {
+	const msg = useMsg();
 	return (
 		<>
 			<button
-				aria-label={`Insert asset ${asset.id}`}
+				aria-label={msg("assetManager.browser.insert").replace(
+					"{id}",
+					asset.id,
+				)}
 				draggable={draggableRows}
 				data-asset-draggable={draggableRows ? "" : undefined}
 				onDragStart={
@@ -236,11 +245,16 @@ function AssetRow({
 				type="button"
 			>
 				<span>{asset.id}</span>
-				<span>{asset.meta?.mimeType ?? "unknown type"}</span>
+				<span>
+					{asset.meta?.mimeType ?? msg("assetManager.browser.unknownMime")}
+				</span>
 			</button>
 			{onEdit !== undefined ? (
 				<Button
-					aria-label={`Edit asset ${asset.id}`}
+					aria-label={msg("assetManager.browser.edit").replace(
+						"{id}",
+						asset.id,
+					)}
 					data-asset-action="edit"
 					onClick={() => {
 						onEdit(asset);
@@ -249,12 +263,15 @@ function AssetRow({
 					variant="ghost"
 					size="sm"
 				>
-					Edit
+					{msg("assetManager.button.edit")}
 				</Button>
 			) : null}
 			{onReplace !== undefined ? (
 				<Button
-					aria-label={`Replace asset ${asset.id}`}
+					aria-label={msg("assetManager.browser.replace").replace(
+						"{id}",
+						asset.id,
+					)}
 					data-asset-action="replace"
 					onClick={() => {
 						onReplace(asset);
@@ -263,12 +280,15 @@ function AssetRow({
 					variant="ghost"
 					size="sm"
 				>
-					Replace
+					{msg("assetManager.button.replace")}
 				</Button>
 			) : null}
 			{onDelete !== undefined ? (
 				<Button
-					aria-label={`Delete asset ${asset.id}`}
+					aria-label={msg("assetManager.browser.delete").replace(
+						"{id}",
+						asset.id,
+					)}
 					data-asset-action="delete"
 					onClick={() => {
 						onDelete(asset);
@@ -277,7 +297,7 @@ function AssetRow({
 					variant="ghost"
 					size="sm"
 				>
-					Delete
+					{msg("assetManager.button.delete")}
 				</Button>
 			) : null}
 		</>
@@ -298,6 +318,7 @@ export function AssetBrowser({
 	itemHeight = DEFAULT_ITEM_HEIGHT,
 	maxHeight = DEFAULT_MAX_HEIGHT,
 }: AssetBrowserProps) {
+	const msg = useMsg();
 	const [activeIndex, setActiveIndex] = React.useState(
 		assets.length > 0 ? 0 : -1,
 	);
@@ -468,19 +489,19 @@ export function AssetBrowser({
 	if (total === 0) {
 		const emptyLabel =
 			searchEnabled && (query !== "" || activeKinds.length > 0)
-				? "No assets match the current filters."
-				: "No assets uploaded yet.";
+				? msg("assetManager.browser.emptyFiltered")
+				: msg("assetManager.browser.empty");
 		return (
 			<Card>
 				<CardHeader>
-					<CardTitle>Asset browser</CardTitle>
+					<CardTitle>{msg("assetManager.browser.title")}</CardTitle>
 					<CardDescription>
-						Validated assets currently registered in memory.
+						{msg("assetManager.browser.subtitle")}
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
 					{filterRow}
-					<ul aria-label="Assets">
+					<ul aria-label={msg("assetManager.browser.assetsLabel")}>
 						<li>{emptyLabel}</li>
 					</ul>
 				</CardContent>
@@ -491,9 +512,9 @@ export function AssetBrowser({
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Asset browser</CardTitle>
+				<CardTitle>{msg("assetManager.browser.title")}</CardTitle>
 				<CardDescription>
-					Validated assets currently registered in memory.
+					{msg("assetManager.browser.subtitle")}
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -502,7 +523,7 @@ export function AssetBrowser({
 					activeIndex={
 						effectiveActiveIndex >= 0 ? effectiveActiveIndex : undefined
 					}
-					aria-label="Assets"
+					aria-label={msg("assetManager.browser.assetsLabel")}
 					as="ul"
 					data-testid="asset-browser-virtualized"
 					estimateSize={itemHeight}
@@ -522,7 +543,7 @@ export function AssetBrowser({
 						variant="outline"
 						size="sm"
 					>
-						Load more
+						{msg("assetManager.button.loadMore")}
 					</Button>
 				) : null}
 			</CardContent>

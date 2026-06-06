@@ -1,16 +1,9 @@
 /** @vitest-environment happy-dom */
 
-import {
-	cleanup,
-	fireEvent,
-	render,
-	screen,
-	waitFor,
-} from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-
 import type { UploadResult } from "../../types.js";
 import { ReplaceAssetDialog } from "../ReplaceAssetDialog.js";
+import { cleanup, fireEvent, render, screen, waitFor } from "./test-utils.js";
 
 function noop(): void {
 	// Placeholder for tests that need a callback prop they ignore.

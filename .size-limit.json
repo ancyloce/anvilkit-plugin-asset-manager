@@ -2,7 +2,7 @@
 	{
 		"name": "@anvilkit/plugin-asset-manager (total incl. lazy chunks)",
 		"path": "dist/index.js",
-		"limit": "14 KB",
+		"limit": "17 KB",
 		"gzip": true,
 		"ignore": [
 			"react",

@@ -1,5 +1,6 @@
 "use client";
 
+import { useMsg } from "@anvilkit/core/i18n";
 import { Button } from "@anvilkit/ui/button";
 import {
 	Dialog,
@@ -28,10 +29,14 @@ export function FolderNameDialog({
 	open,
 	onOpenChange,
 	onSubmit,
-	title = "New folder",
-	submitLabel = "Create",
+	title,
+	submitLabel,
 	initialName = "",
 }: FolderNameDialogProps) {
+	const msg = useMsg();
+	// Host-provided labels win; otherwise fall back to the localized defaults.
+	const resolvedTitle = title ?? msg("assetManager.dialog.newFolderTitle");
+	const resolvedSubmit = submitLabel ?? msg("assetManager.button.create");
 	const [name, setName] = React.useState(initialName);
 	const [busy, setBusy] = React.useState(false);
 	const [error, setError] = React.useState<string | null>(null);
@@ -62,7 +67,9 @@ export function FolderNameDialog({
 			onOpenChange(false);
 		} catch (cause) {
 			setError(
-				cause instanceof Error ? cause.message : "Could not save the folder.",
+				cause instanceof Error
+					? cause.message
+					: msg("assetManager.dialog.folderSaveError"),
 			);
 		} finally {
 			setBusy(false);
@@ -83,11 +90,11 @@ export function FolderNameDialog({
 		>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>{title}</DialogTitle>
+					<DialogTitle>{resolvedTitle}</DialogTitle>
 				</DialogHeader>
 				<Input
 					value={name}
-					placeholder="Folder name"
+					placeholder={msg("assetManager.dialog.folderNamePlaceholder")}
 					data-testid="ak-folder-name-input"
 					onChange={(event) => setName(event.currentTarget.value)}
 					onKeyDown={(event) => {
@@ -109,14 +116,14 @@ export function FolderNameDialog({
 						disabled={busy}
 						onClick={requestClose}
 					>
-						Cancel
+						{msg("assetManager.button.cancel")}
 					</Button>
 					<Button
 						type="button"
 						disabled={busy || name.trim() === ""}
 						onClick={() => void handleSubmit()}
 					>
-						{busy ? "Saving…" : submitLabel}
+						{busy ? msg("assetManager.dialog.saveProgress") : resolvedSubmit}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useMsg } from "@anvilkit/core/i18n";
 import { Button } from "@anvilkit/ui/button";
 import { Input } from "@anvilkit/ui/input";
 import * as React from "react";
@@ -50,9 +51,13 @@ export function UnsplashPanel({
 	status,
 	onPick,
 	onLoadMore,
-	themeLabel = (key) => key,
+	themeLabel,
 	skeletonCount = 12,
 }: UnsplashPanelProps) {
+	const msg = useMsg();
+	// Host-provided theme resolver wins; otherwise resolve the theme key
+	// (`assetManager.unsplash.theme.*`) against the catalog.
+	const resolvedThemeLabel = themeLabel ?? ((key: string) => msg(key));
 	if (status === "disabled") {
 		return (
 			<div
@@ -60,7 +65,7 @@ export function UnsplashPanel({
 				data-testid="ak-unsplash-disabled"
 				className="flex flex-col items-center gap-2 p-6 text-center text-sm text-[var(--ak-studio-muted-fg)]"
 			>
-				<p>Connect Unsplash by adding an access key via a server proxy.</p>
+				<p>{msg("assetManager.unsplash.disabled")}</p>
 			</div>
 		);
 	}
@@ -75,18 +80,18 @@ export function UnsplashPanel({
 				data-testid="ak-unsplash-status"
 				className="sr-only"
 			>
-				{status === "loading" ? "Loading photos…" : ""}
+				{status === "loading" ? msg("assetManager.unsplash.loading") : ""}
 			</span>
 			<Input
 				value={query}
-				placeholder="Search Unsplash…"
+				placeholder={msg("assetManager.unsplash.searchPlaceholder")}
 				data-testid="ak-unsplash-search"
 				onChange={(event) => onQueryChange(event.currentTarget.value)}
 			/>
 			{themes.length > 0 ? (
 				<div
 					role="group"
-					aria-label="Unsplash themes"
+					aria-label={msg("assetManager.unsplash.themesLabel")}
 					data-testid="ak-unsplash-themes"
 					className="flex flex-wrap gap-1"
 				>
@@ -102,7 +107,7 @@ export function UnsplashPanel({
 								onThemeChange(theme.id === activeThemeId ? undefined : theme.id)
 							}
 						>
-							{themeLabel(theme.label)}
+							{resolvedThemeLabel(theme.label)}
 						</Button>
 					))}
 				</div>
@@ -114,12 +119,12 @@ export function UnsplashPanel({
 					data-testid="ak-unsplash-rate-limited"
 					className="text-sm"
 				>
-					Unsplash rate limit reached. Try again shortly.
+					{msg("assetManager.unsplash.rateLimited")}
 				</p>
 			) : null}
 			{status === "error" ? (
 				<p role="alert" data-testid="ak-unsplash-error" className="text-sm">
-					Couldn’t reach Unsplash. Retry.
+					{msg("assetManager.unsplash.error")}
 				</p>
 			) : null}
 
@@ -138,7 +143,7 @@ export function UnsplashPanel({
 				</ul>
 			) : results.length === 0 && status === "idle" ? (
 				<p data-testid="ak-unsplash-empty" className="p-4 text-center text-sm">
-					Search Unsplash to browse photos.
+					{msg("assetManager.unsplash.empty")}
 				</p>
 			) : (
 				<ul
@@ -150,7 +155,10 @@ export function UnsplashPanel({
 							<button
 								type="button"
 								data-unsplash-id={result.id}
-								aria-label={`Insert photo by ${result.photographerName}`}
+								aria-label={msg("assetManager.unsplash.insert").replace(
+									"{photographer}",
+									result.photographerName,
+								)}
 								className="overflow-hidden rounded"
 								onClick={() => void onPick(result.id)}
 							>
@@ -197,7 +205,7 @@ export function UnsplashPanel({
 						disabled={status === "loading"}
 						onClick={onLoadMore}
 					>
-						Load more
+						{msg("assetManager.button.loadMore")}
 					</Button>
 				</div>
 			) : null}

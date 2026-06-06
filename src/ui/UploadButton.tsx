@@ -1,5 +1,6 @@
 "use client";
 
+import { useMsg } from "@anvilkit/core/i18n";
 import { Button } from "@anvilkit/ui/button";
 import * as React from "react";
 import { validateSelectedFile } from "../plugin.js";
@@ -56,6 +57,7 @@ export function UploadButton({
 	onUploaded,
 	uploader,
 }: UploadButtonProps) {
+	const msg = useMsg();
 	const inputRef = React.useRef<HTMLInputElement>(null);
 	const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 	const [batch, setBatch] = React.useState<UploadProgressSnapshot | null>(null);
@@ -178,8 +180,13 @@ export function UploadButton({
 	const statusMessage =
 		errorMessage ??
 		(batch !== null
-			? `Uploading ${Math.min(batch.completed + 1, batch.total)} of ${batch.total}…`
-			: "Accepted files upload through the configured adapter.");
+			? msg("assetManager.upload.statusProgress")
+					.replace(
+						"{completed}",
+						String(Math.min(batch.completed + 1, batch.total)),
+					)
+					.replace("{total}", String(batch.total))
+			: msg("assetManager.upload.statusIdle"));
 
 	return (
 		<div
@@ -195,7 +202,7 @@ export function UploadButton({
 		>
 			<input
 				accept={acceptAttr}
-				aria-label="Choose files to upload"
+				aria-label={msg("assetManager.upload.chooseLabel")}
 				multiple
 				onChange={(event) => {
 					void handleChange(event);
@@ -208,7 +215,7 @@ export function UploadButton({
 				type="file"
 			/>
 			<Button
-				aria-label="Upload asset file"
+				aria-label={msg("assetManager.upload.buttonLabel")}
 				disabled={isUploading}
 				onClick={() => {
 					inputRef.current?.click();
@@ -217,7 +224,11 @@ export function UploadButton({
 				variant="outline"
 			>
 				{isUploading ? <UploadSpinner /> : null}
-				<span>{isUploading ? "Uploading…" : "Upload asset"}</span>
+				<span>
+					{isUploading
+						? msg("assetManager.upload.progress")
+						: msg("assetManager.upload.button")}
+				</span>
 			</Button>
 			<p aria-live="polite" role="status">
 				{statusMessage}

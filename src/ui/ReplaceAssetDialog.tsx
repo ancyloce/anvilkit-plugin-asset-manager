@@ -1,5 +1,6 @@
 "use client";
 
+import { useMsg } from "@anvilkit/core/i18n";
 import { Button } from "@anvilkit/ui/button";
 import {
 	Dialog,
@@ -35,6 +36,7 @@ export function ReplaceAssetDialog({
 	onCancel,
 	onConfirm,
 }: ReplaceAssetDialogProps) {
+	const msg = useMsg();
 	const inputRef = React.useRef<HTMLInputElement>(null);
 	const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
 	const [error, setError] = React.useState<string | null>(null);
@@ -102,15 +104,18 @@ export function ReplaceAssetDialog({
 		<Dialog open={open} onOpenChange={handleOpenChange}>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Replace asset?</DialogTitle>
+					<DialogTitle>{msg("assetManager.dialog.replaceTitle")}</DialogTitle>
 					<DialogDescription>
 						{label
-							? `Pick a file to replace ${label} with. Existing asset:// references will resolve to the new bytes.`
-							: "Pick a file to replace this asset with."}
+							? msg("assetManager.dialog.replaceDescription").replace(
+									"{label}",
+									label,
+								)
+							: msg("assetManager.dialog.replaceDescriptionGeneric")}
 					</DialogDescription>
 				</DialogHeader>
 				<input
-					aria-label="Replacement file"
+					aria-label={msg("assetManager.dialog.replaceFileLabel")}
 					data-testid="replace-asset-file-input"
 					hidden
 					onChange={handleFileChange}
@@ -125,12 +130,17 @@ export function ReplaceAssetDialog({
 						onClick={() => inputRef.current?.click()}
 						disabled={busy}
 					>
-						{selectedFile ? "Choose a different file" : "Choose file"}
+						{selectedFile
+							? msg("assetManager.dialog.chooseFileDifferent")
+							: msg("assetManager.dialog.chooseFile")}
 					</Button>
 					<p aria-live="polite" role="status">
 						{selectedFile
-							? `Selected: ${selectedFile.name}`
-							: "No file selected."}
+							? msg("assetManager.dialog.fileSelected").replace(
+									"{name}",
+									selectedFile.name,
+								)
+							: msg("assetManager.dialog.noFileSelected")}
 					</p>
 					{error ? (
 						<p data-asset-manager-replace-error role="alert">
@@ -145,14 +155,16 @@ export function ReplaceAssetDialog({
 						onClick={handleCancel}
 						disabled={busy}
 					>
-						Cancel
+						{msg("assetManager.button.cancel")}
 					</Button>
 					<Button
 						type="button"
 						onClick={handleConfirm}
 						disabled={busy || asset === null || selectedFile === null}
 					>
-						{busy ? "Replacing…" : "Replace"}
+						{busy
+							? msg("assetManager.dialog.replaceProgress")
+							: msg("assetManager.button.replace")}
 					</Button>
 				</DialogFooter>
 			</DialogContent>
