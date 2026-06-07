@@ -27,6 +27,13 @@ import {
 /** The facet key the UI uses to carry the active theme into a query. */
 export const UNSPLASH_THEME_FACET = "unsplash:theme";
 
+/**
+ * Upper bound on retained photo descriptors. ~21 pages at the 24/page default —
+ * far beyond any realistic browse-before-pick session — while keeping the cache
+ * from growing without limit across a long session of distinct queries.
+ */
+const BYID_MAX_ENTRIES = 512;
+
 /** Enabled when a proxy endpoint or access key is present (or forced via `enabled`). */
 export function unsplashEnabled(options: UnsplashSourceOptions): boolean {
 	return (
@@ -67,8 +74,14 @@ export function createUnsplashProvider(
 		minIntervalMs: options.minRequestIntervalMs ?? 1200,
 	});
 	// Descriptors captured on search so pickResult can fire the download trigger
-	// + return the hotlinked result without a refetch.
-	const byId = new Map<string, UploadResult>();
+	// + return the hotlinked result without a refetch. Bounded LRU+TTL (it shares
+	// the result cache's TTL) so a long session of distinct queries can't grow it
+	// without limit; a miss is safe — pickResult refetches the photo and STILL
+	// fires the mandatory download trigger.
+	const byId = createTtlCache<UploadResult>(
+		options.cacheTtlMs ?? 300_000,
+		BYID_MAX_ENTRIES,
+	);
 
 	const toUploadResult = (photo: UnsplashPhoto): UploadResult =>
 		Object.freeze({
@@ -154,7 +167,8 @@ export function createUnsplashProvider(
 		}
 
 		const items = photos.map(toUploadResult);
-		for (const item of items) byId.set(item.id, item);
+		const seenAt = Date.now();
+		for (const item of items) byId.set(item.id, item, seenAt);
 		const listPage: AssetListPage = {
 			items,
 			total,
@@ -168,7 +182,7 @@ export function createUnsplashProvider(
 		asset: StudioAsset,
 		signal?: AbortSignal,
 	): Promise<UploadResult> => {
-		const cached = byId.get(asset.id);
+		const cached = byId.get(asset.id, Date.now());
 		if (cached?.meta?.attribution !== undefined) {
 			// Mandatory trigger, fire-and-forget so it never blocks insert.
 			void client.trackDownload(
@@ -185,7 +199,7 @@ export function createUnsplashProvider(
 			: asset.id;
 		try {
 			const result = toUploadResult(await client.getPhoto(photoId, signal));
-			byId.set(result.id, result);
+			byId.set(result.id, result, Date.now());
 			if (result.meta?.attribution !== undefined) {
 				void client.trackDownload(
 					result.meta.attribution.downloadLocation,
