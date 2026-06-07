@@ -174,6 +174,51 @@ describe("federatedSearch — cursors & sort", () => {
 		);
 	});
 
+	it("carries a failed provider's cursor forward so the next page retries it (C2)", async () => {
+		const local = fakeProvider("local", [A], {
+			folders: true,
+			nextCursor: "L2",
+		});
+		let remoteCalls = 0;
+		const remote: AssetSourceProvider = {
+			...fakeProvider("unsplash", [B]),
+			search: vi.fn(async () => {
+				remoteCalls += 1;
+				if (remoteCalls === 1) {
+					return { items: [B], total: 1, nextCursor: "R2" };
+				}
+				throw new Error("429"); // fails while paginating from "R2"
+			}),
+		};
+
+		const first = await federatedSearch({
+			providers: [local, remote],
+			filter: {},
+		});
+		expect(decodeCompositeCursor(first.nextCursor)).toEqual({
+			local: "L2",
+			unsplash: "R2",
+		});
+
+		// Page 2: remote fails at cursor "R2". Its position must survive so page 3
+		// retries it — not silently reset to page 1 (which would skip "R2" and
+		// repeat earlier results).
+		const second = await federatedSearch({
+			providers: [local, remote],
+			filter: { cursor: first.nextCursor },
+		});
+		expect(remote.search).toHaveBeenLastCalledWith(
+			expect.anything(),
+			"R2",
+			undefined,
+		);
+		expect(decodeCompositeCursor(second.nextCursor)).toEqual({
+			local: "L2",
+			unsplash: "R2",
+		});
+		expect(second.items.map((i) => i.id)).toEqual(["a"]); // only the survivor
+	});
+
 	it("k-way merges comparable sorts (name) across providers", async () => {
 		const local = fakeProvider("local", [B], { folders: true }); // Banana
 		const remote = fakeProvider("unsplash", [A]); // Apple

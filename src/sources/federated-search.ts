@@ -112,6 +112,7 @@ function compareEntries(
 function mergePages(
 	pages: readonly { provider: AssetSourceProvider; page: AssetListPage }[],
 	filter: AssetFilter,
+	carryForward: CompositeCursor = {},
 ): AssetListPage {
 	const field = filter.sort?.field ?? "recent";
 	const comparable = field === "name" || field === "size" || field === "kind";
@@ -126,9 +127,12 @@ function mergePages(
 	// Otherwise: provider-grouped order (caller passes local first).
 
 	const total = pages.reduce((n, p) => n + p.page.total, 0);
-	const sourceCursors: Record<string, string | undefined> = {};
-	const next: CompositeCursor = {};
-	let hasNext = false;
+	// Seed with the carry-forward sub-cursors of any provider that FAILED this
+	// page (C2) so it resumes from the same position; successful providers then
+	// overwrite their own slot with the real next cursor below.
+	const sourceCursors: Record<string, string | undefined> = { ...carryForward };
+	const next: CompositeCursor = { ...carryForward };
+	let hasNext = Object.keys(carryForward).length > 0;
 	for (const { provider, page } of pages) {
 		sourceCursors[provider.id] = page.nextCursor;
 		if (page.nextCursor !== undefined) {
@@ -174,15 +178,24 @@ export async function federatedSearch(
 		targets.map((p) => p.search(filter, cursors[p.id], signal)),
 	);
 
-	// Resilient: a failed provider is dropped from this page (per-source error
-	// surfacing is a Phase-2 UI concern); successful providers still return.
+	// Resilient: a failed provider is dropped from THIS page (successful
+	// providers still return), but its incoming sub-cursor is carried forward
+	// (C2) so the next page retries it from the same position instead of
+	// silently resetting it to page 1 — which would skip the failed page and
+	// repeat earlier ones. (Surfacing the per-source error in the UI is a
+	// separate, still-open enhancement.)
 	const ok: { provider: AssetSourceProvider; page: AssetListPage }[] = [];
+	const carryForward: CompositeCursor = {};
 	settled.forEach((result, index) => {
 		const provider = targets[index];
-		if (provider !== undefined && result.status === "fulfilled") {
+		if (provider === undefined) return;
+		if (result.status === "fulfilled") {
 			ok.push({ provider, page: result.value });
+		} else {
+			const incoming = cursors[provider.id];
+			if (incoming !== undefined) carryForward[provider.id] = incoming;
 		}
 	});
 
-	return mergePages(ok, filter);
+	return mergePages(ok, filter, carryForward);
 }
