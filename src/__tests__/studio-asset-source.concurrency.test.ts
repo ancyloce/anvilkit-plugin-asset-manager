@@ -240,4 +240,28 @@ describe("StudioAssetSource.upload concurrency", () => {
 
 		await promise;
 	});
+
+	it("a throwing upload subscriber/listener does not reject the batch (C1)", async () => {
+		const registry = createAssetRegistry();
+		let subscriberHits = 0;
+		const source = createStudioAssetSource({
+			registry,
+			upload: async (file) => ({
+				id: `up-${file.name}`,
+				url: `blob:${file.name}`,
+			}),
+		});
+		// Both delivery paths fault on every event: a `subscribeUploads`
+		// subscriber and the inline `upload` listener.
+		source.subscribeUploads(() => {
+			subscriberHits += 1;
+			throw new Error("subscriber boom");
+		});
+		const result = await source.upload([makeFile("a.txt", 1)], () => {
+			throw new Error("inline listener boom");
+		});
+		// The batch still resolves with the uploaded asset despite both throwing.
+		expect(result.map((a) => a.id)).toEqual(["up-a.txt"]);
+		expect(subscriberHits).toBeGreaterThan(0); // the faulting subscriber WAS invoked
+	});
 });

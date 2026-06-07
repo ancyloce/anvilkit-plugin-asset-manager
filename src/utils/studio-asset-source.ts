@@ -77,8 +77,8 @@ export function createStudioAssetSource(
 
 	const uploadListeners = new Set<StudioAssetUploadListener>();
 	const fanOut = (event: StudioAssetUploadEvent): void => {
-		for (const listener of uploadListeners) {
-			listener(event);
+		for (const subscriber of uploadListeners) {
+			safeNotify(subscriber, event);
 		}
 	};
 
@@ -118,7 +118,7 @@ export function createStudioAssetSource(
 			let abortError: unknown = undefined;
 
 			const emit = (event: StudioAssetUploadEvent): void => {
-				listener?.(event);
+				safeNotify(listener, event);
 				fanOut(event);
 			};
 
@@ -305,6 +305,27 @@ function deriveFallbackName(entry: UploadResult): string {
 	}
 	const idTail = entry.id.length > 12 ? `${entry.id.slice(0, 8)}…` : entry.id;
 	return `Asset ${idTail}`;
+}
+
+/**
+ * Deliver an upload event to one listener without letting a faulting subscriber
+ * escape. A throwing `subscribeUploads` callback (or inline `upload` listener)
+ * must NOT reject an otherwise-successful batch — the batch's resolved/aborted
+ * result is the authoritative outcome (C1). Delivery errors are swallowed by
+ * design; this seam is fire-and-forget notification, not control flow.
+ */
+function safeNotify(
+	listener: StudioAssetUploadListener | undefined,
+	event: StudioAssetUploadEvent,
+): void {
+	if (listener === undefined) {
+		return;
+	}
+	try {
+		listener(event);
+	} catch {
+		// Intentionally ignored — a misbehaving subscriber can't fail the batch.
+	}
 }
 
 function isAbortError(error: unknown): boolean {
