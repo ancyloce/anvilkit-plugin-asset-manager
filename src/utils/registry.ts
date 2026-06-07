@@ -138,38 +138,52 @@ function normalizeTags(tags: readonly string[]): string[] {
 	return out;
 }
 
+/** Query / kind / tag filter shared by the registry and the data-source path. */
+export interface AssetMatchFilter {
+	readonly query?: string;
+	readonly kinds?: readonly AssetKind[];
+	readonly tags?: readonly string[];
+}
+
 /**
- * Pure predicate: does `entry` satisfy the query / kind / tag filters? Exported
- * so the in-memory data-source compose layer applies the EXACT same matching
- * before adding its folder clause (PRD 0002 §9.2 — single source of truth for
- * search semantics).
+ * Compile a search filter into a reusable predicate. The query string and tag
+ * filter are trimmed + lowercased ONCE here, not once per candidate, so a scan
+ * over N assets normalizes the filter a single time instead of N times. This is
+ * the registry's search hot path — `AssetCommandPalette` re-runs a free-text
+ * query on every keystroke — so build the matcher once, then apply it across the
+ * list (see `runSearch`).
+ *
+ * Exported so the in-memory data-source compose layer applies the EXACT same
+ * matching before adding its folder clause (PRD 0002 §9.2 — single source of
+ * truth for search semantics).
  */
-export function assetMatchesSearch(
-	entry: UploadResult,
-	options: {
-		readonly query?: string;
-		readonly kinds?: readonly AssetKind[];
-		readonly tags?: readonly string[];
-	},
-): boolean {
+export function prepareAssetMatcher(
+	options: AssetMatchFilter,
+): (entry: UploadResult) => boolean {
 	const query = options.query?.trim().toLowerCase() ?? "";
-	if (!matchesQuery(entry, query)) return false;
-	if (
-		options.kinds &&
-		options.kinds.length > 0 &&
-		!options.kinds.includes(inferAssetKind(entry))
-	) {
-		return false;
-	}
-	if (options.tags && options.tags.length > 0) {
-		const tagFilter: string[] = [];
-		for (const raw of options.tags) {
-			const tag = raw.trim().toLowerCase();
-			if (tag !== "") tagFilter.push(tag);
-		}
+	const kindSet =
+		options.kinds && options.kinds.length > 0
+			? new Set<AssetKind>(options.kinds)
+			: null;
+	const tagFilter = normalizeTagFilter(options.tags);
+
+	return (entry) => {
+		if (!matchesQuery(entry, query)) return false;
+		if (kindSet !== null && !kindSet.has(inferAssetKind(entry))) return false;
 		if (tagFilter.length > 0 && !matchesAllTags(entry, tagFilter)) return false;
+		return true;
+	};
+}
+
+/** Trim + lowercase + drop-empty the query-side tag filter (query-invariant). */
+function normalizeTagFilter(tags: readonly string[] | undefined): string[] {
+	if (tags === undefined || tags.length === 0) return [];
+	const out: string[] = [];
+	for (const raw of tags) {
+		const tag = raw.trim().toLowerCase();
+		if (tag !== "") out.push(tag);
 	}
-	return true;
+	return out;
 }
 
 /**
@@ -202,8 +216,9 @@ function runSearch(
 	options: AssetSearchOptions,
 ): AssetSearchPage {
 	const matches: UploadResult[] = [];
+	const matcher = prepareAssetMatcher(options);
 	for (const entry of assetsById.values()) {
-		if (assetMatchesSearch(entry, options)) matches.push(entry);
+		if (matcher(entry)) matches.push(entry);
 	}
 	return paginateMatches(matches, options);
 }

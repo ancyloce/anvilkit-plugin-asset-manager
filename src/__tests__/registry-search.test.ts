@@ -77,6 +77,18 @@ describe("AssetRegistry.search", () => {
 		expect(registry.search({ tags: ["brand", "video"] }).total).toBe(0);
 	});
 
+	it("normalizes the query + tag filter (trim, case) once per search", () => {
+		const registry = seed();
+		// The matcher is compiled once and reused across the scan; the filter is
+		// still trimmed + lowercased, so padded/upper-cased input matches the
+		// lowercased stored tags + fields (regression guard for the hoist).
+		expect(registry.search({ query: "  HERO  " }).total).toBe(1);
+		expect(registry.search({ tags: ["  BRAND  "] }).total).toBe(2);
+		expect(registry.search({ tags: ["  Brand ", "FONT"] }).total).toBe(1);
+		// A filter that normalizes to nothing is a no-op, not a zero-match.
+		expect(registry.search({ tags: ["   ", ""] }).total).toBe(4);
+	});
+
 	it("composes query + kind + tag filters with AND", () => {
 		const registry = seed();
 		const page = registry.search({
