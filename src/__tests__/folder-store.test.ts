@@ -188,6 +188,33 @@ describe("path / subtree / counts", () => {
 		const got = store.get(a.id);
 		expect(got?.counts).toEqual({ assets: 1, folders: 1 });
 	});
+
+	it("directAssetIds + counts follow asset moves between folders", () => {
+		const a = store.createFolder(null, "A");
+		const b = store.createFolder(null, "B");
+		store.moveAsset("x", a.id);
+		store.moveAsset("y", a.id);
+		expect([...store.directAssetIds(a.id)].sort()).toEqual(["x", "y"]);
+		expect(store.directAssetIds(b.id)).toEqual([]);
+		// Move x A→B: A must release it (no leak in the reverse index), B gains it.
+		store.moveAsset("x", b.id);
+		expect(store.directAssetIds(a.id)).toEqual(["y"]);
+		expect(store.directAssetIds(b.id)).toEqual(["x"]);
+		expect(store.get(a.id)?.counts.assets).toBe(1);
+		expect(store.get(b.id)?.counts.assets).toBe(1);
+	});
+
+	it("childFolderCount follows folder moves between parents", () => {
+		const a = store.createFolder(null, "A");
+		const b = store.createFolder(null, "B");
+		const c = store.createFolder(a.id, "C");
+		expect(store.get(a.id)?.counts.folders).toBe(1);
+		expect(store.get(b.id)?.counts.folders).toBe(0);
+		store.moveFolder(c.id, b.id);
+		expect(store.get(a.id)?.counts.folders).toBe(0);
+		expect(store.get(b.id)?.counts.folders).toBe(1);
+		expect(store.listChildren(b.id).map((f) => f.id)).toEqual([c.id]);
+	});
 });
 
 describe("subscribe", () => {

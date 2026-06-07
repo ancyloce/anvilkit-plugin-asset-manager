@@ -5,8 +5,11 @@
  * Owns the folder tree (records) and the asset→folder side-index. Membership is
  * stored ONLY for non-root assets (absence ⇒ root), so `UploadResult` is never
  * extended and the registry's freeze reconstructor can't strip a folder field.
- * `AssetFolder.counts` is computed fresh on read (never denormalized) so it can
- * never drift from the side-index.
+ * `AssetFolder.counts` is served from two reverse indexes — `childrenByParent`
+ * (parent → child folder ids) and `folderAssets` (folder → direct asset ids) —
+ * kept in lockstep with the authoritative maps via centralized mutation helpers,
+ * so projection, `listChildren`, and subtree walks are O(result size) instead of
+ * O(every record), and the counts still cannot drift from the side-index.
  */
 
 import type { AssetFolder, FolderId } from "../types/folders.js";
@@ -67,6 +70,9 @@ export interface FolderStore {
 	/** Folder id + every descendant folder id (for recursive listing). */
 	subtreeIds(id: FolderId): ReadonlySet<FolderId>;
 
+	/** Asset ids directly contained by `id` (membership only; no descendants). */
+	directAssetIds(id: FolderId): readonly string[];
+
 	subscribe(listener: () => void): () => void;
 }
 
@@ -78,6 +84,14 @@ export function createFolderStore(
 	const assetFolder = new Map<string, FolderId>(); // non-root memberships only
 	const listeners = new Set<() => void>();
 	let seq = 0;
+
+	// Reverse indexes mirroring the authoritative maps above. `childrenByParent`
+	// mirrors `records[].parentId` (the `null` key holds the root's children);
+	// `folderAssets` mirrors `assetFolder` the other way (folder → its direct
+	// asset ids). EVERY write to `records`/`assetFolder` routes through the
+	// link/membership helpers below so these indexes can never drift.
+	const childrenByParent = new Map<FolderId | null, Set<FolderId>>();
+	const folderAssets = new Map<FolderId, Set<string>>();
 
 	const notify = (): void => {
 		for (const listener of listeners) listener();
@@ -91,17 +105,57 @@ export function createFolderStore(
 		return rec;
 	};
 
-	const childFolderCount = (id: FolderId): number => {
-		let n = 0;
-		for (const rec of records.values()) if (rec.parentId === id) n += 1;
-		return n;
+	const linkChild = (parentId: FolderId | null, childId: FolderId): void => {
+		let set = childrenByParent.get(parentId);
+		if (set === undefined) {
+			set = new Set<FolderId>();
+			childrenByParent.set(parentId, set);
+		}
+		set.add(childId);
 	};
 
-	const directAssetCount = (id: FolderId): number => {
-		let n = 0;
-		for (const folderId of assetFolder.values()) if (folderId === id) n += 1;
-		return n;
+	const unlinkChild = (parentId: FolderId | null, childId: FolderId): void => {
+		const set = childrenByParent.get(parentId);
+		if (set === undefined) return;
+		set.delete(childId);
+		if (set.size === 0) childrenByParent.delete(parentId);
 	};
+
+	const detachAsset = (assetId: string, folderId: FolderId): void => {
+		const set = folderAssets.get(folderId);
+		if (set === undefined) return;
+		set.delete(assetId);
+		if (set.size === 0) folderAssets.delete(folderId);
+	};
+
+	/** Point an asset at a folder, keeping both membership indexes in sync. */
+	const setMembership = (assetId: string, folderId: FolderId): void => {
+		const prev = assetFolder.get(assetId);
+		if (prev === folderId) return;
+		if (prev !== undefined) detachAsset(assetId, prev);
+		assetFolder.set(assetId, folderId);
+		let set = folderAssets.get(folderId);
+		if (set === undefined) {
+			set = new Set<string>();
+			folderAssets.set(folderId, set);
+		}
+		set.add(assetId);
+	};
+
+	/** Drop an asset's membership (→ root). Returns whether it had one. */
+	const clearMembership = (assetId: string): boolean => {
+		const prev = assetFolder.get(assetId);
+		if (prev === undefined) return false;
+		assetFolder.delete(assetId);
+		detachAsset(assetId, prev);
+		return true;
+	};
+
+	const childFolderCount = (id: FolderId): number =>
+		childrenByParent.get(id)?.size ?? 0;
+
+	const directAssetCount = (id: FolderId): number =>
+		folderAssets.get(id)?.size ?? 0;
 
 	const project = (rec: FolderRecord): AssetFolder =>
 		Object.freeze({
@@ -129,19 +183,19 @@ export function createFolderStore(
 	};
 
 	const subtree = (id: FolderId): Set<FolderId> => {
+		// DFS over the parent→children adjacency index — visits only the
+		// descendants of `id`, never every folder in the store.
 		const out = new Set<FolderId>([id]);
-		// Iterative BFS over the parent index.
-		let added = true;
-		while (added) {
-			added = false;
-			for (const rec of records.values()) {
-				if (
-					rec.parentId !== null &&
-					out.has(rec.parentId) &&
-					!out.has(rec.id)
-				) {
-					out.add(rec.id);
-					added = true;
+		const stack: FolderId[] = [id];
+		while (stack.length > 0) {
+			const current = stack.pop();
+			if (current === undefined) continue;
+			const kids = childrenByParent.get(current);
+			if (kids === undefined) continue;
+			for (const kid of kids) {
+				if (!out.has(kid)) {
+					out.add(kid);
+					stack.push(kid);
 				}
 			}
 		}
@@ -164,10 +218,12 @@ export function createFolderStore(
 		exceptId?: FolderId,
 	): void => {
 		const lowered = name.toLowerCase();
-		for (const rec of records.values()) {
-			if (rec.parentId !== parentId) continue;
-			if (rec.id === exceptId) continue;
-			if (rec.name.toLowerCase() === lowered) {
+		const siblings = childrenByParent.get(parentId);
+		if (siblings === undefined) return;
+		for (const sibId of siblings) {
+			if (sibId === exceptId) continue;
+			const rec = records.get(sibId);
+			if (rec !== undefined && rec.name.toLowerCase() === lowered) {
 				throw new AssetSourceError(
 					"FOLDER_NAME_CONFLICT",
 					`A folder named "${name}" already exists here.`,
@@ -205,9 +261,12 @@ export function createFolderStore(
 	return {
 		listChildren(parentId) {
 			const target = resolveFolderId(parentId);
+			const ids = childrenByParent.get(target);
+			if (ids === undefined) return Object.freeze([]);
 			const out: AssetFolder[] = [];
-			for (const rec of records.values()) {
-				if (rec.parentId === target) out.push(project(rec));
+			for (const id of ids) {
+				const rec = records.get(id);
+				if (rec !== undefined) out.push(project(rec));
 			}
 			return Object.freeze(out);
 		},
@@ -253,6 +312,7 @@ export function createFolderStore(
 				updatedAt: ts,
 			};
 			records.set(rec.id, rec);
+			linkChild(target, rec.id);
 			notify();
 			return project(rec);
 		},
@@ -289,8 +349,10 @@ export function createFolderStore(
 			if (rec.parentId === target) return project(rec); // no-op
 			assertNameFree(target, rec.name, id);
 			assertDepthOk(depthOf(target), heightOf(id), maxDepth);
+			unlinkChild(rec.parentId, id);
 			rec.parentId = target;
 			rec.updatedAt = now();
+			linkChild(target, id);
 			notify();
 			return project(rec);
 		},
@@ -300,30 +362,39 @@ export function createFolderStore(
 			if (opts?.cascade) {
 				const ids = subtree(id);
 				const removedAssetIds: string[] = [];
-				for (const [assetId, folderId] of assetFolder) {
-					if (ids.has(folderId)) {
-						removedAssetIds.push(assetId);
-						assetFolder.delete(assetId);
+				for (const fid of ids) {
+					const assetsHere = folderAssets.get(fid);
+					if (assetsHere !== undefined) {
+						for (const assetId of assetsHere) {
+							removedAssetIds.push(assetId);
+							assetFolder.delete(assetId);
+						}
+						folderAssets.delete(fid);
 					}
+					childrenByParent.delete(fid);
+					records.delete(fid);
 				}
-				for (const fid of ids) records.delete(fid);
+				unlinkChild(rec.parentId, id);
 				notify();
 				return { removedAssetIds: Object.freeze(removedAssetIds) };
 			}
 			// Reparent children (folders + assets) to the removed folder's parent.
 			const newParent = rec.parentId;
-			for (const child of records.values()) {
-				if (child.parentId === id) {
-					child.parentId = newParent;
-					child.updatedAt = now();
-				}
+			const childIds = [...(childrenByParent.get(id) ?? [])];
+			for (const childId of childIds) {
+				const child = records.get(childId);
+				if (child === undefined) continue;
+				child.parentId = newParent;
+				child.updatedAt = now();
+				linkChild(newParent, childId);
 			}
-			for (const [assetId, folderId] of assetFolder) {
-				if (folderId === id) {
-					if (newParent === null) assetFolder.delete(assetId);
-					else assetFolder.set(assetId, newParent);
-				}
+			childrenByParent.delete(id);
+			const assetIds = [...(folderAssets.get(id) ?? [])];
+			for (const assetId of assetIds) {
+				if (newParent === null) clearMembership(assetId);
+				else setMembership(assetId, newParent);
 			}
+			unlinkChild(newParent, id);
 			records.delete(id);
 			notify();
 			return { removedAssetIds: Object.freeze([]) };
@@ -336,8 +407,8 @@ export function createFolderStore(
 		moveAsset(assetId, folderId) {
 			const target = resolveFolderId(folderId);
 			if (target !== null) requireRecord(target);
-			if (target === null) assetFolder.delete(assetId);
-			else assetFolder.set(assetId, target);
+			if (target === null) clearMembership(assetId);
+			else setMembership(assetId, target);
 			notify();
 		},
 
@@ -345,18 +416,23 @@ export function createFolderStore(
 			const target = resolveFolderId(folderId);
 			if (target !== null) requireRecord(target); // validate once (all-or-nothing)
 			for (const assetId of assetIds) {
-				if (target === null) assetFolder.delete(assetId);
-				else assetFolder.set(assetId, target);
+				if (target === null) clearMembership(assetId);
+				else setMembership(assetId, target);
 			}
 			notify();
 		},
 
 		removeAsset(assetId) {
-			if (assetFolder.delete(assetId)) notify();
+			if (clearMembership(assetId)) notify();
 		},
 
 		subtreeIds(id) {
 			return subtree(id);
+		},
+
+		directAssetIds(id) {
+			const set = folderAssets.get(id);
+			return set === undefined ? Object.freeze([]) : Object.freeze([...set]);
 		},
 
 		subscribe(listener) {
