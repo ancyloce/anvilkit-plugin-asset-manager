@@ -21,7 +21,7 @@ import type {
 } from "../types/types.js";
 import { AssetSourceError } from "./errors.js";
 import { createFolderStore, type FolderStore } from "./folders.js";
-import { assetMatchesSearch, paginateMatches } from "./registry.js";
+import { paginateMatches, prepareAssetMatcher } from "./registry.js";
 
 /**
  * Binary ingest used by `replace` — the same `uploadAsset`-bound callback the
@@ -83,6 +83,18 @@ export interface CreateInMemoryDataSourceOptions {
 	readonly maxDepth?: number;
 }
 
+/** Union of the direct asset ids across `root` and all its descendant folders. */
+function collectSubtreeAssetIds(
+	folders: FolderStore,
+	root: FolderId,
+): readonly string[] {
+	const out: string[] = [];
+	for (const fid of folders.subtreeIds(root)) {
+		out.push(...folders.directAssetIds(fid));
+	}
+	return out;
+}
+
 function makeAbortError(): Error {
 	if (typeof DOMException !== "undefined") {
 		return new DOMException("Operation aborted", "AbortError");
@@ -124,17 +136,30 @@ export function createInMemoryDataSource(
 			}
 			const target = resolveFolderId(query.folderId);
 			const recursive = query.recursive === true;
-			const subtree =
-				recursive && target !== null ? folders.subtreeIds(target) : undefined;
-			const matches = registry.list().filter((entry) => {
-				const owner = folders.folderOf(entry.id);
-				const folderOk = recursive
-					? target === null
-						? true
-						: owner !== null && subtree?.has(owner) === true
-					: owner === target;
-				return folderOk && assetMatchesSearch(entry, query);
-			});
+			// Compile the query/kind/tag matcher once, not per asset.
+			const matchesFilter = prepareAssetMatcher(query);
+			let matches: UploadResult[];
+			if (target === null) {
+				// Root scope is inherently a full pass: non-recursive lists the
+				// un-foldered assets ("not in any folder"), recursive lists every
+				// asset — neither is answerable from the folder→assets index alone.
+				matches = registry.list().filter((entry) => {
+					const folderOk = recursive || folders.folderOf(entry.id) === null;
+					return folderOk && matchesFilter(entry);
+				});
+			} else {
+				// Non-root: pull only this folder's (or its subtree's) members from
+				// the folder→assets reverse index instead of scanning the whole
+				// registry (P4).
+				const ids = recursive
+					? collectSubtreeAssetIds(folders, target)
+					: folders.directAssetIds(target);
+				matches = [];
+				for (const id of ids) {
+					const entry = registry.get(id);
+					if (entry !== undefined && matchesFilter(entry)) matches.push(entry);
+				}
+			}
 			return Promise.resolve(buildPage(paginateMatches(matches, query), query));
 		},
 
