@@ -103,8 +103,8 @@ interface UploadResult {
 
 | Adapter                    | Use case   | Notes                                                                                                |
 | -------------------------- | ---------- | ---------------------------------------------------------------------------------------------------- |
-| `dataUrlUploader(opts?)`   | Dev, demos | `maxBytes` default 1 MB. Extracts image dimensions.                                                  |
-| `inMemoryUploader()`       | Tests      | Stores files in memory with `blob:` URLs.                                                            |
+| `dataUrlUploader(opts?)`   | Dev, demos | `maxBytes` default 1 MB — bounds the **raw** file; the emitted base64 `data:` URL is ~33% larger and is held in memory + embedded inline in the IR/export. Extracts image dimensions. |
+| `inMemoryUploader()`       | Tests      | Stores files in memory with `blob:` URLs. The object URLs are **never revoked** (no delete hook), so long upload/delete churn leaks — dev/test only.                                  |
 | `s3PresignedAdapter(opts)` | Production | POST `{ name, type, size }` to `presignEndpoint`; PUT file to returned `url`. Retries 5xx + network. |
 
 `s3PresignedAdapter` options:
