@@ -149,7 +149,13 @@ function AssetFilterRow({
 interface AssetRowProps {
 	readonly asset: UploadResult;
 	readonly index: number;
-	readonly activeIndex: number;
+	/**
+	 * Whether this row holds the roving tabindex. A per-row boolean (not the
+	 * shared `activeIndex`) so a focus move only re-renders the two rows whose
+	 * active state flipped — every other memoized row sees an unchanged
+	 * `isActive` and skips (R2).
+	 */
+	readonly isActive: boolean;
 	readonly total: number;
 	readonly draggableRows: boolean;
 	readonly onInsert: (asset: UploadResult) => void;
@@ -170,7 +176,7 @@ interface AssetRowProps {
 const AssetRow = React.memo(function AssetRow({
 	asset,
 	index,
-	activeIndex,
+	isActive,
 	total,
 	draggableRows,
 	onInsert,
@@ -241,7 +247,7 @@ const AssetRow = React.memo(function AssetRow({
 				ref={(node) => {
 					registerRow(index, node);
 				}}
-				tabIndex={activeIndex === index ? 0 : -1}
+				tabIndex={isActive ? 0 : -1}
 				type="button"
 			>
 				<span>{asset.id}</span>
@@ -465,10 +471,10 @@ export function AssetBrowser({
 	const renderRow = React.useCallback(
 		(asset: UploadResult, index: number) => (
 			<AssetRow
-				activeIndex={effectiveActiveIndex}
 				asset={asset}
 				draggableRows={draggableRows}
 				index={index}
+				isActive={effectiveActiveIndex === index}
 				onDelete={onDelete}
 				onEdit={onEdit}
 				onFocusRow={setActiveIndex}
