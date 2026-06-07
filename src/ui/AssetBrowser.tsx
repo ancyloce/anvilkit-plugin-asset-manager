@@ -167,7 +167,7 @@ interface AssetRowProps {
  * stays in the parent via `registerRow` / `onMoveFocus` so the row-ref array
  * keeps a single owner.
  */
-function AssetRow({
+const AssetRow = React.memo(function AssetRow({
 	asset,
 	index,
 	activeIndex,
@@ -302,7 +302,7 @@ function AssetRow({
 			) : null}
 		</>
 	);
-}
+});
 
 export function AssetBrowser({
 	assets,
@@ -397,77 +397,99 @@ export function AssetBrowser({
 				? activeIndex
 				: 0;
 
-	function focusRow(index: number): boolean {
+	// All five handlers are `useCallback`-stable so the values threaded into
+	// `renderRow` (and thus each memoized `AssetRow`) keep a constant identity
+	// across renders that don't change them — see `renderRow` below.
+	const focusRow = React.useCallback((index: number): boolean => {
 		const node = buttonRefs.current[index];
 		if (node) {
 			node.focus();
 			return true;
 		}
 		return false;
-	}
+	}, []);
 
-	function moveFocus(nextIndex: number) {
-		if (total === 0) {
-			return;
-		}
+	const moveFocus = React.useCallback(
+		(nextIndex: number) => {
+			if (total === 0) {
+				return;
+			}
 
-		const clampedIndex = Math.max(0, Math.min(nextIndex, total - 1));
-		pendingFocusRef.current = clampedIndex;
-		setActiveIndex(clampedIndex);
-		// Already-mounted rows (below threshold, or an adjacent visible row)
-		// focus synchronously so keyboard nav is instant. For an off-window
-		// jump the row mounts after `Windowed` scrolls to `activeIndex`; its
-		// `ref` callback focuses it then.
-		if (focusRow(clampedIndex)) {
-			pendingFocusRef.current = null;
-		}
-	}
+			const clampedIndex = Math.max(0, Math.min(nextIndex, total - 1));
+			pendingFocusRef.current = clampedIndex;
+			setActiveIndex(clampedIndex);
+			// Already-mounted rows (below threshold, or an adjacent visible row)
+			// focus synchronously so keyboard nav is instant. For an off-window
+			// jump the row mounts after `Windowed` scrolls to `activeIndex`; its
+			// `ref` callback focuses it then.
+			if (focusRow(clampedIndex)) {
+				pendingFocusRef.current = null;
+			}
+		},
+		[total, focusRow],
+	);
 
-	function registerRow(index: number, node: HTMLButtonElement | null) {
-		buttonRefs.current[index] = node;
-		// Focus an off-window target the moment it mounts after a
-		// scroll-into-view triggered by a keyboard jump.
-		if (node && pendingFocusRef.current === index) {
-			pendingFocusRef.current = null;
-			node.focus();
-		}
-	}
+	const registerRow = React.useCallback(
+		(index: number, node: HTMLButtonElement | null) => {
+			buttonRefs.current[index] = node;
+			// Focus an off-window target the moment it mounts after a
+			// scroll-into-view triggered by a keyboard jump.
+			if (node && pendingFocusRef.current === index) {
+				pendingFocusRef.current = null;
+				node.focus();
+			}
+		},
+		[],
+	);
 
 	// Reset to the first page whenever the query or kind filter changes so the
 	// "Load more" cursor never points past a freshly-filtered, shorter list.
-	function changeQuery(value: string) {
+	const changeQuery = React.useCallback((value: string) => {
 		setQuery(value);
 		setExtraPages(0);
-	}
+	}, []);
 
-	function toggleKind(kind: AssetKind) {
+	const toggleKind = React.useCallback((kind: AssetKind) => {
 		setActiveKinds((current) =>
 			current.includes(kind)
 				? current.filter((entry) => entry !== kind)
 				: [...current, kind],
 		);
 		setExtraPages(0);
-	}
+	}, []);
 
 	// `Windowed` (as="ul") owns the <ul>/<li> + aria-posinset/aria-setsize; each
 	// row's content (button, roving tabindex, keyboard nav, actions) lives in
 	// `AssetRow`. Focus state stays here and is threaded down so behavior is
 	// unchanged.
-	const renderRow = (asset: UploadResult, index: number) => (
-		<AssetRow
-			activeIndex={effectiveActiveIndex}
-			asset={asset}
-			draggableRows={draggableRows}
-			index={index}
-			onDelete={onDelete}
-			onEdit={onEdit}
-			onFocusRow={setActiveIndex}
-			onInsert={onInsert}
-			onMoveFocus={moveFocus}
-			onReplace={onReplace}
-			registerRow={registerRow}
-			total={total}
-		/>
+	const renderRow = React.useCallback(
+		(asset: UploadResult, index: number) => (
+			<AssetRow
+				activeIndex={effectiveActiveIndex}
+				asset={asset}
+				draggableRows={draggableRows}
+				index={index}
+				onDelete={onDelete}
+				onEdit={onEdit}
+				onFocusRow={setActiveIndex}
+				onInsert={onInsert}
+				onMoveFocus={moveFocus}
+				onReplace={onReplace}
+				registerRow={registerRow}
+				total={total}
+			/>
+		),
+		[
+			draggableRows,
+			effectiveActiveIndex,
+			moveFocus,
+			onDelete,
+			onEdit,
+			onInsert,
+			onReplace,
+			registerRow,
+			total,
+		],
 	);
 
 	const searchRow = searchEnabled ? (

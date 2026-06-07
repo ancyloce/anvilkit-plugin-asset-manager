@@ -148,6 +148,25 @@ export function AssetManagerUI({
 		setPendingEdit(null);
 	}
 
+	// Stable identities for the AssetBrowser callbacks so a re-render here (e.g.
+	// opening a dialog via the `pending*` state) doesn't hand the browser fresh
+	// functions and re-render every memoized asset row.
+	const handleBrowserDelete = React.useCallback((asset: UploadResult) => {
+		setPendingDelete(asset);
+	}, []);
+	const handleBrowserEdit = React.useCallback((asset: UploadResult) => {
+		setPendingEdit(asset);
+	}, []);
+	const handleBrowserInsert = React.useCallback(
+		(asset: UploadResult) => {
+			onAssetInserted?.(asset);
+		},
+		[onAssetInserted],
+	);
+	const handleBrowserReplace = React.useCallback((asset: UploadResult) => {
+		setPendingReplace(asset);
+	}, []);
+
 	const showProgress = progress !== null && progress.total > 0;
 	const percent = showProgress
 		? Math.round((progress.completed / progress.total) * 100)
@@ -184,18 +203,10 @@ export function AssetManagerUI({
 				) : null}
 				<AssetBrowser
 					assets={assets}
-					onDelete={(asset) => {
-						setPendingDelete(asset);
-					}}
-					onEdit={(asset) => {
-						setPendingEdit(asset);
-					}}
-					onInsert={(asset) => {
-						onAssetInserted?.(asset);
-					}}
-					onReplace={(asset) => {
-						setPendingReplace(asset);
-					}}
+					onDelete={handleBrowserDelete}
+					onEdit={handleBrowserEdit}
+					onInsert={handleBrowserInsert}
+					onReplace={handleBrowserReplace}
 					searchEnabled={searchEnabled}
 					{...(aboveFilters !== undefined ? { aboveFilters } : {})}
 					{...(draggableRows !== undefined ? { draggableRows } : {})}
