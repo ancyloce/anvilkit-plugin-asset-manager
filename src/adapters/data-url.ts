@@ -3,11 +3,24 @@ import { AssetValidationError } from "../utils/errors.js";
 import { extractImageDimensions } from "./extract-image-dimensions.js";
 
 export interface DataUrlUploaderOptions {
+	/**
+	 * Maximum **raw file size** in bytes (default 1 MB). This bounds the input
+	 * file, NOT the emitted `data:` URL: base64 encoding inflates the payload
+	 * ~4/3, so a file at the cap becomes a ~1.33× larger string that is held in
+	 * memory and embedded inline in the registry / IR / exported page (C3). Size
+	 * the cap for the *encoded* footprint your target can carry.
+	 */
 	readonly maxBytes?: number;
 }
 
 const DEFAULT_MAX_BYTES = 1_048_576;
 
+/**
+ * Dev/demo upload adapter that inlines the file as a `data:` URL. The result is
+ * self-contained (no host backend) but ~33% larger than the raw bytes once
+ * base64-encoded — see {@link DataUrlUploaderOptions.maxBytes}. Not for
+ * production; use `s3PresignedAdapter` or a custom `UploadAdapter` there.
+ */
 export function dataUrlUploader(
 	options: DataUrlUploaderOptions = {},
 ): UploadAdapter {
