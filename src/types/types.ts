@@ -11,7 +11,13 @@ export interface AssetMeta {
 	 * extended to preserve this field in Phase 1 (M5); the type is additive here.
 	 */
 	readonly attribution?: {
-		readonly source: "unsplash";
+		/**
+		 * Provider that requires the credit. Open string union: `"unsplash"`
+		 * keeps autocomplete while a future credit-requiring provider (Pexels,
+		 * etc.) can set its own id without a breaking type change. Mirrors the
+		 * `AssetSourceId` idiom.
+		 */
+		readonly source: "unsplash" | (string & {});
 		readonly photographerName: string;
 		readonly photographerUrl: string;
 		readonly unsplashUrl: string;
