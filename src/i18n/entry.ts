@@ -20,6 +20,8 @@ const LOCALE_PACKS: Readonly<
 	Record<string, () => Promise<{ readonly default: Record<string, string> }>>
 > = {
 	zh: () => import("../../i18n/messages/zh.json", { with: { type: "json" } }),
+	ja: () => import("../../i18n/messages/ja.json", { with: { type: "json" } }),
+	ko: () => import("../../i18n/messages/ko.json", { with: { type: "json" } }),
 };
 
 /** The registry entry contributed to the catalog (core prepends `studio.*`). */
