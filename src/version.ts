@@ -16,4 +16,4 @@
  * constant ships only the version. Mirrors `@anvilkit/core`'s
  * `runtime/version.ts`, which makes the same call.
  */
-export const ASSET_MANAGER_VERSION = "0.1.7";
+export const ASSET_MANAGER_VERSION = "0.1.8";
