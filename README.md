@@ -10,7 +10,7 @@ Headless asset manager plugin for Anvilkit Studio. The host provides the upload 
 pnpm add @anvilkit/plugin-asset-manager @anvilkit/core react react-dom @puckeditor/core
 ```
 
-Non-optional peers: `react >=19.0.0`, `react-dom >=19.0.0`, `@puckeditor/core ^0.21.3`.
+Non-optional peers: `react >=19.2.0`, `react-dom >=19.2.0`, `@puckeditor/core ^0.21.3`.
 
 Subpath imports:
 
@@ -418,7 +418,7 @@ Only `name`, `size`, and `mimeType` are considered safe to log. If your host end
 3. **Wire CSP.** Call `getRequiredCsp(...)` and merge the result into your `connect-src` / `img-src` / `media-src` builder. Re-run when you add or remove an adapter.
 4. **Choose a persistence story.** Plugin state is in-memory; host stores `publicUrl`s server-side and re-seeds on boot.
 5. **Monitor.** Subscribe to `asset-manager:error` event bus envelopes for upload failures, and log `AssetResolutionError.code` from your export pipeline so `ASSET_NOT_FOUND` / `ASSET_URL_REJECTED` / `ASSET_VALIDATION_FAILED` get separate alerts.
-6. **Lock down the bundle.** `.size-limit.json` keeps the headless entry under 6 KB gzip and the UI subpath under 12 KB. CI gates both.
+6. **Lock down the bundle.** `.size-limit.json` keeps the headless entry under 8 KB gzip and the UI subpath under 12 KB. CI gates both.
 
 ### Optional UI is a separate entry
 
