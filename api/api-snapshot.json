@@ -14409,12 +14409,12 @@
 								"type": "reference",
 								"target": {
 									"packageName": "@types/react",
-									"packagePath": "jsx-runtime.d.ts",
-									"qualifiedName": "JSX.Element"
+									"packagePath": "index.d.ts",
+									"qualifiedName": "React.JSX.Element"
 								},
 								"name": "Element",
 								"package": "@types/react",
-								"qualifiedName": "JSX.Element"
+								"qualifiedName": "React.JSX.Element"
 							}
 						}
 					]
@@ -14451,12 +14451,12 @@
 								"type": "reference",
 								"target": {
 									"packageName": "@types/react",
-									"packagePath": "jsx-runtime.d.ts",
-									"qualifiedName": "JSX.Element"
+									"packagePath": "index.d.ts",
+									"qualifiedName": "React.JSX.Element"
 								},
 								"name": "Element",
 								"package": "@types/react",
-								"qualifiedName": "JSX.Element"
+								"qualifiedName": "React.JSX.Element"
 							}
 						}
 					]
@@ -14569,12 +14569,12 @@
 								"type": "reference",
 								"target": {
 									"packageName": "@types/react",
-									"packagePath": "jsx-runtime.d.ts",
-									"qualifiedName": "JSX.Element"
+									"packagePath": "index.d.ts",
+									"qualifiedName": "React.JSX.Element"
 								},
 								"name": "Element",
 								"package": "@types/react",
-								"qualifiedName": "JSX.Element"
+								"qualifiedName": "React.JSX.Element"
 							}
 						}
 					]
@@ -14611,12 +14611,12 @@
 								"type": "reference",
 								"target": {
 									"packageName": "@types/react",
-									"packagePath": "jsx-runtime.d.ts",
-									"qualifiedName": "JSX.Element"
+									"packagePath": "index.d.ts",
+									"qualifiedName": "React.JSX.Element"
 								},
 								"name": "Element",
 								"package": "@types/react",
-								"qualifiedName": "JSX.Element"
+								"qualifiedName": "React.JSX.Element"
 							}
 						}
 					]
@@ -14653,12 +14653,12 @@
 								"type": "reference",
 								"target": {
 									"packageName": "@types/react",
-									"packagePath": "jsx-runtime.d.ts",
-									"qualifiedName": "JSX.Element"
+									"packagePath": "index.d.ts",
+									"qualifiedName": "React.JSX.Element"
 								},
 								"name": "Element",
 								"package": "@types/react",
-								"qualifiedName": "JSX.Element"
+								"qualifiedName": "React.JSX.Element"
 							}
 						}
 					]
@@ -14695,12 +14695,12 @@
 								"type": "reference",
 								"target": {
 									"packageName": "@types/react",
-									"packagePath": "jsx-runtime.d.ts",
-									"qualifiedName": "JSX.Element"
+									"packagePath": "index.d.ts",
+									"qualifiedName": "React.JSX.Element"
 								},
 								"name": "Element",
 								"package": "@types/react",
-								"qualifiedName": "JSX.Element"
+								"qualifiedName": "React.JSX.Element"
 							}
 						}
 					]
@@ -14737,12 +14737,12 @@
 								"type": "reference",
 								"target": {
 									"packageName": "@types/react",
-									"packagePath": "jsx-runtime.d.ts",
-									"qualifiedName": "JSX.Element"
+									"packagePath": "index.d.ts",
+									"qualifiedName": "React.JSX.Element"
 								},
 								"name": "Element",
 								"package": "@types/react",
-								"qualifiedName": "JSX.Element"
+								"qualifiedName": "React.JSX.Element"
 							}
 						}
 					]
@@ -14779,12 +14779,12 @@
 								"type": "reference",
 								"target": {
 									"packageName": "@types/react",
-									"packagePath": "jsx-runtime.d.ts",
-									"qualifiedName": "JSX.Element"
+									"packagePath": "index.d.ts",
+									"qualifiedName": "React.JSX.Element"
 								},
 								"name": "Element",
 								"package": "@types/react",
-								"qualifiedName": "JSX.Element"
+								"qualifiedName": "React.JSX.Element"
 							}
 						}
 					]
@@ -14824,12 +14824,12 @@
 										"type": "reference",
 										"target": {
 											"packageName": "@types/react",
-											"packagePath": "jsx-runtime.d.ts",
-											"qualifiedName": "JSX.Element"
+											"packagePath": "index.d.ts",
+											"qualifiedName": "React.JSX.Element"
 										},
 										"name": "Element",
 										"package": "@types/react",
-										"qualifiedName": "JSX.Element"
+										"qualifiedName": "React.JSX.Element"
 									},
 									{
 										"type": "literal",
@@ -14872,12 +14872,12 @@
 								"type": "reference",
 								"target": {
 									"packageName": "@types/react",
-									"packagePath": "jsx-runtime.d.ts",
-									"qualifiedName": "JSX.Element"
+									"packagePath": "index.d.ts",
+									"qualifiedName": "React.JSX.Element"
 								},
 								"name": "Element",
 								"package": "@types/react",
-								"qualifiedName": "JSX.Element"
+								"qualifiedName": "React.JSX.Element"
 							}
 						}
 					]
@@ -14914,12 +14914,12 @@
 								"type": "reference",
 								"target": {
 									"packageName": "@types/react",
-									"packagePath": "jsx-runtime.d.ts",
-									"qualifiedName": "JSX.Element"
+									"packagePath": "index.d.ts",
+									"qualifiedName": "React.JSX.Element"
 								},
 								"name": "Element",
 								"package": "@types/react",
-								"qualifiedName": "JSX.Element"
+								"qualifiedName": "React.JSX.Element"
 							}
 						}
 					]
@@ -14956,12 +14956,12 @@
 								"type": "reference",
 								"target": {
 									"packageName": "@types/react",
-									"packagePath": "jsx-runtime.d.ts",
-									"qualifiedName": "JSX.Element"
+									"packagePath": "index.d.ts",
+									"qualifiedName": "React.JSX.Element"
 								},
 								"name": "Element",
 								"package": "@types/react",
-								"qualifiedName": "JSX.Element"
+								"qualifiedName": "React.JSX.Element"
 							}
 						}
 					]
@@ -14998,12 +14998,12 @@
 								"type": "reference",
 								"target": {
 									"packageName": "@types/react",
-									"packagePath": "jsx-runtime.d.ts",
-									"qualifiedName": "JSX.Element"
+									"packagePath": "index.d.ts",
+									"qualifiedName": "React.JSX.Element"
 								},
 								"name": "Element",
 								"package": "@types/react",
-								"qualifiedName": "JSX.Element"
+								"qualifiedName": "React.JSX.Element"
 							}
 						}
 					]
@@ -15040,12 +15040,12 @@
 								"type": "reference",
 								"target": {
 									"packageName": "@types/react",
-									"packagePath": "jsx-runtime.d.ts",
-									"qualifiedName": "JSX.Element"
+									"packagePath": "index.d.ts",
+									"qualifiedName": "React.JSX.Element"
 								},
 								"name": "Element",
 								"package": "@types/react",
-								"qualifiedName": "JSX.Element"
+								"qualifiedName": "React.JSX.Element"
 							}
 						}
 					]
