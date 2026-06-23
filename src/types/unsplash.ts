@@ -19,6 +19,7 @@ export interface UnsplashTheme {
 	readonly contentFilter?: "low" | "high";
 }
 
+/** Theme configuration for the built-in Unsplash provider. */
 export interface UnsplashThemeConfig {
 	/** Replace the default theme set entirely. */
 	readonly themes?: readonly UnsplashTheme[];
@@ -31,6 +32,7 @@ export interface UnsplashThemeConfig {
 	readonly allowFreeSearch?: boolean;
 }
 
+/** Options for enabling and configuring the Unsplash source provider. */
 export interface UnsplashSourceOptions {
 	/** RECOMMENDED — proxy injects the `Client-ID` server-side. */
 	readonly proxyEndpoint?: string | URL;

@@ -11,6 +11,7 @@
 /** Canonical id of a folder. `null` (never a real id) denotes the root. */
 export type FolderId = string;
 
+/** Folder node returned by the asset library data source. */
 export interface AssetFolder {
 	readonly id: FolderId;
 	/** Display name; trimmed, non-empty. Siblings are case-insensitively unique. */
@@ -33,6 +34,7 @@ export interface AssetFolder {
 	readonly meta?: Readonly<Record<string, string | number | boolean>>;
 }
 
+/** Feature flags that control folder support in the plugin UI and source. */
 export interface FolderOptions {
 	/** Maximum nesting depth. `undefined` ⇒ unbounded. */
 	readonly maxDepth?: number;

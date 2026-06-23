@@ -1,3 +1,4 @@
+/** Optional metadata associated with an uploaded asset. */
 export interface AssetMeta {
 	readonly size?: number;
 	readonly mimeType?: string;
@@ -40,6 +41,7 @@ export type AssetKind =
 	| "document"
 	| "other";
 
+/** Normalized asset row returned by upload adapters and registry mutations. */
 export interface UploadResult {
 	readonly url: string;
 	readonly id: string;
@@ -78,8 +80,8 @@ export type UploadAdapter = (
 // `AssetManagerOptions` is defined in `./options.ts` (hoisted there so it can
 // aggregate the data-source / folder / provider / category contracts without
 // forming an import cycle). It is re-exported from the package barrel under the
-// same name. The `Pick<AssetManagerOptions, "acceptedMimeTypes" | "maxFileSize">`
-// trust-boundary subset used by `validate-upload-result.ts` imports from there.
+// same name. The selected-file trust-boundary subset used by `plugin.ts`
+// imports from there.
 
 /**
  * Listener invoked after every registry mutation
@@ -119,6 +121,7 @@ export interface AssetSearchPage {
 	readonly nextCursor: string | undefined;
 }
 
+/** In-memory catalog API that stores and searches uploaded assets. */
 export interface AssetRegistry {
 	readonly register: (asset: UploadResult) => UploadResult;
 	readonly get: (id: string) => UploadResult | undefined;

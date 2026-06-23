@@ -20,6 +20,7 @@ export type AssetSourceId = "local" | "unsplash" | (string & {});
 
 export type AssetSortField = "recent" | "name" | "size" | "kind" | "relevance";
 
+/** Sort selection for asset search and list queries. */
 export interface AssetSort {
 	readonly field: AssetSortField;
 	/** Defaults are field-appropriate: `recent`→`desc`, `name`→`asc`. */

@@ -10,6 +10,7 @@
 import type { AssetSourceId } from "./filter.js";
 import type { AssetKind, UploadResult } from "./types.js";
 
+/** One selectable option within an asset facet filter. */
 export interface AssetFacetOption {
 	readonly value: string;
 	readonly label: string;
@@ -17,6 +18,7 @@ export interface AssetFacetOption {
 	readonly count?: number;
 }
 
+/** Describes a facet filter available in the asset browser. */
 export interface AssetFacetDefinition {
 	/** Stable key; used in `AssetFilter.facets[id]`. */
 	readonly id: string;
@@ -37,6 +39,7 @@ export interface AssetFacetDefinition {
 	readonly remote?: boolean;
 }
 
+/** Top-level asset category exposed to the browser UI. */
 export interface AssetCategory {
 	readonly id: string;
 	readonly label: string;

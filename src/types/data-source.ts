@@ -42,6 +42,7 @@ export type AssetSourceStatus =
 	  }
 	| { readonly phase: "error"; readonly error: AssetSourceError };
 
+/** Host-supplied read and mutation plane for the local asset library. */
 export interface AssetDataSource {
 	// ── Asset + folder READ plane (one unified call) ─────────────────
 	/**
@@ -52,12 +53,15 @@ export interface AssetDataSource {
 	list?(query: AssetFilter, signal?: AbortSignal): Promise<AssetListPage>;
 
 	// ── Asset mutation plane (resolves together) ─────────────────────
+	/** Remove an asset by id from the backing library. */
 	remove?(id: string, signal?: AbortSignal): Promise<void>;
+	/** Replace an asset's binary contents and return the updated upload row. */
 	replace?(
 		id: string,
 		payload: ReplacePayload,
 		signal?: AbortSignal,
 	): Promise<UploadResult>;
+	/** Rename an asset and return the updated upload row. */
 	rename?(
 		id: string,
 		name: string,
@@ -71,21 +75,25 @@ export interface AssetDataSource {
 	): Promise<void>;
 
 	// ── Folder mutation plane (reads come from `list` above) ─────────
+	/** Create a child folder under `parentId`, or under root when `null`. */
 	createFolder?(
 		parentId: FolderId | null,
 		name: string,
 		signal?: AbortSignal,
 	): Promise<AssetFolder>;
+	/** Rename a folder and return the updated folder record. */
 	renameFolder?(
 		id: FolderId,
 		name: string,
 		signal?: AbortSignal,
 	): Promise<AssetFolder>;
+	/** Remove a folder, optionally cascading through descendants and assets. */
 	removeFolder?(
 		id: FolderId,
 		opts?: { readonly cascade?: boolean },
 		signal?: AbortSignal,
 	): Promise<void>;
+	/** Move a folder under `parentId`, or to root when `null`. */
 	moveFolder?(
 		id: FolderId,
 		parentId: FolderId | null,
@@ -93,5 +101,6 @@ export interface AssetDataSource {
 	): Promise<AssetFolder>;
 
 	// ── Status plane (optional) ──────────────────────────────────────
+	/** Subscribe to data-source loading and mutation status updates. */
 	subscribeStatus?(listener: (status: AssetSourceStatus) => void): () => void;
 }

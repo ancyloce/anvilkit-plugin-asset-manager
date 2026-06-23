@@ -15,6 +15,7 @@ import type { FolderOptions } from "./folders.js";
 import type { UploadAdapter, UploadResult } from "./types.js";
 import type { UnsplashSourceOptions } from "./unsplash.js";
 
+/** Configuration accepted by `createAssetManagerPlugin()`. */
 export interface AssetManagerOptions {
 	/**
 	 * Binary ingest: `File → UploadResult`. WIDENED to optional in PRD 0002 —
@@ -50,6 +51,14 @@ export interface AssetManagerOptions {
 	// ── existing optional fields (unchanged from the original AssetManagerOptions) ──
 	readonly maxFileSize?: number;
 	readonly acceptedMimeTypes?: readonly string[];
+	/**
+	 * Optional extension allowlist, matched case-insensitively against `File.name`.
+	 * Entries may be supplied with or without the leading dot (`".png"` or `"png"`).
+	 * When both MIME and extension allowlists are configured, both known MIME types
+	 * and extensions must be accepted; an empty browser MIME type can still pass via
+	 * a matching extension.
+	 */
+	readonly acceptedFileExtensions?: readonly string[];
 	/**
 	 * Permit `data:` URLs through the trust boundary. Defaults to `false` —
 	 * `http`, `https`, and `blob` are always allowed; every other scheme is
