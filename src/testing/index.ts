@@ -15,10 +15,12 @@ import type {
 } from "../types/types.js";
 import { createAssetRegistry } from "../utils/registry.js";
 
+/** Options for constructing a registry fixture in tests. */
 export interface CreateTestRegistryOptions {
 	readonly initial?: readonly UploadResult[];
 }
 
+/** Create an in-memory registry preloaded with optional upload rows. */
 export function createTestRegistry(
 	options: CreateTestRegistryOptions = {},
 ): AssetRegistry {
@@ -29,6 +31,7 @@ export function createTestRegistry(
 	return registry;
 }
 
+/** Options for the deterministic fake uploader helper. */
 export interface FakeUploaderOptions {
 	/**
 	 * Optional map keyed by `File.name`. When a file is uploaded whose
@@ -39,6 +42,7 @@ export interface FakeUploaderOptions {
 	readonly responses?: Record<string, UploadResult>;
 }
 
+/** Create a deterministic fake upload adapter for plugin and host tests. */
 export function fakeUploader(options: FakeUploaderOptions = {}): UploadAdapter {
 	const responses = options.responses ?? {};
 	return async (file) => {

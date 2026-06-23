@@ -2,10 +2,18 @@ export type { DataUrlUploaderOptions } from "./adapters/data-url.js";
 export { dataUrlUploader } from "./adapters/data-url.js";
 export { inMemoryUploader } from "./adapters/in-memory.js";
 export {
+	ASSET_MANAGER_ERROR_EVENT,
+	ASSET_MANAGER_UPLOADED_EVENT,
 	createAssetManagerPlugin,
 	createAssetReference,
 	getAssetRegistry,
 	uploadAsset,
+} from "./plugin.js";
+export type {
+	AssetManagerErrorEvent,
+	AssetManagerEventMap,
+	AssetManagerEventName,
+	AssetManagerUploadedEvent,
 } from "./plugin.js";
 export type {
 	AssetSourceCapabilities,

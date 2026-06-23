@@ -34,6 +34,37 @@ import { ASSET_MANAGER_VERSION } from "./version.js";
 
 export { createAssetReference };
 
+/** Event name emitted after an asset upload has been validated and registered. */
+export const ASSET_MANAGER_UPLOADED_EVENT = "asset-manager:uploaded" as const;
+
+/** Event name emitted when upload validation or adapter execution fails. */
+export const ASSET_MANAGER_ERROR_EVENT = "asset-manager:error" as const;
+
+/** Payload emitted with {@link ASSET_MANAGER_UPLOADED_EVENT}. */
+export interface AssetManagerUploadedEvent {
+	readonly asset: UploadResult;
+	readonly reference: string;
+}
+
+/** Payload emitted with {@link ASSET_MANAGER_ERROR_EVENT}. */
+export interface AssetManagerErrorEvent {
+	readonly code: string;
+	readonly message: string;
+}
+
+/**
+ * Event payload map for asset-manager runtime notifications. Hosts can use this
+ * to type their event-bus wrappers around `asset-manager:uploaded` and
+ * `asset-manager:error`.
+ */
+export interface AssetManagerEventMap {
+	readonly [ASSET_MANAGER_UPLOADED_EVENT]: AssetManagerUploadedEvent;
+	readonly [ASSET_MANAGER_ERROR_EVENT]: AssetManagerErrorEvent;
+}
+
+/** Supported asset-manager event names. */
+export type AssetManagerEventName = keyof AssetManagerEventMap;
+
 // `version` comes from the hand-maintained `version.ts` constant rather than a
 // `package.json` import, which esbuild would inline whole and blow the gzip
 // budget. `plugin.metadata-drift.test.ts` asserts it matches package.json, so a
@@ -54,6 +85,7 @@ interface NormalizedAssetManagerOptions extends AssetManagerOptions {
 	/** Resolved to a concrete uploader — the host's or the in-memory default. */
 	readonly uploader: UploadAdapter;
 	readonly acceptedMimeTypes?: readonly string[];
+	readonly acceptedFileExtensions?: readonly string[];
 }
 
 const stateByToken = new WeakMap<object, AssetManagerRuntimeState>();
@@ -61,6 +93,14 @@ const stateByToken = new WeakMap<object, AssetManagerRuntimeState>();
 // agnostic to the plugin's `UserConfig` type parameter.
 const tokenByContext = new WeakMap<object, object>();
 
+/**
+ * Create the Anvilkit Studio asset-manager plugin.
+ *
+ * The returned plugin registers localization messages, a header upload action,
+ * an IR asset resolver, and a Studio asset source. With no options it provides
+ * an in-memory uploader/library; production hosts typically provide an
+ * `uploader` and optionally a folder-aware `dataSource` or external providers.
+ */
 export function createAssetManagerPlugin<
 	UserConfig extends PuckConfig = PuckConfig,
 >(options: AssetManagerOptions = {}): StudioPlugin<UserConfig> {
@@ -157,6 +197,13 @@ export function createAssetManagerPlugin<
 	};
 }
 
+/**
+ * Return the runtime registry associated with an initialized plugin context.
+ *
+ * The registry is available after the plugin `onInit` hook has run and is
+ * removed during `onDestroy`; callers should handle `undefined` in setup,
+ * teardown, and tests that inspect lifecycle boundaries.
+ */
 export function getAssetRegistry<UserConfig extends PuckConfig = PuckConfig>(
 	ctx: StudioPluginContext<UserConfig>,
 ): AssetRegistry | undefined {
@@ -164,6 +211,14 @@ export function getAssetRegistry<UserConfig extends PuckConfig = PuckConfig>(
 	return token ? stateByToken.get(token)?.registry : undefined;
 }
 
+/**
+ * Validate and upload a single file through the configured plugin runtime.
+ *
+ * The pipeline enforces selected-file constraints, calls the resolved upload
+ * adapter, validates the adapter's `UploadResult`, derives lightweight tags,
+ * registers the asset, dispatches an `asset://` reference into page data, and
+ * emits typed asset-manager events.
+ */
 export async function uploadAsset<UserConfig extends PuckConfig = PuckConfig>(
 	ctx: StudioPluginContext<UserConfig>,
 	file: File,
@@ -192,10 +247,11 @@ export async function uploadAsset<UserConfig extends PuckConfig = PuckConfig>(
 		const tagged = withDerivedTags(validated, file);
 		const stored = registry.register(tagged);
 		dispatchAssetReference(ctx, stored);
-		ctx.emit("asset-manager:uploaded", {
+		const payload: AssetManagerUploadedEvent = {
 			asset: stored,
 			reference: createAssetReference(stored.id),
-		});
+		};
+		ctx.emit(ASSET_MANAGER_UPLOADED_EVENT, payload);
 
 		return stored;
 	} catch (error) {
@@ -215,20 +271,24 @@ export async function uploadAsset<UserConfig extends PuckConfig = PuckConfig>(
 						{ cause: error },
 					);
 
-		ctx.emit("asset-manager:error", {
-			code: normalizedError.code,
-			message: normalizedError.message,
-		});
-		ctx.log("error", normalizedError.message, {
-			code: normalizedError.code,
-		});
+			const payload: AssetManagerErrorEvent = {
+				code: normalizedError.code,
+				message: normalizedError.message,
+			};
+			ctx.emit(ASSET_MANAGER_ERROR_EVENT, payload);
+			ctx.log("error", normalizedError.message, {
+				code: normalizedError.code,
+			});
 		throw normalizedError;
 	}
 }
 
 export function validateSelectedFile(
 	file: File,
-	options: Pick<AssetManagerOptions, "acceptedMimeTypes" | "maxFileSize">,
+	options: Pick<
+		AssetManagerOptions,
+		"acceptedFileExtensions" | "acceptedMimeTypes" | "maxFileSize"
+	>,
 ): void {
 	if (options.maxFileSize !== undefined && file.size > options.maxFileSize) {
 		throw new AssetValidationError(
@@ -237,15 +297,37 @@ export function validateSelectedFile(
 		);
 	}
 
+	const acceptedMimeTypes = options.acceptedMimeTypes ?? [];
+	const acceptedFileExtensions = options.acceptedFileExtensions ?? [];
+	const hasMimeAllowlist = acceptedMimeTypes.length > 0;
+	const hasExtensionAllowlist = acceptedFileExtensions.length > 0;
+
 	if (
-		options.acceptedMimeTypes &&
-		options.acceptedMimeTypes.length > 0 &&
-		!mimeTypeMatches(file.type, options.acceptedMimeTypes)
+		hasMimeAllowlist &&
+		file.type !== "" &&
+		!mimeTypeMatches(file.type, acceptedMimeTypes)
 	) {
-		const mimeType = file.type || "unknown";
 		throw new AssetValidationError(
 			"UNSUPPORTED_MIME_TYPE",
-			`File MIME type "${mimeType}" is not in acceptedMimeTypes.`,
+			`File MIME type "${file.type}" is not in acceptedMimeTypes.`,
+		);
+	}
+	if (hasMimeAllowlist && file.type === "" && !hasExtensionAllowlist) {
+		throw new AssetValidationError(
+			"UNSUPPORTED_MIME_TYPE",
+			'File MIME type "unknown" is not in acceptedMimeTypes.',
+		);
+	}
+	if (
+		hasExtensionAllowlist &&
+		!fileExtensionMatches(file.name, acceptedFileExtensions)
+	) {
+		const extension = file.name.includes(".")
+			? file.name.slice(file.name.lastIndexOf(".")).toLowerCase()
+			: "unknown";
+		throw new AssetValidationError(
+			"UNSUPPORTED_FILE_EXTENSION",
+			`File extension "${extension}" is not in acceptedFileExtensions.`,
 		);
 	}
 }
@@ -298,11 +380,14 @@ async function loadRichSource<UserConfig extends PuckConfig = PuckConfig>(
 		]);
 	const maxDepth =
 		typeof options.folders === "object" ? options.folders.maxDepth : undefined;
+	const allowMove =
+		typeof options.folders === "object" ? options.folders.allowMove : undefined;
 	const resolved = resolveDataSource({
 		registry,
 		upload,
 		...(options.dataSource ? { hostDataSource: options.dataSource } : {}),
 		...(maxDepth !== undefined ? { maxDepth } : {}),
+		...(allowMove !== undefined ? { allowMove } : {}),
 		warn: (message) => ctx.log("warn", message),
 	});
 
@@ -348,6 +433,13 @@ function normalizeOptions(
 		uploader: options.uploader ?? inMemoryUploader(),
 		...(options.acceptedMimeTypes
 			? { acceptedMimeTypes: Object.freeze([...options.acceptedMimeTypes]) }
+			: {}),
+		...(options.acceptedFileExtensions
+			? {
+					acceptedFileExtensions: Object.freeze([
+						...options.acceptedFileExtensions,
+					]),
+				}
 			: {}),
 	};
 }
@@ -425,6 +517,25 @@ function mimeTypeMatches(
 		}
 
 		return input === accepted;
+	});
+}
+
+function fileExtensionMatches(
+	name: string,
+	acceptedFileExtensions: readonly string[],
+): boolean {
+	const lowerName = name.toLowerCase();
+	if (lowerName === "") {
+		return false;
+	}
+
+	return acceptedFileExtensions.some((accepted) => {
+		const trimmed = accepted.trim().toLowerCase();
+		if (trimmed === "") {
+			return false;
+		}
+		const extension = trimmed.startsWith(".") ? trimmed : `.${trimmed}`;
+		return lowerName.endsWith(extension);
 	});
 }
 
