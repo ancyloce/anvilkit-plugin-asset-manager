@@ -15,6 +15,7 @@ export type ValidateUploadResultOptions = Pick<
 	"dataUrlAllowlistOptIn" | "allowMixedScriptHostnames"
 >;
 
+/** Validate and sanitize an upload adapter result before registry insertion. */
 export function validateUploadResult(
 	result: UploadResult,
 	options: ValidateUploadResultOptions = {},
@@ -99,7 +100,7 @@ function normalizeAllowedUrl(
 		assertNoMixedScriptHostname(sanitized, options);
 	}
 
-	return candidate;
+	return sanitized;
 }
 
 function isSchemeAllowed(
@@ -253,6 +254,9 @@ function stripUndefinedMeta(meta: UploadResult["meta"]) {
 		...(meta.mimeType !== undefined ? { mimeType: meta.mimeType } : {}),
 		...(meta.width !== undefined ? { width: meta.width } : {}),
 		...(meta.height !== undefined ? { height: meta.height } : {}),
+		...(meta.attribution !== undefined
+			? { attribution: Object.freeze({ ...meta.attribution }) }
+			: {}),
 	};
 
 	return Object.freeze(nextMeta);

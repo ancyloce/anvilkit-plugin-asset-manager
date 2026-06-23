@@ -27,6 +27,7 @@ import type {
 	UploadResult,
 } from "../types/types.js";
 import { createAssetReference } from "./asset-reference.js";
+import { AssetSourceError } from "./errors.js";
 import { inferAssetKind } from "./infer-kind.js";
 
 /**
@@ -36,6 +37,7 @@ import { inferAssetKind } from "./infer-kind.js";
  */
 export const MAX_CONCURRENT_UPLOADS = 3;
 
+/** Inputs needed to bridge the registry into core's studio asset source API. */
 export interface CreateStudioAssetSourceOptions {
 	readonly registry: AssetRegistry;
 	/**
@@ -63,6 +65,7 @@ export interface CreateStudioAssetSourceOptions {
 	readonly maxConcurrentUploads?: number;
 }
 
+/** Adapt the upload registry into core's `StudioAssetSource` contract. */
 export function createStudioAssetSource(
 	options: CreateStudioAssetSourceOptions,
 ): StudioAssetSource {
@@ -206,17 +209,23 @@ export function createStudioAssetSource(
 		},
 
 		delete(assetId) {
-			registry.delete(assetId);
+			if (!registry.delete(assetId)) {
+				return Promise.reject(makeUnknownAssetMutationError("delete", assetId));
+			}
 			return Promise.resolve();
 		},
 
 		rename(assetId, nextName) {
-			registry.rename(assetId, nextName);
+			if (registry.rename(assetId, nextName) === undefined) {
+				return Promise.reject(makeUnknownAssetMutationError("rename", assetId));
+			}
 			return Promise.resolve();
 		},
 
 		setTags(assetId, tags) {
-			registry.setTags(assetId, tags);
+			if (registry.setTags(assetId, tags) === undefined) {
+				return Promise.reject(makeUnknownAssetMutationError("set tags on", assetId));
+			}
 			return Promise.resolve();
 		},
 
@@ -296,6 +305,16 @@ function deriveThumbnailUrl(
 		return getThumbnail(entry);
 	}
 	return kind === "image" ? entry.url : undefined;
+}
+
+function makeUnknownAssetMutationError(
+	operation: string,
+	assetId: string,
+): AssetSourceError {
+	return new AssetSourceError(
+		"ASSET_MUTATION_REJECTED",
+		`Cannot ${operation} unknown asset "${assetId}".`,
+	);
 }
 
 function deriveFallbackName(entry: UploadResult): string {

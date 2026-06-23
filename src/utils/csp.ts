@@ -30,6 +30,7 @@ export interface S3CspOptions {
 	readonly publicHost?: string;
 }
 
+/** Inputs describing which asset backends need CSP allowances. */
 export interface RequiredCspOptions {
 	/** True if `dataUrlUploader` is mounted. Defaults to false. */
 	readonly dataUrl?: boolean;
@@ -39,12 +40,14 @@ export interface RequiredCspOptions {
 	readonly s3?: S3CspOptions | readonly S3CspOptions[];
 }
 
+/** Computed CSP directive sources needed for configured asset backends. */
 export interface RequiredCsp {
 	readonly connectSrc: readonly string[];
 	readonly imgSrc: readonly string[];
 	readonly mediaSrc: readonly string[];
 }
 
+/** Compute CSP origins required by the configured asset upload backends. */
 export function getRequiredCsp(options: RequiredCspOptions = {}): RequiredCsp {
 	const connectSrc = new Set<string>();
 	const imgSrc = new Set<string>();

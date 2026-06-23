@@ -35,12 +35,21 @@ const ASSET_PROP_KEYS = new Set([
 	"thumbnailSrc",
 ]);
 
+/** Options for creating an IR asset-reference resolver. */
 export interface CreateIRAssetResolverOptions {
 	readonly registry: AssetRegistry;
 	readonly dataUrlAllowlistOptIn?: boolean;
 	readonly allowMixedScriptHostnames?: boolean;
 }
 
+/**
+ * Create an IR asset resolver for `asset://<id>` references.
+ *
+ * The resolver looks up references in the supplied registry, re-validates the
+ * stored URL at export/render time, and translates lookup or validation failures
+ * into `AssetResolutionError` codes for callers that need actionable export
+ * diagnostics.
+ */
 export function createIRAssetResolver(
 	options: CreateIRAssetResolverOptions,
 ): IRAssetResolver {
@@ -93,6 +102,13 @@ export function createIRAssetResolver(
 	};
 }
 
+/**
+ * Resolve all asset references found in a Page IR tree.
+ *
+ * The function scans the IR asset table and asset-like node props, resolves each
+ * distinct URL concurrently with the supplied resolver, clones the IR with any
+ * resolved URLs/meta applied, and returns a deeply frozen result.
+ */
 export async function resolveAssets(
 	ir: PageIR,
 	resolver: IRAssetResolver,

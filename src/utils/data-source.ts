@@ -81,6 +81,8 @@ export interface CreateInMemoryDataSourceOptions {
 	readonly folderStore?: FolderStore;
 	/** Max nesting depth from `FolderOptions`. */
 	readonly maxDepth?: number;
+	/** Allow moving assets/folders. `undefined` ⇒ treated as `true`. */
+	readonly allowMove?: boolean;
 }
 
 /** Union of the direct asset ids across `root` and all its descendant folders. */
@@ -102,6 +104,13 @@ function makeAbortError(): Error {
 	const error = new Error("Operation aborted");
 	error.name = "AbortError";
 	return error;
+}
+
+function makeMoveDisabledError(): AssetSourceError {
+	return new AssetSourceError(
+		"MOVE_REJECTED",
+		"Asset and folder moves are disabled by FolderOptions.allowMove.",
+	);
 }
 
 export function createInMemoryDataSource(
@@ -192,6 +201,9 @@ export function createInMemoryDataSource(
 		},
 
 		move(id, folderId) {
+			if (options.allowMove === false) {
+				return Promise.reject(makeMoveDisabledError());
+			}
 			folders.moveAsset(id, folderId);
 			return Promise.resolve();
 		},
@@ -211,6 +223,9 @@ export function createInMemoryDataSource(
 		},
 
 		moveFolder(id, parentId) {
+			if (options.allowMove === false) {
+				return Promise.reject(makeMoveDisabledError());
+			}
 			return Promise.resolve(folders.moveFolder(id, parentId, maxDepth));
 		},
 
@@ -306,6 +321,10 @@ export function resolveDataSource(
 	}
 	if (typeof host.subscribeStatus === "function") {
 		resolved.subscribeStatus = host.subscribeStatus.bind(host);
+	}
+	if (input.allowMove === false) {
+		resolved.move = () => Promise.reject(makeMoveDisabledError());
+		resolved.moveFolder = () => Promise.reject(makeMoveDisabledError());
 	}
 
 	return resolved;

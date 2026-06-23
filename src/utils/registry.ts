@@ -10,6 +10,14 @@ import { inferAssetKind } from "./infer-kind.js";
 
 const DEFAULT_SEARCH_LIMIT = 50;
 
+/**
+ * Create an in-memory asset registry.
+ *
+ * The registry stores immutable `UploadResult` records by id and exposes the
+ * local catalog operations used by the plugin runtime and Studio asset source:
+ * registration, lookup, listing, delete, rename, replace, tag mutation, search,
+ * pagination, and mutation subscriptions.
+ */
 export function createAssetRegistry(): AssetRegistry {
 	const assetsById = new Map<string, UploadResult>();
 	const listeners = new Set<AssetRegistryListener>();

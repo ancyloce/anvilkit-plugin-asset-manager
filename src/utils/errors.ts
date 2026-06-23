@@ -1,6 +1,8 @@
+/** Error thrown when an upload adapter returns an invalid result. */
 export class AssetValidationError extends Error {
 	readonly code: string;
 
+	/** Create a validation error with a stable machine-readable code. */
 	constructor(
 		code: string,
 		message: string,
@@ -52,6 +54,7 @@ export class AssetSourceError extends Error {
 	readonly status?: number;
 	readonly retryAfterMs?: number;
 
+	/** Create an asset-source error with optional retry and status metadata. */
 	constructor(
 		code: AssetSourceErrorCode,
 		message: string,
@@ -80,10 +83,12 @@ export type AssetResolutionErrorCode =
 	| "ASSET_URL_REJECTED"
 	| "ASSET_VALIDATION_FAILED";
 
+/** Error thrown when an `asset://` reference cannot be resolved safely. */
 export class AssetResolutionError extends Error {
 	readonly assetId: string;
 	readonly code: AssetResolutionErrorCode;
 
+	/** Create a resolver error for a specific asset id and failure code. */
 	constructor(
 		assetId: string,
 		code: AssetResolutionErrorCode = "ASSET_NOT_FOUND",

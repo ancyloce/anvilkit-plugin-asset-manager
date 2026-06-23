@@ -26,6 +26,7 @@
 export class RetryableError extends Error {
 	readonly retryAfterMs?: number;
 
+	/** Create a transient error that `withRetry()` may reschedule. */
 	constructor(
 		message: string,
 		options?: { readonly cause?: unknown; readonly retryAfterMs?: number },
@@ -42,6 +43,7 @@ export class RetryableError extends Error {
 	}
 }
 
+/** Retry policy used by network-bound upload adapters. */
 export interface RetryOptions {
 	/**
 	 * Maximum number of retry attempts after the initial call.
