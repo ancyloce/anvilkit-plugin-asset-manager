@@ -46,6 +46,7 @@ function clamp(value: number, min: number, max: number): number {
 	return Math.min(max, Math.max(min, value));
 }
 
+/** Create the Unsplash-backed read-only asset source provider. */
 export function createUnsplashProvider(
 	options: UnsplashSourceOptions,
 ): AssetSourceProvider {

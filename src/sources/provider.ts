@@ -16,6 +16,7 @@ import type {
 } from "../types/filter.js";
 import type { UploadResult } from "../types/types.js";
 
+/** Capability flags advertised by an asset source provider. */
 export interface AssetSourceCapabilities {
 	readonly searchable: boolean;
 	readonly themed: boolean;
@@ -31,6 +32,7 @@ export interface AssetSourceCapabilities {
 	readonly folders?: boolean;
 }
 
+/** Browse theme exposed by an external asset source provider. */
 export interface AssetTheme {
 	readonly id: string;
 	/** i18n message key (not inline copy). */
@@ -38,6 +40,7 @@ export interface AssetTheme {
 	readonly description?: string;
 }
 
+/** Read-only external provider contract for searchable asset sources. */
 export interface AssetSourceProvider {
 	/** `"unsplash"` | host id. The built-in `"local"` provider wraps the data source. */
 	readonly id: AssetSourceId;
@@ -48,7 +51,9 @@ export interface AssetSourceProvider {
 		readonly connectSrc?: readonly string[];
 		readonly imgSrc?: readonly string[];
 	};
+	/** Return browse themes or categories this provider exposes. */
 	listThemes(): readonly AssetTheme[] | Promise<readonly AssetTheme[]>;
+	/** Search or browse the provider and return one page of normalized assets. */
 	search(
 		query: AssetFilter,
 		page: string | undefined,
