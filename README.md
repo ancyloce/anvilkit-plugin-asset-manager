@@ -70,6 +70,7 @@ function createAssetManagerPlugin(options: AssetManagerOptions): StudioPlugin;
 | `facets`                    | `readonly AssetFacetDefinition[]`              | none      | Custom faceted filters (local `valueOf` or remote).                          |
 | `maxFileSize`               | `number`                                       | none      | Bytes. Enforced before the adapter runs.                                     |
 | `acceptedMimeTypes`         | `readonly string[]`                            | none      | Allowlist. Enforced before the adapter runs.                                 |
+| `acceptedFileExtensions`    | `readonly string[]`                            | none      | Extension allowlist (`".png"` or `"png"`). Enforced before the adapter runs. |
 | `dataUrlAllowlistOptIn`     | `boolean`                                      | `false`   | When `true`, `data:` URLs are valid output.                                  |
 | `allowMixedScriptHostnames` | `boolean`                                      | `false`   | When `true`, hostnames mixing Latin with a confusable script are allowed.    |
 | `getThumbnail`              | `(entry: UploadResult) => string \| undefined` | none      | Optional override for the displayed thumbnail.                               |
@@ -81,6 +82,13 @@ function createAssetManagerPlugin(options: AssetManagerOptions): StudioPlugin;
 | `uploadAsset`          | `(ctx, file, signal?) => Promise<UploadResult>` | Validate file → run uploader → validate result → register. |
 | `getAssetRegistry`     | `(ctx) => AssetRegistry \| undefined`           | Read the runtime registry after `onInit`.                  |
 | `createAssetReference` | `(id) => string`                                | Produce a stable `asset://<id>` reference for IR.          |
+
+Runtime events:
+
+| Event constant | Event name | Payload |
+| -------------- | ---------- | ------- |
+| `ASSET_MANAGER_UPLOADED_EVENT` | `asset-manager:uploaded` | `AssetManagerUploadedEvent` — `{ asset, reference }` after validation and registry insertion. |
+| `ASSET_MANAGER_ERROR_EVENT` | `asset-manager:error` | `AssetManagerErrorEvent` — `{ code, message }` for upload validation or adapter failures. |
 
 ### `UploadAdapter`
 
@@ -260,6 +268,7 @@ Full-jitter exponential backoff; the optional `retryAfterMs` on a `RetryableErro
 | ------------------------------ | --------------------------- |
 | `FILE_TOO_LARGE`               | pre-upload file validation  |
 | `UNSUPPORTED_MIME_TYPE`        | pre-upload file validation  |
+| `UNSUPPORTED_FILE_EXTENSION`   | pre-upload file validation  |
 | `INVALID_UPLOAD_ID`            | `validateUploadResult`      |
 | `EMPTY_UPLOAD_URL`             | `validateUploadResult`      |
 | `UNSCHEMED_UPLOAD_URL`         | `validateUploadResult`      |
