@@ -2,6 +2,7 @@ import type { UploadAdapter, UploadResult } from "../types/types.js";
 import { AssetValidationError } from "../utils/errors.js";
 import { extractImageDimensions } from "./extract-image-dimensions.js";
 
+/** Options for the development-only data URL uploader. */
 export interface DataUrlUploaderOptions {
 	/**
 	 * Maximum **raw file size** in bytes (default 1 MB). This bounds the input

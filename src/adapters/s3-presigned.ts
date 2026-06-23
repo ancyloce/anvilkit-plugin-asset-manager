@@ -35,6 +35,7 @@ export type { RetryOptions } from "../utils/retry.js";
 /** @deprecated Import from `@anvilkit/plugin-asset-manager/retry` instead. */
 export { RetryableError } from "../utils/retry.js";
 
+/** Configuration for uploads through a host-provided S3 presign endpoint. */
 export interface S3PresignedAdapterOptions {
 	/** Endpoint that returns a presigned PUT target for the file. */
 	readonly presignEndpoint: string | URL;
@@ -71,6 +72,7 @@ export interface S3PresignResponse {
 	readonly id?: string;
 }
 
+/** Create an upload adapter backed by a host presign endpoint and S3 PUT. */
 export function s3PresignedAdapter(
 	options: S3PresignedAdapterOptions,
 ): UploadAdapter {
