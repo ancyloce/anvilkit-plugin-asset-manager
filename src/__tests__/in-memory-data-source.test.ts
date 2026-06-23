@@ -158,6 +158,20 @@ describe("asset mutations", () => {
 		await ds.move("a1", f.id);
 		expect(folders.folderOf("a1")).toBe(f.id);
 	});
+
+	it("rejects asset moves when allowMove is false", async () => {
+		const f = folders.createFolder(null, "F");
+		const locked = createInMemoryDataSource({
+			registry,
+			upload,
+			folderStore: folders,
+			allowMove: false,
+		});
+		await expect(locked.move("a1", f.id)).rejects.toMatchObject({
+			code: "MOVE_REJECTED",
+		});
+		expect(folders.folderOf("a1")).toBeNull();
+	});
 });
 
 describe("folder mutations via the data source", () => {
@@ -179,6 +193,21 @@ describe("folder mutations via the data source", () => {
 		folders.moveAsset("a1", f.id);
 		await ds.removeFolder(f.id, { cascade: true });
 		expect(registry.get("a1")).toBeUndefined();
+	});
+
+	it("rejects folder moves when allowMove is false", async () => {
+		const locked = createInMemoryDataSource({
+			registry,
+			upload,
+			folderStore: folders,
+			allowMove: false,
+		});
+		const f = await locked.createFolder(null, "F");
+		const g = await locked.createFolder(null, "G");
+		await expect(locked.moveFolder(g.id, f.id)).rejects.toMatchObject({
+			code: "MOVE_REJECTED",
+		});
+		expect(folders.get(g.id)?.parentId).toBeNull();
 	});
 });
 

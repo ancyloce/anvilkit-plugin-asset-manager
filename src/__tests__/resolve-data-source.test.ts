@@ -129,6 +129,32 @@ describe("resolveDataSource — per-plane ladder", () => {
 		resolved.subscribeStatus(() => undefined);
 		expect(subscribeStatus).toHaveBeenCalledOnce();
 	});
+
+	it("blocks host-provided move methods when allowMove is false", async () => {
+		const registry = createAssetRegistry();
+		const host: AssetDataSource = {
+			...fullAssetHost(),
+			createFolder: vi.fn(),
+			renameFolder: vi.fn(),
+			removeFolder: vi.fn(),
+			moveFolder: vi.fn(),
+		};
+		const resolved = resolveDataSource({
+			registry,
+			upload,
+			hostDataSource: host,
+			allowMove: false,
+		});
+
+		await expect(resolved.move("a1", "folder-1")).rejects.toMatchObject({
+			code: "MOVE_REJECTED",
+		});
+		await expect(resolved.moveFolder("folder-1", null)).rejects.toMatchObject({
+			code: "MOVE_REJECTED",
+		});
+		expect(host.move).not.toHaveBeenCalled();
+		expect(host.moveFolder).not.toHaveBeenCalled();
+	});
 });
 
 describe("createAssetManagerPlugin zero-config", () => {

@@ -3,6 +3,15 @@ import { describe, expect, it } from "vitest";
 import { AssetValidationError } from "../utils/errors.js";
 import { validateUploadResult } from "../utils/validate-upload-result.js";
 
+const attribution = {
+	source: "unsplash" as const,
+	photographerName: "Jane Doe",
+	photographerUrl: "https://unsplash.com/@jane",
+	unsplashUrl: "https://unsplash.com",
+	photoUrl: "https://unsplash.com/photos/1",
+	downloadLocation: "https://api.unsplash.com/photos/1/download",
+};
+
 describe("validateUploadResult", () => {
 	it("rejects hostile or malformed URLs", () => {
 		for (const url of [
@@ -142,5 +151,31 @@ describe("validateUploadResult", () => {
 				url: "blob:https://studio.example.com/abcd",
 			}),
 		).toMatchObject({ id: "asset-1" });
+	});
+
+	it("returns the same sanitized URL string it validates", () => {
+		expect(
+			validateUploadResult({
+				id: "asset-1",
+				url: " https://cdn.example.com/im\nage.png\t ",
+			}),
+		).toMatchObject({
+			id: "asset-1",
+			url: "https://cdn.example.com/image.png",
+		});
+	});
+
+	it("preserves and freezes attribution metadata", () => {
+		const result = validateUploadResult({
+			id: "asset-1",
+			url: "https://images.unsplash.com/photo-1",
+			meta: {
+				mimeType: "image/jpeg",
+				attribution,
+			},
+		});
+
+		expect(result.meta?.attribution).toEqual(attribution);
+		expect(Object.isFrozen(result.meta?.attribution)).toBe(true);
 	});
 });

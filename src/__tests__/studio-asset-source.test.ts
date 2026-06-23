@@ -1,6 +1,7 @@
 import type { StudioAsset, StudioAssetUploadEvent } from "@anvilkit/core/types";
 import { describe, expect, it } from "vitest";
 import type { UploadResult } from "../types/types.js";
+import { AssetSourceError } from "../utils/errors.js";
 import { createAssetRegistry } from "../utils/registry.js";
 import { createStudioAssetSource } from "../utils/studio-asset-source.js";
 
@@ -214,6 +215,24 @@ describe("createStudioAssetSource", () => {
 
 		expect(registry.get("png-1")).toBeUndefined();
 		expect(source.list()).toHaveLength(0);
+	});
+
+	it("rejects delete, rename, and tag edits for unknown assets", async () => {
+		const registry = createAssetRegistry();
+		const source = createStudioAssetSource({
+			registry,
+			upload: async () => PNG,
+		});
+
+		await expect(source.delete?.("ghost")).rejects.toMatchObject({
+			code: "ASSET_MUTATION_REJECTED",
+		});
+		await expect(source.rename?.("ghost", "missing.png")).rejects.toBeInstanceOf(
+			AssetSourceError,
+		);
+		await expect(source.setTags?.("ghost", ["missing"])).rejects.toMatchObject({
+			code: "ASSET_MUTATION_REJECTED",
+		});
 	});
 
 	it("getUrl returns the canonical asset:// reference", () => {
