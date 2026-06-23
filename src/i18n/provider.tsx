@@ -17,6 +17,7 @@ import * as React from "react";
 
 import { ASSET_MANAGER_ENTRY, type AssetManagerMessageKey } from "./entry.js";
 
+/** Provide asset-manager i18n messages for standalone UI subpath mounts. */
 export function AssetManagerI18nProvider({
 	children,
 }: {
