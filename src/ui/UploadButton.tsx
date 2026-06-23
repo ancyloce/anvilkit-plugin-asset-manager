@@ -8,14 +8,17 @@ import type { AssetManagerOptions } from "../types/options.js";
 import type { UploadAdapter, UploadResult } from "../types/types.js";
 import { validateUploadResult } from "../utils/validate-upload-result.js";
 
+/** Aggregate progress snapshot for the active upload batch. */
 export interface UploadProgressSnapshot {
 	readonly completed: number;
 	readonly total: number;
 }
 
+/** Props for the upload button and drop-zone component. */
 export interface UploadButtonProps
 	extends Pick<
 		AssetManagerOptions,
+		| "acceptedFileExtensions"
 		| "acceptedMimeTypes"
 		| "maxFileSize"
 		| "dataUrlAllowlistOptIn"
@@ -47,7 +50,9 @@ function handleDragOver(event: React.DragEvent<HTMLDivElement>) {
 	}
 }
 
+/** Upload control with file picker, drag/drop, progress, and validation. */
 export function UploadButton({
+	acceptedFileExtensions,
 	acceptedMimeTypes,
 	allowMixedScriptHostnames,
 	dataUrlAllowlistOptIn,
@@ -71,8 +76,11 @@ export function UploadButton({
 	React.useEffect(() => () => uploadAbortRef.current?.abort(), []);
 
 	const acceptAttr = React.useMemo(
-		() => acceptedMimeTypes?.join(","),
-		[acceptedMimeTypes],
+		() =>
+			[...(acceptedMimeTypes ?? []), ...(acceptedFileExtensions ?? [])].join(
+				",",
+			) || undefined,
+		[acceptedFileExtensions, acceptedMimeTypes],
 	);
 
 	async function processFiles(files: readonly File[]) {
@@ -98,8 +106,12 @@ export function UploadButton({
 			if (signal.aborted) return;
 			const file = files[index];
 			if (!file) continue;
-			try {
-				validateSelectedFile(file, { acceptedMimeTypes, maxFileSize });
+				try {
+					validateSelectedFile(file, {
+						acceptedFileExtensions,
+						acceptedMimeTypes,
+						maxFileSize,
+					});
 				const uploaded = await uploader(file, { signal });
 				// A newer batch (or unmount) superseded this run mid-upload —
 				// bail without touching state the newer run now owns.

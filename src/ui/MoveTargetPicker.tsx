@@ -26,6 +26,7 @@ export interface MoveTargetPickerProps {
 	readonly rootLabel?: string;
 }
 
+/** Dialog for choosing the destination folder for an asset or folder move. */
 export function MoveTargetPicker({
 	open,
 	onOpenChange,

@@ -13,6 +13,7 @@ import * as React from "react";
 import type { AssetRegistry, UploadResult } from "../types/types.js";
 import { inferAssetKind } from "../utils/infer-kind.js";
 
+/** Props for the command palette asset picker. */
 export interface AssetCommandPaletteProps {
 	/** Registry the palette searches against. */
 	readonly registry: AssetRegistry;
@@ -34,6 +35,7 @@ export interface AssetCommandPaletteProps {
 
 const DEFAULT_MAX_RESULTS = 20;
 
+/** Search palette for quickly finding and selecting registry assets. */
 export function AssetCommandPalette({
 	registry,
 	open,

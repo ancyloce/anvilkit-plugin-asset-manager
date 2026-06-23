@@ -14,6 +14,7 @@ import * as React from "react";
 
 import type { AssetFolder } from "../types/folders.js";
 
+/** Props for the delete-folder confirmation dialog. */
 export interface DeleteFolderDialogProps {
 	/** Folder to delete. `null` ⇒ closed. */
 	readonly folder: AssetFolder | null;
@@ -26,6 +27,7 @@ export interface DeleteFolderDialogProps {
 	readonly onCancel: () => void;
 }
 
+/** Confirmation dialog for deleting or cascading deletion of a folder. */
 export function DeleteFolderDialog({
 	folder,
 	onConfirm,

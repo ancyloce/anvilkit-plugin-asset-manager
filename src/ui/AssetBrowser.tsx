@@ -24,6 +24,7 @@ const KIND_FILTERS: readonly AssetKind[] = [
 	"document",
 ];
 
+/** Props for the reusable asset browser grid/list component. */
 export interface AssetBrowserProps {
 	readonly assets: readonly UploadResult[];
 	readonly onInsert: (asset: UploadResult) => void;
@@ -310,6 +311,7 @@ const AssetRow = React.memo(function AssetRow({
 	);
 });
 
+/** Asset grid and list browser with search, filters, paging, and actions. */
 export function AssetBrowser({
 	assets,
 	onInsert,

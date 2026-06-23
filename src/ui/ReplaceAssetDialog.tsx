@@ -16,8 +16,12 @@ import { validateSelectedFile } from "../plugin.js";
 import type { AssetManagerOptions } from "../types/options.js";
 import type { UploadResult } from "../types/types.js";
 
+/** Props for the replace-asset file selection dialog. */
 export interface ReplaceAssetDialogProps
-	extends Pick<AssetManagerOptions, "acceptedMimeTypes" | "maxFileSize"> {
+	extends Pick<
+		AssetManagerOptions,
+		"acceptedFileExtensions" | "acceptedMimeTypes" | "maxFileSize"
+	> {
 	/** Asset to replace. `null` closes the dialog. */
 	readonly asset: UploadResult | null;
 	/**
@@ -29,7 +33,9 @@ export interface ReplaceAssetDialogProps
 	readonly onCancel: () => void;
 }
 
+/** Dialog that validates and confirms selecting a replacement file for an asset. */
 export function ReplaceAssetDialog({
+	acceptedFileExtensions,
 	acceptedMimeTypes,
 	asset,
 	maxFileSize,
@@ -43,8 +49,11 @@ export function ReplaceAssetDialog({
 	const [busy, setBusy] = React.useState(false);
 
 	const acceptAttr = React.useMemo(
-		() => acceptedMimeTypes?.join(","),
-		[acceptedMimeTypes],
+		() =>
+			[...(acceptedMimeTypes ?? []), ...(acceptedFileExtensions ?? [])].join(
+				",",
+			) || undefined,
+		[acceptedFileExtensions, acceptedMimeTypes],
 	);
 
 	// Clear the transient picker state on every close path (cancel, dismiss,
@@ -62,7 +71,11 @@ export function ReplaceAssetDialog({
 			return;
 		}
 		try {
-			validateSelectedFile(file, { acceptedMimeTypes, maxFileSize });
+			validateSelectedFile(file, {
+				acceptedFileExtensions,
+				acceptedMimeTypes,
+				maxFileSize,
+			});
 			setError(null);
 			setSelectedFile(file);
 		} catch (err) {

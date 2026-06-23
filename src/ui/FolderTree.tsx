@@ -9,6 +9,7 @@ import type { AssetFolder } from "../types/folders.js";
 /** dataTransfer MIME for an asset-id drag payload (native HTML5 DnD, no @dnd-kit). */
 export const ASSET_DRAG_MIME = "application/x-anvilkit-assets";
 
+/** Props for the folder navigation tree. */
 export interface FolderTreeProps {
 	/** Child folders of the current folder. */
 	readonly folders: readonly AssetFolder[];
@@ -21,6 +22,7 @@ export interface FolderTreeProps {
 	) => void;
 }
 
+/** Folder navigation tree with optional asset drop targets. */
 export function FolderTree({
 	folders,
 	currentFolderId,

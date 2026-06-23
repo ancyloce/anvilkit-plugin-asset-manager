@@ -25,6 +25,7 @@ export interface FolderNameDialogProps {
 	readonly initialName?: string;
 }
 
+/** Dialog used to create or rename a folder. */
 export function FolderNameDialog({
 	open,
 	onOpenChange,

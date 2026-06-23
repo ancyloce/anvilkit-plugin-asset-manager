@@ -13,6 +13,7 @@ import * as React from "react";
 
 import type { AssetFolder } from "../types/folders.js";
 
+/** Props for folder breadcrumb navigation. */
 export interface FolderBreadcrumbProps {
 	/** Root → … → current folder. Empty ⇒ at root. */
 	readonly path: readonly AssetFolder[];
@@ -20,6 +21,7 @@ export interface FolderBreadcrumbProps {
 	readonly rootLabel?: string;
 }
 
+/** Breadcrumb navigation for the current asset folder path. */
 export function FolderBreadcrumb({
 	path,
 	onNavigate,

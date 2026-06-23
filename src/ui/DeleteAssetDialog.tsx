@@ -14,6 +14,7 @@ import * as React from "react";
 
 import type { UploadResult } from "../types/types.js";
 
+/** Props for the delete-asset confirmation dialog. */
 export interface DeleteAssetDialogProps {
 	/**
 	 * Asset to confirm deletion for. When `null`, the dialog is closed.
@@ -34,6 +35,7 @@ export interface DeleteAssetDialogProps {
 	readonly referenceCount?: number;
 }
 
+/** Confirmation dialog for deleting a single asset. */
 export function DeleteAssetDialog({
 	asset,
 	onCancel,

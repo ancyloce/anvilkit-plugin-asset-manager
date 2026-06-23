@@ -25,9 +25,11 @@ import { MetadataPanel } from "./MetadataPanel.js";
 import { ReplaceAssetDialog } from "./ReplaceAssetDialog.js";
 import { UploadButton, type UploadProgressSnapshot } from "./UploadButton.js";
 
+/** Props for the complete standalone asset manager UI. */
 export interface AssetManagerUIProps
 	extends Pick<
 		AssetManagerOptions,
+		| "acceptedFileExtensions"
 		| "acceptedMimeTypes"
 		| "maxFileSize"
 		| "dataUrlAllowlistOptIn"
@@ -59,7 +61,16 @@ export interface AssetManagerUIProps
 	readonly draggableRows?: boolean;
 }
 
+/**
+ * Render the bundled asset-manager browser UI.
+ *
+ * This component wires the upload button, progress display, searchable asset
+ * browser, command palette, delete/replace dialogs, and metadata editor around a
+ * caller-provided registry and uploader. It is optional; headless integrations
+ * can use the plugin runtime and registry APIs directly.
+ */
 export function AssetManagerUI({
+	acceptedFileExtensions,
 	acceptedMimeTypes,
 	allowMixedScriptHostnames,
 	aboveFilters,
@@ -179,9 +190,10 @@ export function AssetManagerUI({
 				<CardDescription>{msg("assetManager.ui.subtitle")}</CardDescription>
 			</CardHeader>
 			<CardContent>
-				<UploadButton
-					acceptedMimeTypes={acceptedMimeTypes}
-					allowMixedScriptHostnames={allowMixedScriptHostnames}
+					<UploadButton
+						acceptedFileExtensions={acceptedFileExtensions}
+						acceptedMimeTypes={acceptedMimeTypes}
+						allowMixedScriptHostnames={allowMixedScriptHostnames}
 					dataUrlAllowlistOptIn={dataUrlAllowlistOptIn}
 					maxFileSize={maxFileSize}
 					onProgress={setProgress}
@@ -218,9 +230,10 @@ export function AssetManagerUI({
 					}}
 					onConfirm={handleConfirmDelete}
 				/>
-				<ReplaceAssetDialog
-					acceptedMimeTypes={acceptedMimeTypes}
-					asset={pendingReplace}
+					<ReplaceAssetDialog
+						acceptedFileExtensions={acceptedFileExtensions}
+						acceptedMimeTypes={acceptedMimeTypes}
+						asset={pendingReplace}
 					maxFileSize={maxFileSize}
 					onCancel={() => {
 						setPendingReplace(null);

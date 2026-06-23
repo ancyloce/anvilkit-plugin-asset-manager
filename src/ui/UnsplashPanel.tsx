@@ -24,6 +24,7 @@ export type UnsplashPanelStatus =
 	| "error"
 	| "disabled";
 
+/** Props for the Unsplash browsing panel. */
 export interface UnsplashPanelProps {
 	readonly themes: readonly AssetTheme[];
 	readonly activeThemeId?: string;
@@ -41,6 +42,7 @@ export interface UnsplashPanelProps {
 	readonly skeletonCount?: number;
 }
 
+/** Browse, search, and pick assets from the configured Unsplash provider. */
 export function UnsplashPanel({
 	themes,
 	activeThemeId,

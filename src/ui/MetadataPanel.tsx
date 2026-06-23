@@ -16,6 +16,7 @@ import * as React from "react";
 
 import type { UploadResult } from "../types/types.js";
 
+/** Props for the asset metadata editing dialog. */
 export interface MetadataPanelProps {
 	/**
 	 * Asset whose metadata is being edited. When `null`, the panel is
@@ -35,6 +36,7 @@ export interface MetadataPanelProps {
 	readonly onCancel: () => void;
 }
 
+/** Dialog panel for editing an asset name and tag metadata. */
 export function MetadataPanel({
 	asset,
 	onCancel,

@@ -4,11 +4,13 @@ import { useMsg } from "@anvilkit/core/i18n";
 import { Button } from "@anvilkit/ui/button";
 import * as React from "react";
 
+/** Props for the empty-folder prompt. */
 export interface EmptyFolderStateProps {
 	readonly onUpload?: () => void;
 	readonly message?: string;
 }
 
+/** Empty-state prompt rendered when the active folder has no assets. */
 export function EmptyFolderState({ onUpload, message }: EmptyFolderStateProps) {
 	const msg = useMsg();
 	const resolvedMessage = message ?? msg("assetManager.folder.empty");
