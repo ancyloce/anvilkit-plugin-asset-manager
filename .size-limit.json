@@ -37,6 +37,12 @@
 		"gzip": true
 	},
 	{
+		"name": "@anvilkit/plugin-asset-manager/session-store",
+		"path": "dist/utils/upload-session-store.js",
+		"limit": "1.5 KB",
+		"gzip": true
+	},
+	{
 		"name": "@anvilkit/plugin-asset-manager/adapters/s3",
 		"path": "dist/adapters/s3-presigned.js",
 		"limit": "3 KB",
