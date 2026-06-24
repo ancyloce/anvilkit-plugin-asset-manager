@@ -52,6 +52,7 @@ export type {
 } from "./types/resumable.js";
 export { isResumableAdapter } from "./types/resumable.js";
 export type {
+	AssetDeletedHook,
 	AssetKind,
 	AssetMeta,
 	AssetRegistry,

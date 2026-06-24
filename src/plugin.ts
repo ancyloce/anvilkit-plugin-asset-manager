@@ -17,6 +17,7 @@ import type { AssetSourceProvider } from "./sources/provider.js";
 import type { AssetManagerOptions } from "./types/options.js";
 import type { ResumableUploadConfig } from "./types/resumable.js";
 import type {
+	AssetDeletedHook,
 	AssetMeta,
 	AssetRegistry,
 	UploadAdapter,
@@ -29,7 +30,6 @@ import { uploadAssetAction } from "./utils/header-action.js";
 import { inferAssetKind } from "./utils/infer-kind.js";
 import { createAssetRegistry } from "./utils/registry.js";
 import { createIRAssetResolver } from "./utils/resolver.js";
-import { runResumableUpload } from "./utils/run-resumable-upload.js";
 import { createStudioAssetSource } from "./utils/studio-asset-source.js";
 import { validateUploadResult } from "./utils/validate-upload-result.js";
 import { ASSET_MANAGER_VERSION } from "./version.js";
@@ -137,12 +137,17 @@ export function createAssetManagerPlugin<
 
 						const upload: UploadFn = (file, opts) =>
 							uploadAsset(initCtx, file, opts?.signal);
+						const onDelete = createAssetDeletedHandler(
+							normalizedOptions,
+							!hostOwnsAssetPlane(normalizedOptions),
+						);
 
 						// Lightweight registry-backed source, registered synchronously for
 						// immediate sidebar availability + zero new headless bytes.
 						const studioAssetSource = createStudioAssetSource({
 							registry,
 							upload,
+							onDelete,
 							...(normalizedOptions.getThumbnail
 								? { getThumbnail: normalizedOptions.getThumbnail }
 								: {}),
@@ -232,6 +237,35 @@ export async function uploadAsset<UserConfig extends PuckConfig = PuckConfig>(
 	try {
 		validateSelectedFile(file, options);
 
+		// Content dedup (opt-in): hash the bytes first; if an asset with the same
+		// digest already exists, reuse it instead of re-uploading. Reference is
+		// still dispatched so the drop inserts the (existing) asset.
+		let contentHash: string | undefined;
+		if (options.dedupe === true) {
+			// Don't read/hash a whole (possibly large) file for an already-cancelled
+			// upload.
+			if (signal?.aborted) {
+				throw makePluginAbortError();
+			}
+			contentHash = await computeFileHash(file);
+			if (signal?.aborted) {
+				throw makePluginAbortError();
+			}
+			if (contentHash !== undefined) {
+				const existing = registry
+					.list()
+					.find((entry) => entry.meta?.hash === contentHash);
+				if (existing !== undefined) {
+					dispatchAssetReference(ctx, existing);
+					ctx.emit(ASSET_MANAGER_UPLOADED_EVENT, {
+						asset: existing,
+						reference: createAssetReference(existing.id),
+					});
+					return existing;
+				}
+			}
+		}
+
 		const uploadResult = await performUpload(options, file, signal);
 		// Adapters may ignore or only partially honor the abort signal — bail
 		// here BEFORE registering or dispatching so a cancelled batch can't
@@ -243,7 +277,15 @@ export async function uploadAsset<UserConfig extends PuckConfig = PuckConfig>(
 			mergeUploadMeta(uploadResult, file),
 			options,
 		);
-		const tagged = withDerivedTags(validated, file);
+		// Stamp the computed digest so future uploads can dedup against it.
+		const hashed =
+			contentHash !== undefined
+				? {
+						...validated,
+						meta: { ...(validated.meta ?? {}), hash: contentHash },
+					}
+				: validated;
+		const tagged = withDerivedTags(hashed, file);
 		const stored = registry.register(tagged);
 		dispatchAssetReference(ctx, stored);
 		const payload: AssetManagerUploadedEvent = {
@@ -295,14 +337,26 @@ const DEFAULT_RESUMABLE_THRESHOLD = 8 * 1024 * 1024;
  * everything else uses the single-shot `uploader`. Both return a raw
  * `UploadResult` that the caller runs through `validateUploadResult`, so the
  * trust boundary is identical regardless of path.
+ *
+ * The runner (and its session-store dependency) is loaded LAZILY only when a
+ * resumable upload actually fires, so flat/single-shot callers never pull it —
+ * or the chunking/persistence code — into the eager headless entry chunk.
  */
-function performUpload(
+async function performUpload(
 	options: NormalizedAssetManagerOptions,
 	file: File,
 	signal: AbortSignal | undefined,
 ): Promise<UploadResult> {
 	const { resumable } = options;
 	if (resumable !== undefined && shouldUseResumable(resumable, file)) {
+		// Fast-abort before fetching the lazy runner chunk — an already-cancelled
+		// upload shouldn't pay a network round-trip for code it won't run.
+		if (signal?.aborted) {
+			throw makePluginAbortError();
+		}
+		const { runResumableUpload } = await import(
+			"./utils/run-resumable-upload.js"
+		);
 		return runResumableUpload(resumable.adapter, file, {
 			...(resumable.partSize !== undefined
 				? { partSize: resumable.partSize }
@@ -323,6 +377,79 @@ function shouldUseResumable(
 	const threshold =
 		resumable.threshold ?? resumable.partSize ?? DEFAULT_RESUMABLE_THRESHOLD;
 	return file.size >= threshold;
+}
+
+/**
+ * Asset-deletion lifecycle handler threaded into the (default) sources. Revokes
+ * `blob:` object URLs so the built-in `inMemoryUploader` no longer leaks them
+ * (PRD 0004 §5 — M6), then invokes the host's optional `onAssetDeleted` hook.
+ */
+function createAssetDeletedHandler(
+	options: NormalizedAssetManagerOptions,
+	callHostHook: boolean,
+): AssetDeletedHook {
+	return async (asset) => {
+		// Always revoke blob: URLs (harmless safety net). The host `onAssetDeleted`
+		// hook only fires for the default-owned asset plane — when a host
+		// `dataSource` owns deletion it runs the host's own `remove`, so firing the
+		// hook here too would double-signal the deletion.
+		revokeBlobUrl(asset.url);
+		if (callHostHook) await options.onAssetDeleted?.(asset);
+	};
+}
+
+/**
+ * Whether the host's `dataSource` owns asset DELETION — i.e. it implements the
+ * FULL asset-plane method set, so `resolveDataSource` routes `remove` to it. A
+ * folder-only or partial `dataSource` leaves the in-memory plane owning deletes,
+ * so the `onAssetDeleted` hook should still fire there. Mirrors the `ASSET_PLANE`
+ * ladder in `utils/data-source.ts` — keep the method list in sync.
+ */
+const HOST_ASSET_PLANE_METHODS = [
+	"list",
+	"remove",
+	"replace",
+	"rename",
+	"move",
+] as const;
+
+function hostOwnsAssetPlane(options: NormalizedAssetManagerOptions): boolean {
+	const ds = options.dataSource;
+	if (ds === undefined) return false;
+	return HOST_ASSET_PLANE_METHODS.every(
+		(method) => typeof (ds as Record<string, unknown>)[method] === "function",
+	);
+}
+
+function revokeBlobUrl(url: string): void {
+	if (
+		url.startsWith("blob:") &&
+		typeof URL !== "undefined" &&
+		typeof URL.revokeObjectURL === "function"
+	) {
+		URL.revokeObjectURL(url);
+	}
+}
+
+/**
+ * SHA-256 of the file bytes as lowercase hex, or `undefined` when the platform
+ * lacks `crypto.subtle` / `File.arrayBuffer` (e.g. older runtimes) — dedup then
+ * degrades to a normal upload rather than failing.
+ */
+async function computeFileHash(file: File): Promise<string | undefined> {
+	const subtle = globalThis.crypto?.subtle;
+	if (subtle === undefined || typeof file.arrayBuffer !== "function") {
+		return undefined;
+	}
+	try {
+		const digest = await subtle.digest("SHA-256", await file.arrayBuffer());
+		const bytes = new Uint8Array(digest);
+		let hex = "";
+		for (const byte of bytes) hex += byte.toString(16).padStart(2, "0");
+		return hex;
+	} catch {
+		return undefined;
+	}
 }
 
 export function validateSelectedFile(
@@ -427,6 +554,7 @@ async function loadRichSource<UserConfig extends PuckConfig = PuckConfig>(
 	const resolved = resolveDataSource({
 		registry,
 		upload,
+		onDelete: createAssetDeletedHandler(options, !hostOwnsAssetPlane(options)),
 		...(options.dataSource ? { hostDataSource: options.dataSource } : {}),
 		...(maxDepth !== undefined ? { maxDepth } : {}),
 		...(allowMove !== undefined ? { allowMove } : {}),
