@@ -2,7 +2,7 @@
 
 import { execFileSync } from "node:child_process";
 import { mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
-import { basename, dirname, resolve } from "node:path";
+import { basename, dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { gzipSync } from "node:zlib";
 
@@ -100,8 +100,21 @@ async function bundle(packageName, peerDependencies) {
 }
 
 function findEntryChunk(metafile) {
+	// esbuild marks EVERY dynamic-import chunk with an `entryPoint` (its source
+	// module), not just the true entry — so match the entry file we wrote rather
+	// than the first output that happens to carry an `entryPoint`. (A naive
+	// "first with entryPoint" misfires when a new lazy chunk reorders outputs and
+	// e.g. the unsplash chunk sorts first.)
+	const entryRelative = relative(PACKAGE_ROOT, ENTRY_FILE).split("\\").join("/");
 	for (const [outputPath, output] of Object.entries(metafile.outputs)) {
-		if (output.entryPoint) {
+		if (output.entryPoint === entryRelative) {
+			return resolve(PACKAGE_ROOT, outputPath);
+		}
+	}
+	// Fallback: match by basename in case of a path-normalisation difference.
+	const entryBase = basename(ENTRY_FILE);
+	for (const [outputPath, output] of Object.entries(metafile.outputs)) {
+		if (output.entryPoint && basename(output.entryPoint) === entryBase) {
 			return resolve(PACKAGE_ROOT, outputPath);
 		}
 	}
