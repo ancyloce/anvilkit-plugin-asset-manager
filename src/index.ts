@@ -48,6 +48,7 @@ export type {
 	ResumableUploadConfig,
 	UploadPart,
 	UploadSession,
+	UploadSessionStore,
 } from "./types/resumable.js";
 export { isResumableAdapter } from "./types/resumable.js";
 export type {
@@ -90,5 +91,13 @@ export {
 	createStudioAssetSource,
 	inferStudioAssetKind,
 } from "./utils/studio-asset-source.js";
+export type {
+	CreateUploadSessionStoreOptions,
+	UploadSessionStorage,
+} from "./utils/upload-session-store.js";
+export {
+	createUploadSessionStore,
+	fingerprintFile,
+} from "./utils/upload-session-store.js";
 export type { ValidateUploadResultOptions } from "./utils/validate-upload-result.js";
 export { validateUploadResult } from "./utils/validate-upload-result.js";

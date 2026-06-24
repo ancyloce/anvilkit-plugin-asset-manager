@@ -75,11 +75,12 @@ export interface UploadSession {
 	 */
 	readonly partSize?: number;
 	/**
-	 * Host-opaque continuation data echoed back to subsequent calls. To support
-	 * resume across a page reload it MUST be JSON / structured-clone safe — the
-	 * M2 session store persists it via {@link PersistedUploadSession.meta}.
+	 * Host-opaque continuation data echoed back to subsequent calls. Typed
+	 * JSON-safe so the runner can persist it directly into
+	 * {@link PersistedUploadSession.meta} (which the M2 session store round-trips
+	 * through `localStorage`) without a lossy conversion.
 	 */
-	readonly meta?: Readonly<Record<string, unknown>>;
+	readonly meta?: Readonly<Record<string, JsonValue>>;
 }
 
 /**
@@ -87,6 +88,10 @@ export interface UploadSession {
  * unchanged. Used to type persisted continuation data so the M2 session store
  * can round-trip it through `localStorage` without silently dropping functions,
  * symbols, `BigInt`, class instances, or cyclic references.
+ *
+ * NOTE: numbers must be **finite** — `NaN` and `±Infinity` serialize to `null`
+ * via `JSON.stringify`, so they do not round-trip. The session store treats
+ * non-finite numeric meta as a host bug.
  */
 export type JsonValue =
 	| string
@@ -115,6 +120,32 @@ export interface PersistedUploadSession {
 	 * is serializable by construction, not just by convention.
 	 */
 	readonly meta?: Readonly<Record<string, JsonValue>>;
+}
+
+/**
+ * Persistence seam for resumable uploads. The runner loads a prior session
+ * before {@link ResumableUploadAdapter.begin} (so an interrupted upload can
+ * resume), saves progress as parts complete, and clears it once the upload
+ * finishes or is abandoned. Keyed internally by a stable file fingerprint
+ * (name + size + lastModified), so the same picked file resumes while a
+ * different file does not.
+ *
+ * The built-in `createUploadSessionStore` persists to `localStorage` (with an
+ * in-memory fallback where unavailable); hosts may supply their own (e.g.
+ * IndexedDB or remote), hence the optionally-async return types.
+ */
+export interface UploadSessionStore {
+	/** Look up a persisted session for `file`, or `undefined` if none. */
+	load(
+		file: File,
+	):
+		| PersistedUploadSession
+		| undefined
+		| Promise<PersistedUploadSession | undefined>;
+	/** Persist (or overwrite) the in-progress session for `file`. Best-effort. */
+	save(file: File, session: PersistedUploadSession): void | Promise<void>;
+	/** Remove any persisted session for `file` — called on complete or abort. */
+	clear(file: File): void | Promise<void>;
 }
 
 /**
@@ -177,9 +208,6 @@ export interface ResumableUploadAdapter {
 
 /**
  * Resumable / multipart upload configuration on {@link AssetManagerOptions}.
- *
- * NOTE: the optional `sessionStore` field is added in M2 once
- * `UploadSessionStore` exists; this M1 shape carries the adapter + tuning only.
  */
 export interface ResumableUploadConfig {
 	/** The multipart backend driving begin / uploadPart / complete / abort. */
@@ -195,6 +223,13 @@ export interface ResumableUploadConfig {
 	 * in one part gains nothing from multipart.
 	 */
 	readonly threshold?: number;
+	/**
+	 * Where in-progress sessions are persisted so an interrupted upload can
+	 * resume. Omitted ⇒ the runner uses the built-in `createUploadSessionStore`
+	 * (localStorage, with an in-memory fallback). Supply a custom store
+	 * (IndexedDB, remote) to change the backing.
+	 */
+	readonly sessionStore?: UploadSessionStore;
 }
 
 /**
