@@ -12,6 +12,7 @@ import type { AssetSourceProvider } from "../sources/provider.js";
 import type { AssetCategory, AssetFacetDefinition } from "./categories.js";
 import type { AssetDataSource } from "./data-source.js";
 import type { FolderOptions } from "./folders.js";
+import type { ResumableUploadConfig } from "./resumable.js";
 import type { UploadAdapter, UploadResult } from "./types.js";
 import type { UnsplashSourceOptions } from "./unsplash.js";
 
@@ -25,6 +26,14 @@ export interface AssetManagerOptions {
 	 * assigns (pure widening).
 	 */
 	readonly uploader?: UploadAdapter;
+	/**
+	 * Opt-in resumable / multipart upload for large media. When set, files at or
+	 * above `resumable.threshold` upload through the session-based
+	 * {@link ResumableUploadConfig.adapter} (chunked, per-part retry, resumable
+	 * across interruptions); smaller files keep using the single-shot
+	 * `uploader`. Omitted ⇒ every upload is single-shot (unchanged default).
+	 */
+	readonly resumable?: ResumableUploadConfig;
 	/**
 	 * Unified local-library data plane (list + asset/folder CRUD). Omitted ⇒ a
 	 * full in-memory default over the built-in registry + a folder side-index.
