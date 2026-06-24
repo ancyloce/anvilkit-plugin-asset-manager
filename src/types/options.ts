@@ -13,6 +13,7 @@ import type { AssetCategory, AssetFacetDefinition } from "./categories.js";
 import type { AssetDataSource } from "./data-source.js";
 import type { FolderOptions } from "./folders.js";
 import type { ResumableUploadConfig } from "./resumable.js";
+import type { TransformResolver } from "./transform.js";
 import type { AssetDeletedHook, UploadAdapter, UploadResult } from "./types.js";
 import type { UnsplashSourceOptions } from "./unsplash.js";
 
@@ -95,6 +96,15 @@ export interface AssetManagerOptions {
 	 * (overriding the default-for-images behavior).
 	 */
 	readonly getThumbnail?: (entry: UploadResult) => string | undefined;
+	/**
+	 * Maps an asset + {@link AssetTransform} to a derivative URL (resize / crop /
+	 * format / quality), produced by the host's image CDN or service. Wired into
+	 * the IR resolver so an `asset://<id>?w=…&fm=…` reference resolves to the
+	 * derivative URL at export / render time. Omitted ⇒ transforms are ignored
+	 * and the original URL is used. See `createQueryParamTransformResolver` for a
+	 * built-in query-param CDN mapping.
+	 */
+	readonly transformResolver?: TransformResolver;
 	/**
 	 * Called when an asset is deleted through the source (default in-memory data
 	 * plane / lightweight registry source), with the record at deletion time.
