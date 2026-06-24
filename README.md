@@ -135,6 +135,7 @@ Large media can upload in parts, retry per part, and resume after an interruptio
 
 ```ts
 import { createAssetManagerPlugin } from "@anvilkit/plugin-asset-manager";
+import { s3PresignedAdapter } from "@anvilkit/plugin-asset-manager/adapters/s3";
 import { s3MultipartAdapter } from "@anvilkit/plugin-asset-manager/adapters/s3-multipart";
 
 createAssetManagerPlugin({
@@ -157,7 +158,7 @@ createAssetManagerPlugin({
 | `threshold`    | `partSize`         | Minimum file size routed through the resumable path; smaller files use `uploader`.       |
 | `sessionStore` | localStorage store | Where in-progress sessions persist (`createUploadSessionStore`, or a custom one).        |
 
-**Resume is automatic.** Progress is persisted (keyed by a stable file fingerprint of name + size + last-modified) via the session store; re-selecting the same interrupted file reconciles against the backend and skips the parts already accepted — no explicit "resume" action is needed.
+**Resume is automatic** when a persistent session store is available. Progress is persisted (keyed by a stable file fingerprint of name + size + last-modified) via the session store; re-selecting the same interrupted file reconciles against the backend and skips the parts already accepted — no explicit "resume" action is needed. The default store uses `localStorage`; where that is unavailable (SSR, private mode) it falls back to an in-memory store, so resume then holds only within the same page session.
 
 **`s3MultipartAdapter` (`./adapters/s3-multipart`)** is dependency-free — like `s3PresignedAdapter`, it never bundles the AWS SDK. It brokers every S3 operation through one host `endpoint` POSTed JSON discriminated by `action`:
 
@@ -265,6 +266,9 @@ function getRequiredCsp(options: RequiredCspOptions): RequiredCsp;
 | `dataUrlUploader`    | _(none)_                      | `data:`                 | `data:`                 |
 | `inMemoryUploader`   | _(none)_                      | `blob:`                 | `blob:`                 |
 | `s3PresignedAdapter` | presign origin + `publicHost` | `publicHost` ?? presign | `publicHost` ?? presign |
+| `s3MultipartAdapter` | `endpoint` + `bucketHost` + `publicHost` | `publicHost` ?? `bucketHost` | `publicHost` ?? `bucketHost` |
+
+Pass `s3Multipart: { endpoint, bucketHost?, publicHost? }` (single or array) alongside `dataUrl` / `inMemory` / `s3`.
 
 ### React UI (`./ui`)
 
