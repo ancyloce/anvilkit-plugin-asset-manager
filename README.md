@@ -48,6 +48,7 @@ For real uploads pass an `uploader`. `dataUrlUploader` is dev-only — files are
 - **IR-time resolution** — `createIRAssetResolver` + `resolveAssets` turn `asset://<id>` references into validated URLs at export / render time.
 - **CSP advisor** — `getRequiredCsp` computes the minimum `connect-src` / `img-src` / `media-src` directives the configured adapters need.
 - **Production-ready S3 adapter** — `s3PresignedAdapter` POST-then-PUT with exponential-backoff retry on 5xx + network failures (4xx fails fast).
+- **Resumable / multipart upload** — opt-in `resumable` option chunks large media, retries per part, and resumes interrupted uploads after a reload; `s3MultipartAdapter` ships in-box (`./adapters/s3-multipart`). See [Resumable / multipart upload](#resumable--multipart-upload).
 - **Optional React UI** — `UploadButton`, `AssetBrowser`, `AssetCommandPalette`, `MetadataPanel`, `ReplaceAssetDialog`, `DeleteAssetDialog`, and the composite `AssetManagerUI`.
 - **Batch upload control** — `StudioAssetSource.upload(files)` honors `maxConcurrentUploads` (default 3) and `AbortSignal`.
 
@@ -62,6 +63,7 @@ function createAssetManagerPlugin(options: AssetManagerOptions): StudioPlugin;
 | Field                       | Type                                           | Default   | Purpose                                                                      |
 | --------------------------- | ---------------------------------------------- | --------- | ---------------------------------------------------------------------------- |
 | `uploader`                  | `UploadAdapter`                                | in-memory | Binary ingest backend (optional; defaults to an in-memory uploader).         |
+| `resumable`                 | `ResumableUploadConfig`                        | none      | Opt-in chunked/resumable upload for large files (`{ adapter, partSize?, threshold?, sessionStore? }`). |
 | `dataSource`                | `AssetDataSource`                              | in-memory | Host-backed catalog (list / remove / replace / rename / move + folders).     |
 | `folders`                   | `boolean \| FolderOptions`                     | `true`    | Folder management; `false` for a flat library, or `{ maxDepth, allowMove }`. |
 | `providers`                 | `readonly AssetSourceProvider[]`               | `[]`      | Extra read-only sources, federated alongside the local library.              |
@@ -126,6 +128,48 @@ interface UploadResult {
 | `signal`          | none                  | Aborts in-flight presign + PUT + any retry sleep.              |
 | `headers`         | none                  | Extra headers on the presign POST (e.g., auth).                |
 | `idGenerator`     | `crypto.randomUUID()` | Asset id override.                                             |
+
+### Resumable / multipart upload
+
+Large media can upload in parts, retry per part, and resume after an interruption (refresh, network drop). Opt in with the `resumable` option; files at or above the threshold take the resumable path, everything else stays single-shot.
+
+```ts
+import { createAssetManagerPlugin } from "@anvilkit/plugin-asset-manager";
+import { s3MultipartAdapter } from "@anvilkit/plugin-asset-manager/adapters/s3-multipart";
+
+createAssetManagerPlugin({
+	uploader: s3PresignedAdapter({ presignEndpoint: "/api/sign" }), // small files
+	resumable: {
+		adapter: s3MultipartAdapter({ endpoint: "/api/s3-multipart" }),
+		partSize: 8 * 1024 * 1024, // bytes/part (clamped up to S3's 5 MiB min)
+		threshold: 16 * 1024 * 1024, // route files ≥ this through multipart
+		// sessionStore defaults to localStorage (in-memory fallback)
+	},
+});
+```
+
+`ResumableUploadConfig`:
+
+| Field          | Default            | Purpose                                                                                  |
+| -------------- | ------------------ | ---------------------------------------------------------------------------------------- |
+| `adapter`      | _required_         | A `ResumableUploadAdapter` (`begin` / `uploadPart` / `complete` / `abort`).              |
+| `partSize`     | 8 MiB              | Bytes per part.                                                                          |
+| `threshold`    | `partSize`         | Minimum file size routed through the resumable path; smaller files use `uploader`.       |
+| `sessionStore` | localStorage store | Where in-progress sessions persist (`createUploadSessionStore`, or a custom one).        |
+
+**Resume is automatic.** Progress is persisted (keyed by a stable file fingerprint of name + size + last-modified) via the session store; re-selecting the same interrupted file reconciles against the backend and skips the parts already accepted — no explicit "resume" action is needed.
+
+**`s3MultipartAdapter` (`./adapters/s3-multipart`)** is dependency-free — like `s3PresignedAdapter`, it never bundles the AWS SDK. It brokers every S3 operation through one host `endpoint` POSTed JSON discriminated by `action`:
+
+| `action`     | Host runs                  | Returns                          |
+| ------------ | -------------------------- | -------------------------------- |
+| `create`     | `CreateMultipartUpload`    | `{ uploadId, key?, partSize? }`  |
+| `sign-part`  | presign one `UploadPart`   | `{ url, headers? }`              |
+| `complete`   | `CompleteMultipartUpload`  | `{ url, publicUrl?, id? }`       |
+| `abort`      | `AbortMultipartUpload`     | —                                |
+| `list-parts` | `ListParts` (resume)       | `{ parts, key? }` (404 ⇒ gone)   |
+
+The part PUT must expose its `ETag` to the browser — set S3 CORS `ExposeHeaders: ["ETag"]`. For CSP, pass `s3Multipart: { endpoint, bucketHost, publicHost? }` to `getRequiredCsp`.
 
 ### `AssetRegistry`
 
