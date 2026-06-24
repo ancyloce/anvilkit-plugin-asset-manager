@@ -15,6 +15,7 @@ import { ASSET_MANAGER_ENTRY } from "./i18n/entry.js";
 import type { CompositeAssetSource } from "./sources/composite-source.js";
 import type { AssetSourceProvider } from "./sources/provider.js";
 import type { AssetManagerOptions } from "./types/options.js";
+import type { ResumableUploadConfig } from "./types/resumable.js";
 import type {
 	AssetMeta,
 	AssetRegistry,
@@ -28,6 +29,7 @@ import { uploadAssetAction } from "./utils/header-action.js";
 import { inferAssetKind } from "./utils/infer-kind.js";
 import { createAssetRegistry } from "./utils/registry.js";
 import { createIRAssetResolver } from "./utils/resolver.js";
+import { runResumableUpload } from "./utils/run-resumable-upload.js";
 import { createStudioAssetSource } from "./utils/studio-asset-source.js";
 import { validateUploadResult } from "./utils/validate-upload-result.js";
 import { ASSET_MANAGER_VERSION } from "./version.js";
@@ -230,10 +232,7 @@ export async function uploadAsset<UserConfig extends PuckConfig = PuckConfig>(
 	try {
 		validateSelectedFile(file, options);
 
-		const uploadResult = await options.uploader(
-			file,
-			signal ? { signal } : undefined,
-		);
+		const uploadResult = await performUpload(options, file, signal);
 		// Adapters may ignore or only partially honor the abort signal — bail
 		// here BEFORE registering or dispatching so a cancelled batch can't
 		// mutate the registry / Puck data after unmount.
@@ -271,16 +270,59 @@ export async function uploadAsset<UserConfig extends PuckConfig = PuckConfig>(
 						{ cause: error },
 					);
 
-			const payload: AssetManagerErrorEvent = {
-				code: normalizedError.code,
-				message: normalizedError.message,
-			};
-			ctx.emit(ASSET_MANAGER_ERROR_EVENT, payload);
-			ctx.log("error", normalizedError.message, {
-				code: normalizedError.code,
-			});
+		const payload: AssetManagerErrorEvent = {
+			code: normalizedError.code,
+			message: normalizedError.message,
+		};
+		ctx.emit(ASSET_MANAGER_ERROR_EVENT, payload);
+		ctx.log("error", normalizedError.message, {
+			code: normalizedError.code,
+		});
 		throw normalizedError;
 	}
+}
+
+/**
+ * 8 MiB — matches the resumable runner's default part size. Used as the resume
+ * threshold when neither `resumable.threshold` nor `resumable.partSize` is set
+ * (a file that fits in a single part gains nothing from multipart).
+ */
+const DEFAULT_RESUMABLE_THRESHOLD = 8 * 1024 * 1024;
+
+/**
+ * Select the upload path: files at or above the resumable threshold go through
+ * the multipart runner (chunked, per-part retry, resumable across reloads);
+ * everything else uses the single-shot `uploader`. Both return a raw
+ * `UploadResult` that the caller runs through `validateUploadResult`, so the
+ * trust boundary is identical regardless of path.
+ */
+function performUpload(
+	options: NormalizedAssetManagerOptions,
+	file: File,
+	signal: AbortSignal | undefined,
+): Promise<UploadResult> {
+	const { resumable } = options;
+	if (resumable !== undefined && shouldUseResumable(resumable, file)) {
+		return runResumableUpload(resumable.adapter, file, {
+			...(resumable.partSize !== undefined
+				? { partSize: resumable.partSize }
+				: {}),
+			...(resumable.sessionStore
+				? { sessionStore: resumable.sessionStore }
+				: {}),
+			...(signal ? { signal } : {}),
+		});
+	}
+	return options.uploader(file, signal ? { signal } : undefined);
+}
+
+function shouldUseResumable(
+	resumable: ResumableUploadConfig,
+	file: File,
+): boolean {
+	const threshold =
+		resumable.threshold ?? resumable.partSize ?? DEFAULT_RESUMABLE_THRESHOLD;
+	return file.size >= threshold;
 }
 
 export function validateSelectedFile(

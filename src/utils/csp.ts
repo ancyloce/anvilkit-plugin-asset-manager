@@ -30,6 +30,25 @@ export interface S3CspOptions {
 	readonly publicHost?: string;
 }
 
+/** CSP inputs for an `s3MultipartAdapter` instance. */
+export interface S3MultipartCspOptions {
+	/** The broker `endpoint` configured on `s3MultipartAdapter`. */
+	readonly endpoint: string | URL;
+	/**
+	 * Origin that part PUTs and the completed object live on (e.g.
+	 * `https://my-bucket.s3.amazonaws.com`). Presigned part URLs target it
+	 * directly, so it must be in `connect-src`. When omitted, only the broker
+	 * endpoint origin is added and you must allow the bucket origin yourself.
+	 */
+	readonly bucketHost?: string;
+	/**
+	 * Separate public/CDN origin the completed object is served from, if it
+	 * differs from `bucketHost`. Added to `connect-src` / `img-src` /
+	 * `media-src`.
+	 */
+	readonly publicHost?: string;
+}
+
 /** Inputs describing which asset backends need CSP allowances. */
 export interface RequiredCspOptions {
 	/** True if `dataUrlUploader` is mounted. Defaults to false. */
@@ -38,6 +57,10 @@ export interface RequiredCspOptions {
 	readonly inMemory?: boolean;
 	/** Description of any `s3PresignedAdapter` instance(s). */
 	readonly s3?: S3CspOptions | readonly S3CspOptions[];
+	/** Description of any `s3MultipartAdapter` instance(s). */
+	readonly s3Multipart?:
+		| S3MultipartCspOptions
+		| readonly S3MultipartCspOptions[];
 }
 
 /** Computed CSP directive sources needed for configured asset backends. */
@@ -84,6 +107,35 @@ export function getRequiredCsp(options: RequiredCspOptions = {}): RequiredCsp {
 		} else if (presignOrigin !== undefined) {
 			imgSrc.add(presignOrigin);
 			mediaSrc.add(presignOrigin);
+		}
+	}
+
+	const multipartList = Array.isArray(options.s3Multipart)
+		? options.s3Multipart
+		: options.s3Multipart
+			? [options.s3Multipart]
+			: [];
+	for (const entry of multipartList) {
+		const endpointOrigin = parseOrigin(entry.endpoint);
+		if (endpointOrigin !== undefined) connectSrc.add(endpointOrigin);
+
+		// Presigned part PUTs hit the bucket origin directly (connect-src);
+		// it also serves the object unless a distinct publicHost is given.
+		const bucketOrigin =
+			entry.bucketHost !== undefined
+				? parseOrigin(entry.bucketHost)
+				: undefined;
+		if (bucketOrigin !== undefined) connectSrc.add(bucketOrigin);
+
+		const publicOrigin =
+			entry.publicHost !== undefined
+				? parseOrigin(entry.publicHost)
+				: undefined;
+		const serveOrigin = publicOrigin ?? bucketOrigin;
+		if (serveOrigin !== undefined) {
+			connectSrc.add(serveOrigin);
+			imgSrc.add(serveOrigin);
+			mediaSrc.add(serveOrigin);
 		}
 	}
 
