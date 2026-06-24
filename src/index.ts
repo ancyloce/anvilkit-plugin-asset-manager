@@ -41,6 +41,7 @@ export type { AssetFolder, FolderId, FolderOptions } from "./types/folders.js";
 export { resolveFolderId } from "./types/folders.js";
 export type { AssetManagerOptions } from "./types/options.js";
 export type {
+	JsonValue,
 	PartTag,
 	PersistedUploadSession,
 	ResumableUploadAdapter,

@@ -83,6 +83,20 @@ export interface UploadSession {
 }
 
 /**
+ * Any value that survives `JSON.stringify` → `JSON.parse` (and `structuredClone`)
+ * unchanged. Used to type persisted continuation data so the M2 session store
+ * can round-trip it through `localStorage` without silently dropping functions,
+ * symbols, `BigInt`, class instances, or cyclic references.
+ */
+export type JsonValue =
+	| string
+	| number
+	| boolean
+	| null
+	| readonly JsonValue[]
+	| { readonly [key: string]: JsonValue };
+
+/**
  * The serializable subset of an {@link UploadSession} that the M2 session store
  * persists so an interrupted upload can resume after a reload. The runner loads
  * it (keyed by file fingerprint) and hands it to
@@ -96,8 +110,11 @@ export interface PersistedUploadSession {
 	readonly partSize: number;
 	/** Parts the backend had accepted at persist time. */
 	readonly parts: readonly PartTag[];
-	/** Host-opaque continuation data — MUST be JSON / structured-clone safe. */
-	readonly meta?: Readonly<Record<string, unknown>>;
+	/**
+	 * Host-opaque continuation data. Typed as JSON-safe so the persisted handle
+	 * is serializable by construction, not just by convention.
+	 */
+	readonly meta?: Readonly<Record<string, JsonValue>>;
 }
 
 /**
@@ -119,9 +136,11 @@ export interface ResumableUploadAdapter {
 	 * run), the adapter SHOULD reconcile against that backend session — e.g. S3
 	 * `ListParts` against `resume.uploadId` — and return a session that echoes
 	 * the still-valid `uploadId` and accepted `parts` so the runner skips them.
-	 * If the backend session is gone or expired the adapter MUST start fresh:
-	 * return a new `uploadId` with empty `parts`. When `resume` is omitted this
-	 * always starts a fresh session.
+	 * If `resume.uploadId` is reused, the returned session's effective
+	 * `partSize` MUST equal `resume.partSize` — the byte ranges of already-
+	 * uploaded parts depend on it. If the backend session is gone or expired the
+	 * adapter MUST start fresh: return a new `uploadId` with empty `parts`. When
+	 * `resume` is omitted this always starts a fresh session.
 	 */
 	readonly begin: (
 		file: File,
