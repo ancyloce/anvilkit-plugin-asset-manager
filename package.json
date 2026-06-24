@@ -57,6 +57,16 @@
 				"default": "./dist/utils/upload-session-store.cjs"
 			}
 		},
+		"./transform": {
+			"import": {
+				"types": "./dist/utils/query-param-transform.d.ts",
+				"default": "./dist/utils/query-param-transform.js"
+			},
+			"require": {
+				"types": "./dist/utils/query-param-transform.d.cts",
+				"default": "./dist/utils/query-param-transform.cjs"
+			}
+		},
 		"./adapters/s3": {
 			"import": {
 				"types": "./dist/adapters/s3-presigned.d.ts",
