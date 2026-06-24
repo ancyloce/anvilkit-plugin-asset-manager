@@ -77,6 +77,10 @@ function createAssetManagerPlugin(options: AssetManagerOptions): StudioPlugin;
 | `dataUrlAllowlistOptIn`     | `boolean`                                      | `false`   | When `true`, `data:` URLs are valid output.                                  |
 | `allowMixedScriptHostnames` | `boolean`                                      | `false`   | When `true`, hostnames mixing Latin with a confusable script are allowed.    |
 | `getThumbnail`              | `(entry: UploadResult) => string \| undefined` | none      | Optional override for the displayed thumbnail.                               |
+| `transformResolver`         | `TransformResolver`                            | none      | Map an `AssetTransform` to a derivative URL (your image CDN). See [Asset transformations](#asset-transformations--variants). |
+| `dedupe`                    | `boolean`                                      | `false`   | When `true`, hash uploads (SHA-256) and reuse an existing asset with the same content instead of re-uploading. |
+| `sniffContent`              | `boolean`                                      | `false`   | When `true`, reject a file whose magic-byte content contradicts its declared `file.type` (defense-in-depth beyond MIME/extension). |
+| `onAssetDeleted`            | `(asset: UploadResult) => void \| Promise<void>` | none    | Lifecycle hook fired when an asset is deleted via the default source; release backend objects here (`blob:` URLs are auto-revoked). |
 
 ### Imperative API on the plugin context
 
@@ -284,6 +288,8 @@ Throws `AssetValidationError` on bad input. Always enforces:
 - Hard-blocks: `javascript:`, `vbscript:`.
 - Path traversal: `../` and percent-encoded variants (`%2e%2e/`, `%2e%2e%2f`) rejected on `http`/`https`/`blob` URLs.
 - IDN homoglyph: hostnames mixing Latin with Cyrillic or Greek are rejected unless `allowMixedScriptHostnames: true`. Single-script IDN hosts (`münchen.de`, `日本.jp`, `россия.рф`) are always allowed.
+
+Selected files are checked against `maxFileSize`, `acceptedMimeTypes`, and `acceptedFileExtensions` before the adapter runs. Because browser `file.type` is host-set and often empty or spoofable, **`sniffContent: true`** adds magic-byte inspection: a file whose detected type contradicts its declared, specific `file.type` is rejected (`CONTENT_TYPE_MISMATCH`). It's defense-in-depth — unsignable types and generic declarations pass, and the backend should still validate independently.
 
 ### CSP advisor
 
