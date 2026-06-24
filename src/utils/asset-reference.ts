@@ -7,6 +7,11 @@
  * without creating a circular import between them.
  */
 
+/**
+ * Build the opaque `asset://<id>` reference stored in page data for an asset.
+ * The IR resolver ({@link createIRAssetResolver}) turns it back into a validated
+ * URL at export / render time; it is never a directly-loadable URL itself.
+ */
 export function createAssetReference(id: string): string {
 	return `asset://${id}`;
 }

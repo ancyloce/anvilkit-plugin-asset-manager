@@ -15,6 +15,7 @@ import type { AssetFilter, AssetListPage } from "../types/filter.js";
 import type { AssetFolder, FolderId } from "../types/folders.js";
 import { resolveFolderId } from "../types/folders.js";
 import type {
+	AssetDeletedHook,
 	AssetRegistry,
 	AssetSearchPage,
 	UploadResult,
@@ -83,6 +84,8 @@ export interface CreateInMemoryDataSourceOptions {
 	readonly maxDepth?: number;
 	/** Allow moving assets/folders. `undefined` ⇒ treated as `true`. */
 	readonly allowMove?: boolean;
+	/** Fired with the removed record after a successful asset delete. */
+	readonly onDelete?: AssetDeletedHook;
 }
 
 /** Union of the direct asset ids across `root` and all its descendant folders. */
@@ -172,10 +175,19 @@ export function createInMemoryDataSource(
 			return Promise.resolve(buildPage(paginateMatches(matches, query), query));
 		},
 
-		remove(id) {
+		async remove(id) {
+			const removed = registry.get(id);
+			if (removed === undefined) {
+				// Match the StudioAssetSource.delete contract (and `rename` below):
+				// deleting an unknown asset is a source-domain rejection, not a no-op.
+				throw new AssetSourceError(
+					"ASSET_MUTATION_REJECTED",
+					`Cannot delete unknown asset "${id}".`,
+				);
+			}
 			registry.delete(id);
 			folders.removeAsset(id);
-			return Promise.resolve();
+			await options.onDelete?.(removed);
 		},
 
 		async replace(id, payload, signal) {
@@ -216,10 +228,15 @@ export function createInMemoryDataSource(
 			return Promise.resolve(folders.renameFolder(id, name));
 		},
 
-		removeFolder(id, opts) {
+		async removeFolder(id, opts) {
 			const { removedAssetIds } = folders.removeFolder(id, opts);
-			for (const assetId of removedAssetIds) registry.delete(assetId);
-			return Promise.resolve();
+			// Fire the deletion hook for every cascade-removed asset too, so blob:
+			// URLs are revoked and `onAssetDeleted` runs for folder cascades.
+			for (const assetId of removedAssetIds) {
+				const removed = registry.get(assetId);
+				registry.delete(assetId);
+				if (removed !== undefined) await options.onDelete?.(removed);
+			}
 		},
 
 		moveFolder(id, parentId) {

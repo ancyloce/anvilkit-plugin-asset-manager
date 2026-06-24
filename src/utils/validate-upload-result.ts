@@ -254,6 +254,7 @@ function stripUndefinedMeta(meta: UploadResult["meta"]) {
 		...(meta.mimeType !== undefined ? { mimeType: meta.mimeType } : {}),
 		...(meta.width !== undefined ? { width: meta.width } : {}),
 		...(meta.height !== undefined ? { height: meta.height } : {}),
+		...(meta.hash !== undefined ? { hash: meta.hash } : {}),
 		...(meta.attribution !== undefined
 			? { attribution: Object.freeze({ ...meta.attribution }) }
 			: {}),

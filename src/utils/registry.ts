@@ -115,6 +115,7 @@ function freezeUploadResult(asset: UploadResult): UploadResult {
 						...(asset.meta.height !== undefined
 							? { height: asset.meta.height }
 							: {}),
+						...(asset.meta.hash !== undefined ? { hash: asset.meta.hash } : {}),
 						...(asset.meta.attribution !== undefined
 							? {
 									attribution: Object.freeze({

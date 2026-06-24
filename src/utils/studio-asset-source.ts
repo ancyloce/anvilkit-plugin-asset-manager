@@ -22,6 +22,7 @@ import type {
 	StudioAssetUploadListener,
 } from "@anvilkit/core/types";
 import type {
+	AssetDeletedHook,
 	AssetRegistry,
 	UploadAdapterOptions,
 	UploadResult,
@@ -63,13 +64,15 @@ export interface CreateStudioAssetSourceOptions {
 	 * sequential behavior.
 	 */
 	readonly maxConcurrentUploads?: number;
+	/** Fired with the removed record after a successful delete. */
+	readonly onDelete?: AssetDeletedHook;
 }
 
 /** Adapt the upload registry into core's `StudioAssetSource` contract. */
 export function createStudioAssetSource(
 	options: CreateStudioAssetSourceOptions,
 ): StudioAssetSource {
-	const { registry, upload, getThumbnail } = options;
+	const { registry, upload, getThumbnail, onDelete } = options;
 	const maxConcurrent = Math.max(
 		1,
 		options.maxConcurrentUploads ?? MAX_CONCURRENT_UPLOADS,
@@ -208,11 +211,12 @@ export function createStudioAssetSource(
 			}
 		},
 
-		delete(assetId) {
+		async delete(assetId) {
+			const removed = registry.get(assetId);
 			if (!registry.delete(assetId)) {
-				return Promise.reject(makeUnknownAssetMutationError("delete", assetId));
+				throw makeUnknownAssetMutationError("delete", assetId);
 			}
-			return Promise.resolve();
+			if (removed !== undefined) await onDelete?.(removed);
 		},
 
 		rename(assetId, nextName) {
@@ -224,7 +228,9 @@ export function createStudioAssetSource(
 
 		setTags(assetId, tags) {
 			if (registry.setTags(assetId, tags) === undefined) {
-				return Promise.reject(makeUnknownAssetMutationError("set tags on", assetId));
+				return Promise.reject(
+					makeUnknownAssetMutationError("set tags on", assetId),
+				);
 			}
 			return Promise.resolve();
 		},
