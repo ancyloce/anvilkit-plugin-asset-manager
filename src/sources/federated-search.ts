@@ -73,11 +73,11 @@ export function createLocalProvider(
 			folders: true,
 		},
 		listThemes: () => [],
+		// Always scope to the per-source sub-cursor — never the opaque COMPOSITE
+		// `filter.cursor`, which is meaningless to a single source and would
+		// corrupt local pagination if passed through.
 		search: (filter, page, signal) =>
-			source.list(
-				page !== undefined ? { ...filter, cursor: page } : filter,
-				signal,
-			),
+			source.list({ ...filter, cursor: page }, signal),
 		// Local assets are already catalogued — "picking" returns the stored result.
 		pickResult: async (asset) =>
 			registry.get(asset.id) ?? { id: asset.id, url: asset.url },
@@ -109,10 +109,13 @@ function compareEntries(
 	return String(ka).localeCompare(String(kb));
 }
 
+type SourceErrorMap = Record<string, { message: string; code?: string }>;
+
 function mergePages(
 	pages: readonly { provider: AssetSourceProvider; page: AssetListPage }[],
 	filter: AssetFilter,
 	carryForward: CompositeCursor = {},
+	sourceErrors: SourceErrorMap = {},
 ): AssetListPage {
 	const field = filter.sort?.field ?? "recent";
 	const comparable = field === "name" || field === "size" || field === "kind";
@@ -146,7 +149,42 @@ function mergePages(
 		total,
 		nextCursor: hasNext ? encodeCompositeCursor(next) : undefined,
 		sourceCursors,
+		...(Object.keys(sourceErrors).length > 0
+			? { sourceErrors: Object.freeze(sourceErrors) }
+			: {}),
 	};
+}
+
+/** Normalize a rejected provider search into a `{ message, code? }` pair. */
+function describeReason(reason: unknown): { message: string; code?: string } {
+	if (reason instanceof Error) {
+		const code = (reason as { code?: unknown }).code;
+		return {
+			message: reason.message || reason.name,
+			...(typeof code === "string" ? { code } : {}),
+		};
+	}
+	// Structural rejection (e.g. a plain `{ message, code }` object).
+	if (reason !== null && typeof reason === "object") {
+		const message = (reason as { message?: unknown }).message;
+		const code = (reason as { code?: unknown }).code;
+		if (typeof message === "string") {
+			return {
+				message,
+				...(typeof code === "string" ? { code } : {}),
+			};
+		}
+	}
+	return { message: safeString(reason) };
+}
+
+/** `String(value)` that never throws (a hostile `toString` must not abort the page). */
+function safeString(value: unknown): string {
+	try {
+		return String(value);
+	} catch {
+		return "Unknown error";
+	}
 }
 
 export interface FederatedSearchInput {
@@ -163,17 +201,27 @@ export async function federatedSearch(
 	input: FederatedSearchInput,
 ): Promise<AssetListPage> {
 	const { providers, filter, signal } = input;
+	const cursors = decodeCompositeCursor(filter.cursor);
+	// A continuation page carries per-source sub-cursors. A provider absent from
+	// the composite cursor was exhausted on an earlier page (or never started);
+	// re-querying it with no sub-cursor would restart its pagination and
+	// duplicate already-seen results, so on a continuation page only providers
+	// that still have a sub-cursor are queried.
+	const isContinuation =
+		filter.cursor !== undefined && Object.keys(cursors).length > 0;
 	const eligible = providers.filter((p) => providerCanSatisfy(p, filter));
-	const targets =
+	const sourceScoped =
 		filter.sources && filter.sources.length > 0
 			? eligible.filter((p) => filter.sources?.includes(p.id))
 			: eligible;
+	const targets = isContinuation
+		? sourceScoped.filter((p) => cursors[p.id] !== undefined)
+		: sourceScoped;
 
 	if (targets.length === 0) {
 		return { items: Object.freeze([]), total: 0, nextCursor: undefined };
 	}
 
-	const cursors = decodeCompositeCursor(filter.cursor);
 	const settled = await Promise.allSettled(
 		targets.map((p) => p.search(filter, cursors[p.id], signal)),
 	);
@@ -182,10 +230,12 @@ export async function federatedSearch(
 	// providers still return), but its incoming sub-cursor is carried forward
 	// (C2) so the next page retries it from the same position instead of
 	// silently resetting it to page 1 — which would skip the failed page and
-	// repeat earlier ones. (Surfacing the per-source error in the UI is a
-	// separate, still-open enhancement.)
+	// repeat earlier ones. The error is ALSO surfaced per-source via
+	// `sourceErrors` so the sidebar can show a non-blocking degraded hint
+	// instead of silently dropping the failure.
 	const ok: { provider: AssetSourceProvider; page: AssetListPage }[] = [];
 	const carryForward: CompositeCursor = {};
+	const sourceErrors: SourceErrorMap = {};
 	settled.forEach((result, index) => {
 		const provider = targets[index];
 		if (provider === undefined) return;
@@ -194,8 +244,9 @@ export async function federatedSearch(
 		} else {
 			const incoming = cursors[provider.id];
 			if (incoming !== undefined) carryForward[provider.id] = incoming;
+			sourceErrors[provider.id] = describeReason(result.reason);
 		}
 	});
 
-	return mergePages(ok, filter, carryForward);
+	return mergePages(ok, filter, carryForward, sourceErrors);
 }

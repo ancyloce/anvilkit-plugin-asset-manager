@@ -135,6 +135,7 @@ export function createCompositeAssetSource(
 				...(page.folders ? { folders: page.folders } : {}),
 				...(page.folderPath ? { folderPath: page.folderPath } : {}),
 				...(page.sourceCursors ? { sourceCursors: page.sourceCursors } : {}),
+				...(page.sourceErrors ? { sourceErrors: page.sourceErrors } : {}),
 			};
 		},
 
