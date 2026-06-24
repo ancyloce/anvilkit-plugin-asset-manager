@@ -45,6 +45,16 @@ export interface AssetManagerOptions {
 	 */
 	readonly dedupe?: boolean;
 	/**
+	 * Opt-in magic-byte content sniffing. When `true`, each upload's leading
+	 * bytes are inspected and rejected (`CONTENT_TYPE_MISMATCH`) if the detected
+	 * type contradicts a declared, specific `file.type` — defense-in-depth
+	 * against spoofed/empty browser MIME beyond the `acceptedMimeTypes` /
+	 * `acceptedFileExtensions` checks. Off by default; unsignable types and
+	 * generic declarations (`application/octet-stream`) pass. The backend should
+	 * still validate independently.
+	 */
+	readonly sniffContent?: boolean;
+	/**
 	 * Unified local-library data plane (list + asset/folder CRUD). Omitted ⇒ a
 	 * full in-memory default over the built-in registry + a folder side-index.
 	 */

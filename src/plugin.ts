@@ -239,6 +239,7 @@ export async function uploadAsset<UserConfig extends PuckConfig = PuckConfig>(
 
 	try {
 		validateSelectedFile(file, options);
+		await assertSniffedContentType(file, options, signal);
 
 		// Content dedup (opt-in): hash the bytes first; if an asset with the same
 		// digest already exists, reuse it instead of re-uploading. Reference is
@@ -269,6 +270,12 @@ export async function uploadAsset<UserConfig extends PuckConfig = PuckConfig>(
 			}
 		}
 
+		// Unified pre-upload abort guard: an already-cancelled upload must not
+		// invoke the adapter (a backend side effect) regardless of which path
+		// (single-shot / resumable) or whether sniff/dedup short-circuited first.
+		if (signal?.aborted) {
+			throw makePluginAbortError();
+		}
 		const uploadResult = await performUpload(options, file, signal);
 		// Adapters may ignore or only partially honor the abort signal — bail
 		// here BEFORE registering or dispatching so a cancelled batch can't
@@ -453,6 +460,40 @@ async function computeFileHash(file: File): Promise<string | undefined> {
 	} catch {
 		return undefined;
 	}
+}
+
+/**
+ * Opt-in magic-byte check: reject an upload whose real (sniffed) type
+ * contradicts a declared, specific `file.type`. The sniffer is lazy-imported so
+ * its signature table never enters the eager entry; unsignable types and
+ * generic declarations pass.
+ */
+async function assertSniffedContentType(
+	file: File,
+	options: NormalizedAssetManagerOptions,
+	signal: AbortSignal | undefined,
+): Promise<void> {
+	if (options.sniffContent !== true) return;
+	const declared = normalizeMime(file.type);
+	if (declared === "" || declared === "application/octet-stream") return;
+	if (signal?.aborted) throw makePluginAbortError();
+
+	const { sniffFileMime } = await import("./utils/sniff-file-type.js");
+	const sniffed = await sniffFileMime(file);
+	if (signal?.aborted) throw makePluginAbortError();
+	if (sniffed === undefined) return; // unsignable content — can't contradict
+
+	if (normalizeMime(sniffed) !== declared) {
+		throw new AssetValidationError(
+			"CONTENT_TYPE_MISMATCH",
+			`File content was detected as "${sniffed}" but its declared type is "${file.type}".`,
+		);
+	}
+}
+
+function normalizeMime(mime: string): string {
+	const lower = mime.trim().toLowerCase();
+	return lower === "image/jpg" ? "image/jpeg" : lower;
 }
 
 export function validateSelectedFile(
