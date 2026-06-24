@@ -42,6 +42,7 @@ export { resolveFolderId } from "./types/folders.js";
 export type { AssetManagerOptions } from "./types/options.js";
 export type {
 	PartTag,
+	PersistedUploadSession,
 	ResumableUploadAdapter,
 	ResumableUploadConfig,
 	UploadPart,

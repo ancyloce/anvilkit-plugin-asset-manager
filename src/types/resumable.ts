@@ -65,12 +65,38 @@ export interface UploadSession {
 	/** Parts already accepted by the backend (empty/omitted for a fresh session). */
 	readonly parts?: readonly PartTag[];
 	/**
-	 * Backend-recommended part size in bytes. When present the runner honors it
-	 * over its own configured `partSize` so the slicing matches what the backend
-	 * presigned.
+	 * Effective part size in bytes, **locked for the life of the session**. The
+	 * runner slices every part at this size, so resuming MUST reuse the same
+	 * value — otherwise a skipped `partNumber` would map to a different byte
+	 * range and corrupt the object. A backend may dictate it here; otherwise the
+	 * runner sets it from config and persists it (see {@link
+	 * PersistedUploadSession.partSize}). Once parts have been uploaded it must
+	 * not change.
 	 */
 	readonly partSize?: number;
-	/** Host-opaque continuation data echoed back to subsequent calls. */
+	/**
+	 * Host-opaque continuation data echoed back to subsequent calls. To support
+	 * resume across a page reload it MUST be JSON / structured-clone safe — the
+	 * M2 session store persists it via {@link PersistedUploadSession.meta}.
+	 */
+	readonly meta?: Readonly<Record<string, unknown>>;
+}
+
+/**
+ * The serializable subset of an {@link UploadSession} that the M2 session store
+ * persists so an interrupted upload can resume after a reload. The runner loads
+ * it (keyed by file fingerprint) and hands it to
+ * {@link ResumableUploadAdapter.begin} as the `resume` argument. MUST be JSON /
+ * structured-clone safe end-to-end — it round-trips through `localStorage`.
+ */
+export interface PersistedUploadSession {
+	/** Backend session id (e.g. S3 `UploadId`) to reconcile against. */
+	readonly uploadId: string;
+	/** The effective part size locked in when the session started (bytes). */
+	readonly partSize: number;
+	/** Parts the backend had accepted at persist time. */
+	readonly parts: readonly PartTag[];
+	/** Host-opaque continuation data — MUST be JSON / structured-clone safe. */
 	readonly meta?: Readonly<Record<string, unknown>>;
 }
 
@@ -87,12 +113,19 @@ export interface UploadSession {
  */
 export interface ResumableUploadAdapter {
 	/**
-	 * Open — or resume — a multipart session for `file`. Returning a session
-	 * whose `parts` is non-empty signals a resumed upload, and the runner skips
-	 * those part numbers.
+	 * Open — or resume — a multipart session for `file`.
+	 *
+	 * When `resume` is supplied (a persisted handle from a prior, interrupted
+	 * run), the adapter SHOULD reconcile against that backend session — e.g. S3
+	 * `ListParts` against `resume.uploadId` — and return a session that echoes
+	 * the still-valid `uploadId` and accepted `parts` so the runner skips them.
+	 * If the backend session is gone or expired the adapter MUST start fresh:
+	 * return a new `uploadId` with empty `parts`. When `resume` is omitted this
+	 * always starts a fresh session.
 	 */
 	readonly begin: (
 		file: File,
+		resume?: PersistedUploadSession,
 		options?: UploadAdapterOptions,
 	) => Promise<UploadSession>;
 	/** Upload one part and return its completion tag. */
