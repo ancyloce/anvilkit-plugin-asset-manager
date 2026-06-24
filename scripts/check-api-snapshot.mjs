@@ -46,6 +46,7 @@ function main() {
 		"./src/testing/index.ts",
 		"./src/utils/retry.ts",
 		"./src/utils/upload-session-store.ts",
+		"./src/utils/query-param-transform.ts",
 		"./src/adapters/s3-presigned.ts",
 		"./src/adapters/s3-multipart.ts",
 		"./src/sources/unsplash/index.ts",
