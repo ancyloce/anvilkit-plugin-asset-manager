@@ -52,6 +52,10 @@ export type {
 } from "./types/resumable.js";
 export { isResumableAdapter } from "./types/resumable.js";
 export type {
+	AssetTransform,
+	TransformResolver,
+} from "./types/transform.js";
+export type {
 	AssetDeletedHook,
 	AssetKind,
 	AssetMeta,
@@ -68,6 +72,8 @@ export type {
 	UnsplashTheme,
 	UnsplashThemeConfig,
 } from "./types/unsplash.js";
+export type { ParsedAssetReference } from "./utils/asset-reference.js";
+export { parseAssetReference } from "./utils/asset-reference.js";
 export type {
 	RequiredCsp,
 	RequiredCspOptions,

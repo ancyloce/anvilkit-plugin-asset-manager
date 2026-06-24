@@ -113,6 +113,9 @@ export function createAssetManagerPlugin<
 		registry,
 		dataUrlAllowlistOptIn: normalizedOptions.dataUrlAllowlistOptIn,
 		allowMixedScriptHostnames: normalizedOptions.allowMixedScriptHostnames,
+		...(normalizedOptions.transformResolver
+			? { transformResolver: normalizedOptions.transformResolver }
+			: {}),
 	});
 
 	return {
