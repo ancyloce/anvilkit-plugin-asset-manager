@@ -257,3 +257,101 @@ describe("composite source federates extra providers", () => {
 		expect(page.items.map((i) => i.id).sort()).toEqual(["b", "local-1"]);
 	});
 });
+
+function failingProvider(id: string, error: unknown): AssetSourceProvider {
+	return {
+		...fakeProvider(id, []),
+		search: vi.fn(async () => {
+			throw error;
+		}),
+	};
+}
+
+describe("federated provider error propagation", () => {
+	it("surfaces per-source errors while still returning successful providers", async () => {
+		const good = fakeProvider("local", [A]);
+		const bad = failingProvider(
+			"unsplash",
+			Object.assign(new Error("rate limited"), {
+				code: "PROVIDER_RATE_LIMITED",
+			}),
+		);
+		const page = await federatedSearch({ providers: [good, bad], filter: {} });
+
+		expect(page.items.map((i) => i.id)).toContain("a");
+		expect(page.sourceErrors?.unsplash).toEqual({
+			message: "rate limited",
+			code: "PROVIDER_RATE_LIMITED",
+		});
+		expect(page.sourceErrors?.local).toBeUndefined();
+	});
+
+	it("omits sourceErrors when every provider succeeds", async () => {
+		const page = await federatedSearch({
+			providers: [fakeProvider("local", [A]), fakeProvider("unsplash", [B])],
+			filter: {},
+		});
+		expect(page.sourceErrors).toBeUndefined();
+	});
+
+	it("threads sourceErrors through composite.listPaginated", async () => {
+		const registry = createAssetRegistry();
+		registry.register({ id: "local-1", url: "https://x/l1" });
+		const source = resolveDataSource({ registry, upload });
+		const composite = createCompositeAssetSource({
+			source,
+			registry,
+			upload,
+			providers: [failingProvider("unsplash", new Error("boom"))],
+		});
+		const page = await composite.listPaginated({});
+		expect(page.items.map((i) => i.id)).toEqual(["local-1"]);
+		expect(page.sourceErrors?.unsplash?.message).toBe("boom");
+	});
+
+	it("captures a structural (non-Error) rejection's message + code", async () => {
+		const good = fakeProvider("local", [A]);
+		const bad = failingProvider("unsplash", {
+			message: "nope",
+			code: "PROVIDER_BAD_RESPONSE",
+		});
+		const page = await federatedSearch({ providers: [good, bad], filter: {} });
+		expect(page.items.map((i) => i.id)).toContain("a");
+		expect(page.sourceErrors?.unsplash).toEqual({
+			message: "nope",
+			code: "PROVIDER_BAD_RESPONSE",
+		});
+	});
+
+	it("never throws when a rejection value's stringification throws", async () => {
+		const hostile = {
+			toString() {
+				throw new Error("boom");
+			},
+		};
+		const good = fakeProvider("local", [A]);
+		const bad = failingProvider("unsplash", hostile);
+		const page = await federatedSearch({ providers: [good, bad], filter: {} });
+		expect(page.items.map((i) => i.id)).toContain("a");
+		expect(typeof page.sourceErrors?.unsplash?.message).toBe("string");
+	});
+
+	it("skips an exhausted provider (no sub-cursor) on a continuation page", async () => {
+		const local = fakeProvider("local", [A]); // no nextCursor ⇒ exhausted
+		const unsplash = fakeProvider("unsplash", [B], { nextCursor: "u2" });
+		const page1 = await federatedSearch({
+			providers: [local, unsplash],
+			filter: {},
+		});
+		expect(page1.nextCursor).toBeDefined();
+
+		await federatedSearch({
+			providers: [local, unsplash],
+			filter: { cursor: page1.nextCursor },
+		});
+		// `local` was exhausted on page 1 → NOT re-queried on the continuation page
+		// (which would otherwise restart it and duplicate results).
+		expect(local.search).toHaveBeenCalledTimes(1);
+		expect(unsplash.search).toHaveBeenCalledTimes(2);
+	});
+});
