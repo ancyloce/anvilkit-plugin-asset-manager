@@ -5,6 +5,13 @@ export interface AssetMeta {
 	readonly width?: number;
 	readonly height?: number;
 	/**
+	 * Lowercase-hex content digest (SHA-256) of the uploaded bytes. Populated by
+	 * the plugin when `dedupe` is enabled — used to detect duplicate uploads and
+	 * as an integrity/cacheability signal. A host uploader may also set it
+	 * directly; it is preserved through the validate/freeze reconstruction.
+	 */
+	readonly hash?: string;
+	/**
 	 * Optional provenance/attribution for externally-sourced assets (PRD 0002
 	 * §8.4). Set when an asset is inserted from a credit-requiring provider such
 	 * as Unsplash; export plugins read it to emit the required photographer +
@@ -76,6 +83,14 @@ export type UploadAdapter = (
 	file: File,
 	options?: UploadAdapterOptions,
 ) => Promise<UploadResult>;
+
+/**
+ * Lifecycle hook fired when an asset is deleted through the asset source, with
+ * the record as it existed at deletion time. Lets a host release backend
+ * objects tied to the upload (e.g. delete the stored S3 object, revoke a
+ * `blob:` URL). Awaited; throwing rejects the delete.
+ */
+export type AssetDeletedHook = (asset: UploadResult) => void | Promise<void>;
 
 // `AssetManagerOptions` is defined in `./options.ts` (hoisted there so it can
 // aggregate the data-source / folder / provider / category contracts without

@@ -58,4 +58,13 @@ export interface AssetListPage extends AssetSearchPage {
 	readonly folderPath?: readonly AssetFolder[];
 	/** Per-source page tokens for federated paging, keyed by source id. */
 	readonly sourceCursors?: Readonly<Record<string, string | undefined>>;
+	/**
+	 * Per-source errors for a federated page, keyed by source id — set when a
+	 * provider failed for this page while others succeeded (the failed provider's
+	 * items are dropped but its cursor is carried forward). Mirrors core's
+	 * `StudioAssetListPage.sourceErrors`.
+	 */
+	readonly sourceErrors?: Readonly<
+		Record<string, { readonly message: string; readonly code?: string }>
+	>;
 }

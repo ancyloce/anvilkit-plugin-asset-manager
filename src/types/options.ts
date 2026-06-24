@@ -13,7 +13,7 @@ import type { AssetCategory, AssetFacetDefinition } from "./categories.js";
 import type { AssetDataSource } from "./data-source.js";
 import type { FolderOptions } from "./folders.js";
 import type { ResumableUploadConfig } from "./resumable.js";
-import type { UploadAdapter, UploadResult } from "./types.js";
+import type { AssetDeletedHook, UploadAdapter, UploadResult } from "./types.js";
 import type { UnsplashSourceOptions } from "./unsplash.js";
 
 /** Configuration accepted by `createAssetManagerPlugin()`. */
@@ -34,6 +34,15 @@ export interface AssetManagerOptions {
 	 * `uploader`. Omitted ⇒ every upload is single-shot (unchanged default).
 	 */
 	readonly resumable?: ResumableUploadConfig;
+	/**
+	 * Opt-in content deduplication. When `true`, each upload's bytes are hashed
+	 * (SHA-256) before the adapter runs; if an asset with the same hash already
+	 * exists in the registry, that existing asset is reused (its reference is
+	 * dispatched) instead of re-uploading. The computed digest is stored on
+	 * `AssetMeta.hash`. Off by default — hashing reads the whole file, and
+	 * distinct-but-identical uploads are kept separate unless enabled.
+	 */
+	readonly dedupe?: boolean;
 	/**
 	 * Unified local-library data plane (list + asset/folder CRUD). Omitted ⇒ a
 	 * full in-memory default over the built-in registry + a folder side-index.
@@ -86,4 +95,13 @@ export interface AssetManagerOptions {
 	 * (overriding the default-for-images behavior).
 	 */
 	readonly getThumbnail?: (entry: UploadResult) => string | undefined;
+	/**
+	 * Called when an asset is deleted through the source (default in-memory data
+	 * plane / lightweight registry source), with the record at deletion time.
+	 * Use it to release backend objects tied to the upload. `blob:` URLs minted
+	 * by the built-in `inMemoryUploader` are revoked automatically regardless of
+	 * this hook. Not invoked when a host-owned `dataSource` owns the asset plane
+	 * — that backend owns its own deletion.
+	 */
+	readonly onAssetDeleted?: AssetDeletedHook;
 }
