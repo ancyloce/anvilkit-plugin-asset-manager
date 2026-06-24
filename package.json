@@ -47,6 +47,16 @@
 				"default": "./dist/utils/retry.cjs"
 			}
 		},
+		"./session-store": {
+			"import": {
+				"types": "./dist/utils/upload-session-store.d.ts",
+				"default": "./dist/utils/upload-session-store.js"
+			},
+			"require": {
+				"types": "./dist/utils/upload-session-store.d.cts",
+				"default": "./dist/utils/upload-session-store.cjs"
+			}
+		},
 		"./adapters/s3": {
 			"import": {
 				"types": "./dist/adapters/s3-presigned.d.ts",
@@ -55,6 +65,16 @@
 			"require": {
 				"types": "./dist/adapters/s3-presigned.d.cts",
 				"default": "./dist/adapters/s3-presigned.cjs"
+			}
+		},
+		"./adapters/s3-multipart": {
+			"import": {
+				"types": "./dist/adapters/s3-multipart.d.ts",
+				"default": "./dist/adapters/s3-multipart.js"
+			},
+			"require": {
+				"types": "./dist/adapters/s3-multipart.d.cts",
+				"default": "./dist/adapters/s3-multipart.cjs"
 			}
 		},
 		"./providers/unsplash": {
