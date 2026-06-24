@@ -5,7 +5,9 @@ import type {
 	PageIRAsset,
 	PageIRNode,
 } from "@anvilkit/core/types";
+import type { TransformResolver } from "../types/transform.js";
 import type { AssetRegistry } from "../types/types.js";
+import { parseAssetReference } from "./asset-reference.js";
 import { AssetResolutionError, AssetValidationError } from "./errors.js";
 import { validateUploadResult } from "./validate-upload-result.js";
 
@@ -18,7 +20,6 @@ const URL_REJECTION_VALIDATION_CODES = new Set([
 	"MIXED_SCRIPT_HOSTNAME",
 ]);
 
-const ASSET_REFERENCE_PREFIX = "asset://";
 const ASSET_PROP_KEYS = new Set([
 	"src",
 	"imageUrl",
@@ -40,6 +41,13 @@ export interface CreateIRAssetResolverOptions {
 	readonly registry: AssetRegistry;
 	readonly dataUrlAllowlistOptIn?: boolean;
 	readonly allowMixedScriptHostnames?: boolean;
+	/**
+	 * Maps an asset + transform (carried on the reference as `?w=…&fm=…`) to a
+	 * derivative URL. When omitted, or when it returns `undefined`, the asset's
+	 * original URL is used. The derivative URL is re-validated through the same
+	 * trust boundary as any resolved asset URL.
+	 */
+	readonly transformResolver?: TransformResolver;
 }
 
 /**
@@ -54,10 +62,11 @@ export function createIRAssetResolver(
 	options: CreateIRAssetResolverOptions,
 ): IRAssetResolver {
 	return (url) => {
-		const assetId = parseAssetReference(url);
-		if (assetId === null) {
+		const parsed = parseAssetReference(url);
+		if (parsed === null) {
 			return null;
 		}
+		const assetId = parsed.id;
 
 		const asset = options.registry.get(assetId);
 		if (!asset) {
@@ -65,10 +74,26 @@ export function createIRAssetResolver(
 		}
 
 		try {
+			// Apply a requested transform via the host resolver. A derivative URL
+			// is re-validated below exactly like the original, so a hostile
+			// derivative can't bypass the trust boundary.
+			let effectiveUrl = asset.url;
+			let transformApplied = false;
+			if (
+				parsed.transform !== undefined &&
+				options.transformResolver !== undefined
+			) {
+				const derived = options.transformResolver(asset, parsed.transform);
+				if (derived !== undefined) {
+					effectiveUrl = derived;
+					transformApplied = true;
+				}
+			}
+
 			const validated = validateUploadResult(
 				{
 					id: asset.id,
-					url: asset.url,
+					url: effectiveUrl,
 					...(asset.meta ? { meta: asset.meta } : {}),
 				},
 				{
@@ -77,13 +102,20 @@ export function createIRAssetResolver(
 				},
 			);
 
+			// A derivative URL has host-determined dimensions / size / format, so
+			// the original `size`/`width`/`height`/`mimeType`/`hash` are stale —
+			// drop them, but KEEP `attribution`, which is about the source image
+			// and survives a resize (e.g. a required Unsplash credit).
+			const meta =
+				transformApplied && validated.meta
+					? validated.meta.attribution !== undefined
+						? { attribution: validated.meta.attribution }
+						: undefined
+					: validated.meta;
+
 			const resolution: AssetResolution = {
 				url: validated.url,
-				...(validated.meta
-					? {
-							meta: validated.meta as Readonly<Record<string, unknown>>,
-						}
-					: {}),
+				...(meta ? { meta: meta as Readonly<Record<string, unknown>> } : {}),
 			};
 
 			return resolution;
@@ -197,15 +229,6 @@ function collectValueAssetUrls(
 	)) {
 		collectValueAssetUrls(entryValue, urls, entryKey);
 	}
-}
-
-function parseAssetReference(url: string): string | null {
-	if (!url.startsWith(ASSET_REFERENCE_PREFIX)) {
-		return null;
-	}
-
-	const assetId = url.slice(ASSET_REFERENCE_PREFIX.length).trim();
-	return assetId === "" ? null : assetId;
 }
 
 function cloneNode(
