@@ -1,6 +1,12 @@
 export type { DataUrlUploaderOptions } from "./adapters/data-url.js";
 export { dataUrlUploader } from "./adapters/data-url.js";
 export { inMemoryUploader } from "./adapters/in-memory.js";
+export type {
+	AssetManagerErrorEvent,
+	AssetManagerEventMap,
+	AssetManagerEventName,
+	AssetManagerUploadedEvent,
+} from "./plugin.js";
 export {
 	ASSET_MANAGER_ERROR_EVENT,
 	ASSET_MANAGER_UPLOADED_EVENT,
@@ -8,12 +14,6 @@ export {
 	createAssetReference,
 	getAssetRegistry,
 	uploadAsset,
-} from "./plugin.js";
-export type {
-	AssetManagerErrorEvent,
-	AssetManagerEventMap,
-	AssetManagerEventName,
-	AssetManagerUploadedEvent,
 } from "./plugin.js";
 export type {
 	AssetSourceCapabilities,
@@ -40,6 +40,14 @@ export type {
 export type { AssetFolder, FolderId, FolderOptions } from "./types/folders.js";
 export { resolveFolderId } from "./types/folders.js";
 export type { AssetManagerOptions } from "./types/options.js";
+export type {
+	PartTag,
+	ResumableUploadAdapter,
+	ResumableUploadConfig,
+	UploadPart,
+	UploadSession,
+} from "./types/resumable.js";
+export { isResumableAdapter } from "./types/resumable.js";
 export type {
 	AssetKind,
 	AssetMeta,
