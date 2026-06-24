@@ -49,6 +49,7 @@ For real uploads pass an `uploader`. `dataUrlUploader` is dev-only — files are
 - **CSP advisor** — `getRequiredCsp` computes the minimum `connect-src` / `img-src` / `media-src` directives the configured adapters need.
 - **Production-ready S3 adapter** — `s3PresignedAdapter` POST-then-PUT with exponential-backoff retry on 5xx + network failures (4xx fails fast).
 - **Resumable / multipart upload** — opt-in `resumable` option chunks large media, retries per part, and resumes interrupted uploads after a reload; `s3MultipartAdapter` ships in-box (`./adapters/s3-multipart`). See [Resumable / multipart upload](#resumable--multipart-upload).
+- **Asset transformations** — processing-free transform seam: a declarative `AssetTransform` rides on the `asset://<id>?w=…&fm=…` reference and a host `transformResolver` maps it to a derivative URL (your image CDN); `createQueryParamTransformResolver` ships in-box (`./transform`). See [Asset transformations / variants](#asset-transformations--variants).
 - **Optional React UI** — `UploadButton`, `AssetBrowser`, `AssetCommandPalette`, `MetadataPanel`, `ReplaceAssetDialog`, `DeleteAssetDialog`, and the composite `AssetManagerUI`.
 - **Batch upload control** — `StudioAssetSource.upload(files)` honors `maxConcurrentUploads` (default 3) and `AbortSignal`.
 
@@ -236,8 +237,37 @@ interface CreateIRAssetResolverOptions {
   readonly registry: AssetRegistry;
   readonly dataUrlAllowlistOptIn?: boolean;
   readonly allowMixedScriptHostnames?: boolean;
+  readonly transformResolver?: TransformResolver; // see Asset transformations
 }
 ```
+
+### Asset transformations / variants
+
+Request derivative renditions (resize / crop / format / quality) without the plugin processing any bytes — a transform is a declarative `AssetTransform` carried on the reference (`asset://<id>?w=800&fm=webp`), and a host `transformResolver` maps it to a derivative URL produced by your image CDN / service. The IR resolver applies it at export / render time and **re-validates the derivative URL** through the same trust boundary as any asset URL (a hostile derivative is rejected). When no transform is requested, or the resolver returns `undefined`, the original URL is used.
+
+```ts
+import { createAssetManagerPlugin, createAssetReference } from "@anvilkit/plugin-asset-manager";
+import { createQueryParamTransformResolver } from "@anvilkit/plugin-asset-manager/transform";
+
+createAssetManagerPlugin({
+  // Built-in query-param mapping (imgix-style w/h/fit/fm/q/dpr by default;
+  // param names + fit/format vocab are configurable for other CDNs).
+  transformResolver: createQueryParamTransformResolver(),
+});
+
+// A component stores a transform-bearing reference:
+createAssetReference("asset-1", { width: 800, format: "webp" });
+// → "asset://asset-1?w=800&fm=webp"  → resolves to e.g. "https://cdn/asset-1.png?w=800&fm=webp"
+```
+
+`AssetTransform` fields: `width` / `height` (positive integers), `fit` (`cover` \| `contain` \| `fill` \| `inside` \| `outside`), `format` (`webp` \| `avif` \| `jpeg` \| `png` \| `auto`), `quality` (1–100), `dpr`.
+
+| Export (`./transform`)                | Purpose                                                                 |
+| ------------------------------------- | ----------------------------------------------------------------------- |
+| `createQueryParamTransformResolver`   | Build a `TransformResolver` that appends query params to the asset URL. |
+| `deriveVariantUrl(asset, t, resolver)`| Resolve a derivative URL live (non-IR), falling back to the original.   |
+
+A derivative's dimensional metadata is host-owned, so the resolver drops stale `width`/`height`/`size` from the resolution while preserving `attribution` (a required credit survives a resize).
 
 ### Validation & security
 
