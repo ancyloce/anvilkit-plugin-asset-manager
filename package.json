@@ -130,7 +130,7 @@
 		"@anvilkit/ir": "workspace:*",
 		"@anvilkit/ui": "workspace:*",
 		"@anvilkit/utils": "workspace:*",
-		"lucide-react": "^1.16.0"
+		"lucide-react": "^1.21.0"
 	},
 	"scripts": {
 		"build": "rslib build",
