@@ -1,6 +1,6 @@
 # @anvilkit/plugin-asset-manager
 
-> **Alpha (`0.1.10`).** Public surface may still shift before `v1.0`. Bundle budgets enforced in CI: headless entry ≤ 8 KB gzip, UI subpath ≤ 12 KB gzip, Unsplash subpath ≤ 4 KB gzip.
+> **Alpha (`0.1.11`).** Public surface may still shift before `v1.0`. Bundle budgets enforced in CI: headless entry ≤ 8 KB gzip, UI subpath ≤ 12 KB gzip, Unsplash subpath ≤ 4 KB gzip.
 
 Headless asset manager plugin for Anvilkit Studio. The host provides the upload backend; the plugin handles validation, registration, search, IR-time resolution, CSP guidance, and (optionally) a React UI for the upload + browse experience. Designed for pluggable production backends (S3, GCS, custom HTTP) with strict trust-boundary enforcement on every adapter response.
 
