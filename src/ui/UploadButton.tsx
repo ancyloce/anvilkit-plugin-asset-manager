@@ -106,12 +106,12 @@ export function UploadButton({
 			if (signal.aborted) return;
 			const file = files[index];
 			if (!file) continue;
-				try {
-					validateSelectedFile(file, {
-						acceptedFileExtensions,
-						acceptedMimeTypes,
-						maxFileSize,
-					});
+			try {
+				validateSelectedFile(file, {
+					acceptedFileExtensions,
+					acceptedMimeTypes,
+					maxFileSize,
+				});
 				const uploaded = await uploader(file, { signal });
 				// A newer batch (or unmount) superseded this run mid-upload —
 				// bail without touching state the newer run now owns.

@@ -227,9 +227,9 @@ describe("createStudioAssetSource", () => {
 		await expect(source.delete?.("ghost")).rejects.toMatchObject({
 			code: "ASSET_MUTATION_REJECTED",
 		});
-		await expect(source.rename?.("ghost", "missing.png")).rejects.toBeInstanceOf(
-			AssetSourceError,
-		);
+		await expect(
+			source.rename?.("ghost", "missing.png"),
+		).rejects.toBeInstanceOf(AssetSourceError);
 		await expect(source.setTags?.("ghost", ["missing"])).rejects.toMatchObject({
 			code: "ASSET_MUTATION_REJECTED",
 		});

@@ -190,10 +190,10 @@ export function AssetManagerUI({
 				<CardDescription>{msg("assetManager.ui.subtitle")}</CardDescription>
 			</CardHeader>
 			<CardContent>
-					<UploadButton
-						acceptedFileExtensions={acceptedFileExtensions}
-						acceptedMimeTypes={acceptedMimeTypes}
-						allowMixedScriptHostnames={allowMixedScriptHostnames}
+				<UploadButton
+					acceptedFileExtensions={acceptedFileExtensions}
+					acceptedMimeTypes={acceptedMimeTypes}
+					allowMixedScriptHostnames={allowMixedScriptHostnames}
 					dataUrlAllowlistOptIn={dataUrlAllowlistOptIn}
 					maxFileSize={maxFileSize}
 					onProgress={setProgress}
@@ -230,10 +230,10 @@ export function AssetManagerUI({
 					}}
 					onConfirm={handleConfirmDelete}
 				/>
-					<ReplaceAssetDialog
-						acceptedFileExtensions={acceptedFileExtensions}
-						acceptedMimeTypes={acceptedMimeTypes}
-						asset={pendingReplace}
+				<ReplaceAssetDialog
+					acceptedFileExtensions={acceptedFileExtensions}
+					acceptedMimeTypes={acceptedMimeTypes}
+					asset={pendingReplace}
 					maxFileSize={maxFileSize}
 					onCancel={() => {
 						setPendingReplace(null);
