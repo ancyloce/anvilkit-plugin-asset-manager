@@ -146,7 +146,7 @@ describe("content dedup (opt-in)", () => {
 			.slice(before)
 			.filter(([event]) => event === ASSET_MANAGER_UPLOADED_EVENT);
 		expect(uploaded).toHaveLength(1);
-		expect((uploaded[0]?.[1] as { asset: { id: string } }).asset.id).toBe(
+		expect((uploaded[0]![1] as { asset: { id: string } }).asset.id).toBe(
 			first.id,
 		);
 	});

@@ -117,7 +117,7 @@ describe("opt-in content sniffing", () => {
 			([event]) => event === ASSET_MANAGER_ERROR_EVENT,
 		);
 		expect(errors).toHaveLength(1);
-		expect((errors[0]?.[1] as { code: string }).code).toBe(
+		expect((errors[0]![1] as { code: string }).code).toBe(
 			"CONTENT_TYPE_MISMATCH",
 		);
 	});

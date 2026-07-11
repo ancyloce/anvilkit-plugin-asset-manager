@@ -98,7 +98,7 @@ describe("resolveAssets", () => {
 		expect(ir.assets[0]?.url).toBe("asset://asset-1");
 		expect(
 			(
-				ir.root.children?.[0]?.props.posts as ReadonlyArray<
+				ir.root.children![0]!.props.posts as ReadonlyArray<
 					Readonly<Record<string, unknown>>
 				>
 			)[0]?.imageSrc,
@@ -109,7 +109,7 @@ describe("resolveAssets", () => {
 		});
 		expect(
 			(
-				nextIr.root.children?.[0]?.props.posts as ReadonlyArray<
+				nextIr.root.children![0]!.props.posts as ReadonlyArray<
 					Readonly<Record<string, unknown>>
 				>
 			)[0]?.imageSrc,

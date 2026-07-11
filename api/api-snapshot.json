@@ -13401,12 +13401,12 @@
 							"type": {
 								"type": "reference",
 								"target": {
-									"packageName": "@anvilkit/core",
-									"packagePath": "src/types/asset-resolver.ts",
+									"packageName": "@anvilkit/contracts",
+									"packagePath": "src/assets.ts",
 									"qualifiedName": "IRAssetResolver"
 								},
 								"name": "IRAssetResolver",
-								"package": "@anvilkit/core"
+								"package": "@anvilkit/contracts"
 							}
 						}
 					]
@@ -14104,12 +14104,12 @@
 									"type": {
 										"type": "reference",
 										"target": {
-											"packageName": "@anvilkit/core",
-											"packagePath": "src/types/ir.ts",
+											"packageName": "@anvilkit/contracts",
+											"packagePath": "src/ir.ts",
 											"qualifiedName": "PageIR"
 										},
 										"name": "PageIR",
-										"package": "@anvilkit/core"
+										"package": "@anvilkit/contracts"
 									}
 								},
 								{
@@ -14121,12 +14121,12 @@
 									"type": {
 										"type": "reference",
 										"target": {
-											"packageName": "@anvilkit/core",
-											"packagePath": "src/types/asset-resolver.ts",
+											"packageName": "@anvilkit/contracts",
+											"packagePath": "src/assets.ts",
 											"qualifiedName": "IRAssetResolver"
 										},
 										"name": "IRAssetResolver",
-										"package": "@anvilkit/core"
+										"package": "@anvilkit/contracts"
 									}
 								}
 							],
@@ -14141,12 +14141,12 @@
 									{
 										"type": "reference",
 										"target": {
-											"packageName": "@anvilkit/core",
-											"packagePath": "src/types/ir.ts",
+											"packageName": "@anvilkit/contracts",
+											"packagePath": "src/ir.ts",
 											"qualifiedName": "PageIR"
 										},
 										"name": "PageIR",
-										"package": "@anvilkit/core"
+										"package": "@anvilkit/contracts"
 									}
 								],
 								"name": "Promise",
