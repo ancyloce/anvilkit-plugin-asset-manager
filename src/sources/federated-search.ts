@@ -210,9 +210,10 @@ export async function federatedSearch(
 	const isContinuation =
 		filter.cursor !== undefined && Object.keys(cursors).length > 0;
 	const eligible = providers.filter((p) => providerCanSatisfy(p, filter));
+	const requestedSources = new Set(filter.sources ?? []);
 	const sourceScoped =
-		filter.sources && filter.sources.length > 0
-			? eligible.filter((p) => filter.sources?.includes(p.id))
+		requestedSources.size > 0
+			? eligible.filter((p) => requestedSources.has(p.id))
 			: eligible;
 	const targets = isContinuation
 		? sourceScoped.filter((p) => cursors[p.id] !== undefined)
