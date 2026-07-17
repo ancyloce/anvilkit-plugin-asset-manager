@@ -13,7 +13,7 @@
 				"default": "./dist/index.js"
 			},
 			"require": {
-				"types": "./dist/index.d.cts",
+				"types": "./dist/cjs/index.d.cts",
 				"default": "./dist/index.cjs"
 			}
 		},
@@ -23,7 +23,7 @@
 				"default": "./dist/ui/index.js"
 			},
 			"require": {
-				"types": "./dist/ui/index.d.cts",
+				"types": "./dist/cjs/ui/index.d.cts",
 				"default": "./dist/ui/index.cjs"
 			}
 		},
@@ -33,7 +33,7 @@
 				"default": "./dist/testing/index.js"
 			},
 			"require": {
-				"types": "./dist/testing/index.d.cts",
+				"types": "./dist/cjs/testing/index.d.cts",
 				"default": "./dist/testing/index.cjs"
 			}
 		},
@@ -43,7 +43,7 @@
 				"default": "./dist/utils/retry.js"
 			},
 			"require": {
-				"types": "./dist/utils/retry.d.cts",
+				"types": "./dist/cjs/utils/retry.d.cts",
 				"default": "./dist/utils/retry.cjs"
 			}
 		},
@@ -53,7 +53,7 @@
 				"default": "./dist/utils/upload-session-store.js"
 			},
 			"require": {
-				"types": "./dist/utils/upload-session-store.d.cts",
+				"types": "./dist/cjs/utils/upload-session-store.d.cts",
 				"default": "./dist/utils/upload-session-store.cjs"
 			}
 		},
@@ -63,7 +63,7 @@
 				"default": "./dist/utils/query-param-transform.js"
 			},
 			"require": {
-				"types": "./dist/utils/query-param-transform.d.cts",
+				"types": "./dist/cjs/utils/query-param-transform.d.cts",
 				"default": "./dist/utils/query-param-transform.cjs"
 			}
 		},
@@ -73,7 +73,7 @@
 				"default": "./dist/adapters/s3-presigned.js"
 			},
 			"require": {
-				"types": "./dist/adapters/s3-presigned.d.cts",
+				"types": "./dist/cjs/adapters/s3-presigned.d.cts",
 				"default": "./dist/adapters/s3-presigned.cjs"
 			}
 		},
@@ -83,7 +83,7 @@
 				"default": "./dist/adapters/s3-multipart.js"
 			},
 			"require": {
-				"types": "./dist/adapters/s3-multipart.d.cts",
+				"types": "./dist/cjs/adapters/s3-multipart.d.cts",
 				"default": "./dist/adapters/s3-multipart.cjs"
 			}
 		},
@@ -93,7 +93,7 @@
 				"default": "./dist/sources/unsplash/index.js"
 			},
 			"require": {
-				"types": "./dist/sources/unsplash/index.d.cts",
+				"types": "./dist/cjs/sources/unsplash/index.d.cts",
 				"default": "./dist/sources/unsplash/index.cjs"
 			}
 		}
@@ -133,7 +133,7 @@
 		"lucide-react": "^1.21.0"
 	},
 	"scripts": {
-		"build": "rslib build",
+		"build": "rslib build --lib esm && rslib build --lib cjs --no-clean",
 		"dev": "rslib build --watch",
 		"lint": "pnpm exec biome lint package.json biome.json tsconfig.json rslib.config.ts vitest.config.ts src meta",
 		"format": "pnpm exec biome check --write package.json biome.json tsconfig.json rslib.config.ts vitest.config.ts src meta",
