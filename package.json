@@ -110,7 +110,7 @@
 		"access": "public"
 	},
 	"peerDependencies": {
-		"@puckeditor/core": "^0.22.4",
+		"@puckeditor/core": "^0.23.0",
 		"react": ">=19.2.0",
 		"react-dom": ">=19.2.0"
 	},
@@ -130,7 +130,7 @@
 		"@anvilkit/ir": "workspace:*",
 		"@anvilkit/ui": "workspace:*",
 		"@anvilkit/utils": "workspace:*",
-		"lucide-react": "^1.28.0"
+		"lucide-react": "^1.30.0"
 	},
 	"scripts": {
 		"build": "rslib build --lib esm && rslib build --lib cjs --no-clean",
@@ -154,16 +154,16 @@
 		"@anvilkit/biome-config": "workspace:*",
 		"@anvilkit/typescript-config": "workspace:*",
 		"@anvilkit/vitest-config": "workspace:*",
-		"@puckeditor/core": "^0.22.4",
+		"@puckeditor/core": "^0.23.0",
 		"@rslib/core": "^0.23.2",
-		"@types/node": "^26.1.1",
-		"@types/react": "^19.2.17",
-		"@types/react-dom": "19.2.3",
+		"@types/node": "^26.2.0",
+		"@types/react": "^19.2.18",
+		"@types/react-dom": "19.2.4",
 		"axe-core": "4.11.3",
 		"esbuild": "^0.28.1",
 		"happy-dom": "^20.8.9",
 		"madge": "^8.0.0",
-		"publint": "^0.3.22",
+		"publint": "^0.3.23",
 		"react": "^19.2.8",
 		"react-dom": "^19.2.8",
 		"typedoc": "^0.28.20",
