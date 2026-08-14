@@ -1,6 +1,6 @@
 # @anvilkit/plugin-asset-manager
 
-> **Alpha (`0.1.11`).** Public surface may still shift before `v1.0`. Bundle budgets enforced in CI: headless entry ≤ 8 KB gzip, UI subpath ≤ 12 KB gzip, Unsplash subpath ≤ 4 KB gzip.
+> **Alpha (`0.1.11`).** Public surface may still shift before `v1.0`. Bundle budgets enforced in CI: headless initial chunk ≤ 17 KB gzip, UI initial chunk ≤ 12 KB gzip, Unsplash subpath ≤ 4 KB gzip.
 
 Headless asset manager plugin for Anvilkit Studio. The host provides the upload backend; the plugin handles validation, registration, search, IR-time resolution, CSP guidance, and (optionally) a React UI for the upload + browse experience. Designed for pluggable production backends (S3, GCS, custom HTTP) with strict trust-boundary enforcement on every adapter response.
 
@@ -80,7 +80,7 @@ function createAssetManagerPlugin(options: AssetManagerOptions): StudioPlugin;
 | `transformResolver`         | `TransformResolver`                            | none      | Map an `AssetTransform` to a derivative URL (your image CDN). See [Asset transformations](#asset-transformations--variants). |
 | `dedupe`                    | `boolean`                                      | `false`   | When `true`, hash uploads (SHA-256) and reuse an existing asset with the same content instead of re-uploading. |
 | `sniffContent`              | `boolean`                                      | `false`   | When `true`, reject a file whose magic-byte content contradicts its declared `file.type` (defense-in-depth beyond MIME/extension). |
-| `onAssetDeleted`            | `(asset: UploadResult) => void \| Promise<void>` | none    | Lifecycle hook fired when an asset is deleted via the default source; release backend objects here (`blob:` URLs are auto-revoked). |
+| `onAssetDeleted`            | `(asset: UploadResult) => void \| Promise<void>` | none    | Lifecycle hook fired when an asset is deleted or its URL is superseded via the default source; release old backend objects here (`blob:` URLs are auto-revoked). |
 
 `unsplash.proxyEndpoint` is an API base, not a search-only route. The provider
 appends every Unsplash path to it, including the mandatory
@@ -526,7 +526,7 @@ Only `name`, `size`, and `mimeType` are considered safe to log. If your host end
 3. **Wire CSP.** Call `getRequiredCsp(...)` and merge the result into your `connect-src` / `img-src` / `media-src` builder. Re-run when you add or remove an adapter.
 4. **Choose a persistence story.** Plugin state is in-memory; host stores `publicUrl`s server-side and re-seeds on boot.
 5. **Monitor.** Subscribe to `asset-manager:error` event bus envelopes for upload failures, and log `AssetResolutionError.code` from your export pipeline so `ASSET_NOT_FOUND` / `ASSET_URL_REJECTED` / `ASSET_VALIDATION_FAILED` get separate alerts.
-6. **Lock down the bundle.** `.size-limit.json` keeps the headless entry under 8 KB gzip and the UI subpath under 12 KB. CI gates both.
+6. **Lock down the bundle.** `.size-limit.mjs` keeps the headless initial chunk under 17 KB gzip and the UI initial chunk under 12 KB. CI gates both.
 
 ### Optional UI is a separate entry
 
