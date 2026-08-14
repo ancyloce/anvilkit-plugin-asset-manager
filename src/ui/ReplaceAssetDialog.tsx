@@ -12,9 +12,9 @@ import {
 } from "@anvilkit/ui/dialog";
 import * as React from "react";
 
-import { validateSelectedFile } from "../plugin.js";
 import type { AssetManagerOptions } from "../types/options.js";
 import type { UploadResult } from "../types/types.js";
+import { validateSelectedFile } from "../utils/validate-selected-file.js";
 
 /** Props for the replace-asset file selection dialog. */
 export interface ReplaceAssetDialogProps

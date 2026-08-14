@@ -18,6 +18,12 @@ import type { AssetFolder } from "../types/folders.js";
 export interface DeleteFolderDialogProps {
 	/** Folder to delete. `null` ⇒ closed. */
 	readonly folder: AssetFolder | null;
+	/**
+	 * Total number of assets that a cascading delete will remove from the folder
+	 * and its entire descendant tree. This is an explicit deletion preflight;
+	 * {@link AssetFolder.counts}.assets is direct-only and must not be used here.
+	 */
+	readonly cascadeAssetCount: number;
 	/** Confirm. `cascade=false` reparents children to the parent (default, safe);
 	 *  `cascade=true` also deletes the descendant assets. */
 	readonly onConfirm: (
@@ -30,6 +36,7 @@ export interface DeleteFolderDialogProps {
 /** Confirmation dialog for deleting or cascading deletion of a folder. */
 export function DeleteFolderDialog({
 	folder,
+	cascadeAssetCount,
 	onConfirm,
 	onCancel,
 }: DeleteFolderDialogProps) {
@@ -47,7 +54,6 @@ export function DeleteFolderDialog({
 	}
 
 	const open = folder !== null;
-	const assetCount = folder?.counts.assets ?? 0;
 
 	return (
 		<Dialog
@@ -64,8 +70,11 @@ export function DeleteFolderDialog({
 					<DialogDescription>
 						{msg("assetManager.dialog.deleteFolderDescription")
 							.replace("{name}", folder?.name ?? "")
-							.replace("{count}", String(assetCount))
-							.replace("{assets}", assetCount === 1 ? "asset" : "assets")}
+							.replace("{count}", String(cascadeAssetCount))
+							.replace(
+								"{assets}",
+								cascadeAssetCount === 1 ? "asset" : "assets",
+							)}
 					</DialogDescription>
 				</DialogHeader>
 				<DialogFooter>

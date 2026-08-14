@@ -93,6 +93,7 @@ describe("DeleteFolderDialog", () => {
 		render(
 			<DeleteFolderDialog
 				folder={folder("a", "Marketing", null)}
+				cascadeAssetCount={2}
 				onConfirm={onConfirm}
 				onCancel={vi.fn()}
 			/>,
@@ -105,6 +106,7 @@ describe("DeleteFolderDialog", () => {
 		render(
 			<DeleteFolderDialog
 				folder={folder("a", "Marketing", null)}
+				cascadeAssetCount={2}
 				onConfirm={onConfirm}
 				onCancel={vi.fn()}
 			/>,
@@ -113,6 +115,27 @@ describe("DeleteFolderDialog", () => {
 		await waitFor(() =>
 			expect(onConfirm).toHaveBeenCalledWith(expect.anything(), true),
 		);
+	});
+
+	it("shows the recursive asset impact when assets exist only in descendants", () => {
+		const parent = {
+			...folder("parent", "Parent", null),
+			counts: { assets: 0, folders: 1 },
+		};
+
+		render(
+			<DeleteFolderDialog
+				folder={parent}
+				cascadeAssetCount={1}
+				onConfirm={vi.fn()}
+				onCancel={vi.fn()}
+			/>,
+		);
+
+		expect(
+			screen.getByText(/Choose "Delete contents" to remove its 1 asset too\./),
+		).toBeTruthy();
+		expect(screen.queryByText(/remove its 0 assets too\./)).toBeNull();
 	});
 });
 

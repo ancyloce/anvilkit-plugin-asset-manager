@@ -3,9 +3,9 @@
 import { useMsg } from "@anvilkit/core/i18n";
 import { Button } from "@anvilkit/ui/button";
 import * as React from "react";
-import { validateSelectedFile } from "../plugin.js";
 import type { AssetManagerOptions } from "../types/options.js";
 import type { UploadAdapter, UploadResult } from "../types/types.js";
+import { validateSelectedFile } from "../utils/validate-selected-file.js";
 import { validateUploadResult } from "../utils/validate-upload-result.js";
 
 /** Aggregate progress snapshot for the active upload batch. */
