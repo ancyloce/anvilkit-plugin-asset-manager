@@ -72,7 +72,7 @@ export interface CreateStudioAssetSourceOptions {
 	 * sequential behavior. Must be a positive integer.
 	 */
 	readonly maxConcurrentUploads?: number;
-	/** Fired with the removed record after a successful delete. */
+	/** Fired with a removed or URL-superseded record after a successful mutation. */
 	readonly onDelete?: AssetDeletedHook;
 }
 
@@ -245,7 +245,8 @@ export function createStudioAssetSource(
 		},
 
 		async replace(assetId, file) {
-			if (registry.get(assetId) === undefined) {
+			const original = registry.get(assetId);
+			if (original === undefined) {
 				throw makeUnknownAssetMutationError("replace", assetId);
 			}
 			const result = await ingest(file);
@@ -253,8 +254,12 @@ export function createStudioAssetSource(
 			if (replaced === undefined) {
 				// The target can disappear while ingest is in flight. Do not turn
 				// that race into an unintended new asset under the adapter's id.
+				if (result.url !== original.url) await onDelete?.(result);
 				throw makeUnknownAssetMutationError("replace", assetId);
 			}
+			// The registry swap is the commit point. Release the old backing object
+			// only after it succeeds, and never clean up a deliberately reused URL.
+			if (original.url !== replaced.url) await onDelete?.(original);
 			return project(replaced);
 		},
 

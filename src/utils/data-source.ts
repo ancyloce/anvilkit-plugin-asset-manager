@@ -91,7 +91,7 @@ export interface CreateInMemoryDataSourceOptions {
 	readonly maxDepth?: number;
 	/** Allow moving assets/folders. `undefined` ⇒ treated as `true`. */
 	readonly allowMove?: boolean;
-	/** Fired with the removed record after a successful asset delete. */
+	/** Fired with a removed or URL-superseded record after a successful mutation. */
 	readonly onDelete?: AssetDeletedHook;
 	/** Host facet definitions whose local `valueOf` selectors apply to lists. */
 	readonly facets?: readonly AssetFacetDefinition[];
@@ -296,7 +296,8 @@ export function createInMemoryDataSource(
 		},
 
 		async replace(id, payload, signal) {
-			if (registry.get(id) === undefined) {
+			const original = registry.get(id);
+			if (original === undefined) {
 				throw new AssetSourceError(
 					"ASSET_MUTATION_REJECTED",
 					`Cannot replace unknown asset "${id}".`,
@@ -309,11 +310,15 @@ export function createInMemoryDataSource(
 				// The target can disappear while binary ingest is in flight. Never
 				// register the adapter's fresh id as a fallback: that would turn a
 				// failed replacement into an unintended new catalog entry.
+				if (result.url !== original.url) await options.onDelete?.(result);
 				throw new AssetSourceError(
 					"ASSET_MUTATION_REJECTED",
 					`Cannot replace unknown asset "${id}".`,
 				);
 			}
+			// Commit first, then release the superseded backing object. A reused URL
+			// still backs the replacement and must remain live.
+			if (original.url !== replaced.url) await options.onDelete?.(original);
 			return replaced;
 		},
 
