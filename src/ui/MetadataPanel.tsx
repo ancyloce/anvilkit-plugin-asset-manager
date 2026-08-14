@@ -15,6 +15,10 @@ import { Label } from "@anvilkit/ui/label";
 import * as React from "react";
 
 import type { UploadResult } from "../types/types.js";
+import {
+	MutationErrorAlert,
+	mutationErrorMessage,
+} from "./MutationErrorAlert.js";
 
 /** Props for the asset metadata editing dialog. */
 export interface MetadataPanelProps {
@@ -47,6 +51,7 @@ export function MetadataPanel({
 	const [tagInput, setTagInput] = React.useState("");
 	const [tags, setTags] = React.useState<readonly string[]>([]);
 	const [busy, setBusy] = React.useState(false);
+	const [error, setError] = React.useState<string | null>(null);
 
 	// Seed the editable name + tag set from the asset being edited. Only these
 	// two derive from `asset`; the in-progress `tagInput` is cleared on close
@@ -90,8 +95,13 @@ export function MetadataPanel({
 		}
 		const finalTags = tagInput.trim() === "" ? tags : commitTagInput();
 		setBusy(true);
+		setError(null);
 		try {
 			await onConfirm(asset, { name: name.trim(), tags: finalTags });
+		} catch (cause) {
+			setError(
+				mutationErrorMessage(cause, msg("assetManager.error.mutationRetry")),
+			);
 		} finally {
 			setBusy(false);
 		}
@@ -100,6 +110,7 @@ export function MetadataPanel({
 	function handleCancel() {
 		// Drop any half-typed tag so the next asset opens with a clean input.
 		setTagInput("");
+		setError(null);
 		onCancel();
 	}
 
@@ -174,6 +185,7 @@ export function MetadataPanel({
 						/>
 					</div>
 				</div>
+				<MutationErrorAlert message={error} />
 				<DialogFooter>
 					<Button
 						disabled={busy}

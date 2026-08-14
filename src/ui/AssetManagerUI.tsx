@@ -11,6 +11,7 @@ import {
 import { Progress } from "@anvilkit/ui/progress";
 import * as React from "react";
 
+import type { AssetFilter } from "../types/filter.js";
 import type { AssetManagerOptions } from "../types/options.js";
 import type {
 	AssetRegistry,
@@ -34,6 +35,8 @@ export interface AssetManagerUIProps
 		| "maxFileSize"
 		| "dataUrlAllowlistOptIn"
 		| "allowMixedScriptHostnames"
+		| "categories"
+		| "facets"
 	> {
 	/**
 	 * Binary uploader. Required at the UI boundary even though
@@ -59,6 +62,8 @@ export interface AssetManagerUIProps
 	readonly aboveFilters?: React.ReactNode;
 	/** Make asset rows draggable so they can be dropped onto a `FolderTree`. */
 	readonly draggableRows?: boolean;
+	/** Receives the browser's composed local/provider query. */
+	readonly onFilterChange?: (filter: AssetFilter) => void;
 }
 
 /**
@@ -74,10 +79,13 @@ export function AssetManagerUI({
 	acceptedMimeTypes,
 	allowMixedScriptHostnames,
 	aboveFilters,
+	categories,
 	dataUrlAllowlistOptIn,
 	draggableRows,
+	facets,
 	maxFileSize,
 	onAssetInserted,
+	onFilterChange,
 	registry,
 	searchEnabled = true,
 	uploader,
@@ -215,9 +223,12 @@ export function AssetManagerUI({
 				) : null}
 				<AssetBrowser
 					assets={assets}
+					categories={categories}
+					facets={facets}
 					onDelete={handleBrowserDelete}
 					onEdit={handleBrowserEdit}
 					onInsert={handleBrowserInsert}
+					onFilterChange={onFilterChange}
 					onReplace={handleBrowserReplace}
 					searchEnabled={searchEnabled}
 					{...(aboveFilters !== undefined ? { aboveFilters } : {})}

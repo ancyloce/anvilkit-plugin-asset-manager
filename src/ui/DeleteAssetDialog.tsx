@@ -13,6 +13,10 @@ import {
 import * as React from "react";
 
 import type { UploadResult } from "../types/types.js";
+import {
+	MutationErrorAlert,
+	mutationErrorMessage,
+} from "./MutationErrorAlert.js";
 
 /** Props for the delete-asset confirmation dialog. */
 export interface DeleteAssetDialogProps {
@@ -44,14 +48,20 @@ export function DeleteAssetDialog({
 }: DeleteAssetDialogProps) {
 	const msg = useMsg();
 	const [busy, setBusy] = React.useState(false);
+	const [error, setError] = React.useState<string | null>(null);
 
 	async function handleConfirm() {
 		if (asset === null || busy) {
 			return;
 		}
 		setBusy(true);
+		setError(null);
 		try {
 			await onConfirm(asset);
+		} catch (cause) {
+			setError(
+				mutationErrorMessage(cause, msg("assetManager.error.mutationRetry")),
+			);
 		} finally {
 			setBusy(false);
 		}
@@ -59,8 +69,14 @@ export function DeleteAssetDialog({
 
 	function handleOpenChange(nextOpen: boolean) {
 		if (!nextOpen && !busy) {
+			setError(null);
 			onCancel();
 		}
+	}
+
+	function handleCancel() {
+		setError(null);
+		onCancel();
 	}
 
 	const open = asset !== null;
@@ -83,11 +99,12 @@ export function DeleteAssetDialog({
 							: ""}
 					</DialogDescription>
 				</DialogHeader>
+				<MutationErrorAlert message={error} />
 				<DialogFooter>
 					<Button
 						type="button"
 						variant="outline"
-						onClick={onCancel}
+						onClick={handleCancel}
 						disabled={busy}
 					>
 						{msg("assetManager.button.cancel")}

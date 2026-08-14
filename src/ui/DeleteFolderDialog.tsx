@@ -13,6 +13,10 @@ import {
 import * as React from "react";
 
 import type { AssetFolder } from "../types/folders.js";
+import {
+	MutationErrorAlert,
+	mutationErrorMessage,
+} from "./MutationErrorAlert.js";
 
 /** Props for the delete-folder confirmation dialog. */
 export interface DeleteFolderDialogProps {
@@ -42,24 +46,34 @@ export function DeleteFolderDialog({
 }: DeleteFolderDialogProps) {
 	const msg = useMsg();
 	const [busy, setBusy] = React.useState(false);
+	const [error, setError] = React.useState<string | null>(null);
 
 	async function confirm(cascade: boolean) {
 		if (folder === null || busy) return;
 		setBusy(true);
+		setError(null);
 		try {
 			await onConfirm(folder, cascade);
+		} catch (cause) {
+			setError(
+				mutationErrorMessage(cause, msg("assetManager.error.mutationRetry")),
+			);
 		} finally {
 			setBusy(false);
 		}
 	}
 
 	const open = folder !== null;
+	function cancel() {
+		setError(null);
+		onCancel();
+	}
 
 	return (
 		<Dialog
 			open={open}
 			onOpenChange={(next) => {
-				if (!next && !busy) onCancel();
+				if (!next && !busy) cancel();
 			}}
 		>
 			<DialogContent>
@@ -77,12 +91,13 @@ export function DeleteFolderDialog({
 							)}
 					</DialogDescription>
 				</DialogHeader>
+				<MutationErrorAlert message={error} />
 				<DialogFooter>
 					<Button
 						type="button"
 						variant="outline"
 						disabled={busy}
-						onClick={onCancel}
+						onClick={cancel}
 					>
 						{msg("assetManager.button.cancel")}
 					</Button>

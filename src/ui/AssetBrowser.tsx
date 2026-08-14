@@ -12,6 +12,11 @@ import {
 import { Input } from "@anvilkit/ui/input";
 import { Windowed } from "@anvilkit/ui/windowed";
 import * as React from "react";
+import type {
+	AssetCategory,
+	AssetFacetDefinition,
+} from "../types/categories.js";
+import type { AssetFilter } from "../types/filter.js";
 import type { AssetKind, UploadResult } from "../types/types.js";
 import { inferAssetKind } from "../utils/infer-kind.js";
 import { ASSET_DRAG_MIME } from "./FolderTree.js";
@@ -84,6 +89,21 @@ export interface AssetBrowserProps {
 	readonly itemHeight?: number;
 	/** Pixel height of the scroll container when virtualizing. */
 	readonly maxHeight?: number;
+	/** Host-configured saved-view chips. Omitted keeps the default UI unchanged. */
+	readonly categories?: readonly AssetCategory[];
+	/** Host-configured facet controls. Omitted keeps the default UI unchanged. */
+	readonly facets?: readonly AssetFacetDefinition[];
+	/**
+	 * Receives the composed browser query whenever a search, kind, category, or
+	 * facet selection changes. Remote selections stay in this query so the host
+	 * can route it through its resolved/federated source.
+	 */
+	readonly onFilterChange?: (filter: AssetFilter) => void;
+}
+
+interface AssetBrowserCoreProps extends AssetBrowserProps {
+	/** Internal bridge used by the lazy taxonomy wrapper. */
+	readonly onBaseFilterChange?: (filter: AssetFilter) => void;
 }
 
 const DEFAULT_VIRTUALIZE_THRESHOLD = 50;
@@ -312,7 +332,7 @@ const AssetRow = React.memo(function AssetRow({
 });
 
 /** Asset grid and list browser with search, filters, paging, and actions. */
-export function AssetBrowser({
+function AssetBrowserCore({
 	assets,
 	onInsert,
 	onDelete,
@@ -325,7 +345,8 @@ export function AssetBrowser({
 	virtualizeThreshold = DEFAULT_VIRTUALIZE_THRESHOLD,
 	itemHeight = DEFAULT_ITEM_HEIGHT,
 	maxHeight = DEFAULT_MAX_HEIGHT,
-}: AssetBrowserProps) {
+	onBaseFilterChange,
+}: AssetBrowserCoreProps) {
 	const msg = useMsg();
 	const [activeIndex, setActiveIndex] = React.useState(
 		assets.length > 0 ? 0 : -1,
@@ -452,19 +473,32 @@ export function AssetBrowser({
 
 	// Reset to the first page whenever the query or kind filter changes so the
 	// "Load more" cursor never points past a freshly-filtered, shorter list.
-	const changeQuery = React.useCallback((value: string) => {
-		setQuery(value);
-		setExtraPages(0);
-	}, []);
+	const changeQuery = React.useCallback(
+		(value: string) => {
+			setQuery(value);
+			setExtraPages(0);
+			onBaseFilterChange?.({
+				...(value.trim() !== "" ? { query: value } : {}),
+				...(activeKinds.length > 0 ? { kinds: activeKinds } : {}),
+			});
+		},
+		[activeKinds, onBaseFilterChange],
+	);
 
-	const toggleKind = React.useCallback((kind: AssetKind) => {
-		setActiveKinds((current) =>
-			current.includes(kind)
-				? current.filter((entry) => entry !== kind)
-				: [...current, kind],
-		);
-		setExtraPages(0);
-	}, []);
+	const toggleKind = React.useCallback(
+		(kind: AssetKind) => {
+			const next = activeKinds.includes(kind)
+				? activeKinds.filter((entry) => entry !== kind)
+				: [...activeKinds, kind];
+			setActiveKinds(next);
+			onBaseFilterChange?.({
+				...(query.trim() !== "" ? { query } : {}),
+				...(next.length > 0 ? { kinds: next } : {}),
+			});
+			setExtraPages(0);
+		},
+		[activeKinds, onBaseFilterChange, query],
+	);
 
 	// `Windowed` (as="ul") owns the <ul>/<li> + aria-posinset/aria-setsize; each
 	// row's content (button, roving tabindex, keyboard nav, actions) lives in
@@ -578,5 +612,43 @@ export function AssetBrowser({
 				) : null}
 			</CardContent>
 		</Card>
+	);
+}
+
+const TaxonomyAssetBrowser = React.lazy(async () => {
+	const module = await import("./AssetTaxonomyFilters.js");
+	return { default: module.AssetTaxonomyFilters };
+});
+
+/** Public browser wrapper; taxonomy support loads only when configured. */
+export function AssetBrowser(props: AssetBrowserProps) {
+	const hasTaxonomy =
+		(props.categories !== undefined && props.categories.length > 0) ||
+		(props.facets !== undefined && props.facets.length > 0);
+	if (!hasTaxonomy) {
+		return (
+			<AssetBrowserCore {...props} onBaseFilterChange={props.onFilterChange} />
+		);
+	}
+	return (
+		<React.Suspense
+			fallback={
+				<AssetBrowserCore
+					{...props}
+					onBaseFilterChange={props.onFilterChange}
+				/>
+			}
+		>
+			<TaxonomyAssetBrowser
+				aboveFilters={props.aboveFilters}
+				assets={props.assets}
+				categories={props.categories}
+				facets={props.facets}
+				onFilterChange={props.onFilterChange}
+				renderBrowser={(overrides) => (
+					<AssetBrowserCore {...props} {...overrides} />
+				)}
+			/>
+		</React.Suspense>
 	);
 }

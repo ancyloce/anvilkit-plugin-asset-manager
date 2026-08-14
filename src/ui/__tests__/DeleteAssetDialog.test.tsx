@@ -119,4 +119,34 @@ describe("DeleteAssetDialog", () => {
 		).toBe(true);
 		resolveConfirm?.();
 	});
+
+	it("keeps the dialog open and exposes a retryable error when deletion rejects", async () => {
+		const onConfirm = vi
+			.fn()
+			.mockRejectedValueOnce(new Error("Storage is unavailable."))
+			.mockResolvedValueOnce(undefined);
+		render(
+			<DeleteAssetDialog
+				asset={sampleAsset}
+				onCancel={noop}
+				onConfirm={onConfirm}
+			/>,
+		);
+
+		fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+		await waitFor(() => {
+			expect(screen.getByRole("alert").textContent).toContain(
+				"Storage is unavailable. Try again or cancel.",
+			);
+		});
+		expect(screen.getByText("Delete asset?")).toBeDefined();
+		expect(
+			(screen.getByRole("button", { name: "Delete" }) as HTMLButtonElement)
+				.disabled,
+		).toBe(false);
+
+		fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+		await waitFor(() => expect(onConfirm).toHaveBeenCalledTimes(2));
+		await waitFor(() => expect(screen.queryByRole("alert")).toBeNull());
+	});
 });

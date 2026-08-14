@@ -3,7 +3,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { UploadResult } from "../../types.js";
 import { MetadataPanel } from "../MetadataPanel.js";
-import { cleanup, fireEvent, render, screen } from "./test-utils.js";
+import { cleanup, fireEvent, render, screen, waitFor } from "./test-utils.js";
 
 afterEach(() => {
 	cleanup();
@@ -93,5 +93,37 @@ describe("MetadataPanel", () => {
 		fireEvent.click(screen.getByRole("button", { name: /Cancel/i }));
 		expect(onCancel).toHaveBeenCalledTimes(1);
 		expect(onConfirm).not.toHaveBeenCalled();
+	});
+
+	it("keeps edits open and clears a rejected save error on retry", async () => {
+		const onConfirm = vi
+			.fn()
+			.mockRejectedValueOnce(new Error("Metadata write failed."))
+			.mockResolvedValueOnce(undefined);
+		render(
+			<MetadataPanel
+				asset={ASSET}
+				onCancel={() => undefined}
+				onConfirm={onConfirm}
+			/>,
+		);
+
+		fireEvent.click(screen.getByRole("button", { name: "Save" }));
+		await waitFor(() => {
+			expect(screen.getByRole("alert").textContent).toContain(
+				"Metadata write failed. Try again or cancel.",
+			);
+		});
+		expect((screen.getByLabelText("Name") as HTMLInputElement).value).toBe(
+			"hero.png",
+		);
+		expect(
+			(screen.getByRole("button", { name: "Save" }) as HTMLButtonElement)
+				.disabled,
+		).toBe(false);
+
+		fireEvent.click(screen.getByRole("button", { name: "Save" }));
+		await waitFor(() => expect(onConfirm).toHaveBeenCalledTimes(2));
+		await waitFor(() => expect(screen.queryByRole("alert")).toBeNull());
 	});
 });

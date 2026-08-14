@@ -11,6 +11,10 @@ import {
 import * as React from "react";
 
 import type { AssetFolder } from "../types/folders.js";
+import {
+	MutationErrorAlert,
+	mutationErrorMessage,
+} from "./MutationErrorAlert.js";
 
 /**
  * Keyboard-accessible move-target picker — the a11y fallback for drag-to-folder.
@@ -37,13 +41,20 @@ export function MoveTargetPicker({
 	const msg = useMsg();
 	const resolvedRootLabel = rootLabel ?? msg("assetManager.folder.root");
 	const [busy, setBusy] = React.useState(false);
+	const [error, setError] = React.useState<string | null>(null);
 
 	async function pick(folderId: string | null) {
 		if (busy) return;
 		setBusy(true);
+		setError(null);
 		try {
 			await onPick(folderId);
+			setError(null);
 			onOpenChange(false);
+		} catch (cause) {
+			setError(
+				mutationErrorMessage(cause, msg("assetManager.error.mutationRetry")),
+			);
 		} finally {
 			setBusy(false);
 		}
@@ -53,7 +64,10 @@ export function MoveTargetPicker({
 		<Dialog
 			open={open}
 			onOpenChange={(next) => {
-				if (!busy) onOpenChange(next);
+				if (!busy) {
+					if (!next) setError(null);
+					onOpenChange(next);
+				}
 			}}
 		>
 			<DialogContent>
@@ -94,6 +108,7 @@ export function MoveTargetPicker({
 						</li>
 					))}
 				</ul>
+				<MutationErrorAlert message={error} />
 			</DialogContent>
 		</Dialog>
 	);

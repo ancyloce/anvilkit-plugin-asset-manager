@@ -137,6 +137,36 @@ describe("DeleteFolderDialog", () => {
 		).toBeTruthy();
 		expect(screen.queryByText(/remove its 0 assets too\./)).toBeNull();
 	});
+
+	it("keeps the folder dialog open and clears a rejected mutation on retry", async () => {
+		const onConfirm = vi
+			.fn()
+			.mockRejectedValueOnce(new Error("Folder removal failed."))
+			.mockResolvedValueOnce(undefined);
+		render(
+			<DeleteFolderDialog
+				folder={folder("a", "Marketing", null)}
+				cascadeAssetCount={2}
+				onConfirm={onConfirm}
+				onCancel={vi.fn()}
+			/>,
+		);
+
+		fireEvent.click(screen.getByText("Remove folder"));
+		await waitFor(() => {
+			expect(screen.getByRole("alert").textContent).toContain(
+				"Folder removal failed. Try again or cancel.",
+			);
+		});
+		expect(screen.getByText("Delete folder?")).toBeDefined();
+		expect(
+			(screen.getByText("Remove folder") as HTMLButtonElement).disabled,
+		).toBe(false);
+
+		fireEvent.click(screen.getByText("Delete contents"));
+		await waitFor(() => expect(onConfirm).toHaveBeenCalledTimes(2));
+		await waitFor(() => expect(screen.queryByRole("alert")).toBeNull());
+	});
 });
 
 describe("MoveTargetPicker", () => {
@@ -152,6 +182,37 @@ describe("MoveTargetPicker", () => {
 		);
 		fireEvent.click(screen.getByText("Marketing"));
 		await waitFor(() => expect(onPick).toHaveBeenCalledWith("a"));
+	});
+
+	it("keeps the picker open and clears a rejected move error on retry", async () => {
+		const onOpenChange = vi.fn();
+		const onPick = vi
+			.fn()
+			.mockRejectedValueOnce(new Error("Move was rejected."))
+			.mockResolvedValueOnce(undefined);
+		render(
+			<MoveTargetPicker
+				open
+				onOpenChange={onOpenChange}
+				folders={[folder("a", "Marketing", null)]}
+				onPick={onPick}
+			/>,
+		);
+
+		fireEvent.click(screen.getByText("Marketing"));
+		await waitFor(() => {
+			expect(screen.getByRole("alert").textContent).toContain(
+				"Move was rejected. Try again or cancel.",
+			);
+		});
+		expect(onOpenChange).not.toHaveBeenCalledWith(false);
+		expect((screen.getByText("Marketing") as HTMLButtonElement).disabled).toBe(
+			false,
+		);
+
+		fireEvent.click(screen.getByText("Marketing"));
+		await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
+		await waitFor(() => expect(screen.queryByRole("alert")).toBeNull());
 	});
 });
 
