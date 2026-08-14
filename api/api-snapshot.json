@@ -5160,7 +5160,7 @@
 								"summary": [
 									{
 										"kind": "text",
-										"text": "Called when an asset is deleted through the source (default in-memory data\nplane / lightweight registry source), with the record at deletion time.\nUse it to release backend objects tied to the upload. "
+										"text": "Called when an asset is deleted or its backing URL is superseded through the\nsource (default in-memory data plane / lightweight registry source), with\nthe record as it existed before removal or replacement. Use it to release\nbackend objects tied to the upload. "
 									},
 									{
 										"kind": "code",
@@ -5168,7 +5168,7 @@
 									},
 									{
 										"kind": "text",
-										"text": " URLs minted\nby the built-in "
+										"text": " URLs minted by the built-in\n"
 									},
 									{
 										"kind": "code",
@@ -5176,7 +5176,7 @@
 									},
 									{
 										"kind": "text",
-										"text": " are revoked automatically regardless of\nthis hook. Not invoked when a host-owned "
+										"text": " are revoked automatically regardless of this hook. Not\ninvoked when a host-owned "
 									},
 									{
 										"kind": "code",
@@ -5184,7 +5184,7 @@
 									},
 									{
 										"kind": "text",
-										"text": " owns the asset plane\n— that backend owns its own deletion."
+										"text": " owns the asset plane — that backend\nowns its own deletion and replacement lifecycle."
 									}
 								]
 							},
@@ -8169,7 +8169,7 @@
 								"summary": [
 									{
 										"kind": "text",
-										"text": "Fired with the removed record after a successful delete."
+										"text": "Fired with a removed or URL-superseded record after a successful mutation."
 									}
 								]
 							},
@@ -11938,7 +11938,7 @@
 						"summary": [
 							{
 								"kind": "text",
-								"text": "Lifecycle hook fired when an asset is deleted through the asset source, with\nthe record as it existed at deletion time. Lets a host release backend\nobjects tied to the upload (e.g. delete the stored S3 object, revoke a\n"
+								"text": "Lifecycle hook fired when an asset is deleted or its URL is superseded, with\nthe record as it existed before removal/replacement. Lets a host release its\nbacking object (e.g. delete the stored S3 object or revoke a "
 							},
 							{
 								"kind": "code",
@@ -11946,7 +11946,7 @@
 							},
 							{
 								"kind": "text",
-								"text": " URL). Awaited; throwing rejects the delete."
+								"text": " URL).\nAwaited; throwing rejects the mutation."
 							}
 						]
 					},
