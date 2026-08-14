@@ -50,6 +50,14 @@ export interface CreateStudioAssetSourceOptions {
 		options?: UploadAdapterOptions,
 	) => Promise<UploadResult>;
 	/**
+	 * Runs the upload pipeline without registering or dispatching its fresh id.
+	 * Replacement uses this callback, then commits once under the target id.
+	 */
+	readonly ingest?: (
+		file: File,
+		options?: UploadAdapterOptions,
+	) => Promise<UploadResult>;
+	/**
 	 * Optional thumbnail derivation. Returning a string sets
 	 * `StudioAsset.thumbnailUrl`; returning `undefined` suppresses the
 	 * thumbnail (overriding the default-for-images behavior).
@@ -73,6 +81,7 @@ export function createStudioAssetSource(
 	options: CreateStudioAssetSourceOptions,
 ): StudioAssetSource {
 	const { registry, upload, getThumbnail, onDelete } = options;
+	const ingest = options.ingest ?? upload;
 	const maxConcurrent = Math.max(
 		1,
 		options.maxConcurrentUploads ?? MAX_CONCURRENT_UPLOADS,
@@ -236,12 +245,15 @@ export function createStudioAssetSource(
 		},
 
 		async replace(assetId, file) {
-			const result = await upload(file);
+			if (registry.get(assetId) === undefined) {
+				throw makeUnknownAssetMutationError("replace", assetId);
+			}
+			const result = await ingest(file);
 			const replaced = registry.replace(assetId, result);
 			if (replaced === undefined) {
-				// The id no longer exists — fall back to the freshly-uploaded
-				// entry so the caller still sees a valid asset.
-				return project(result);
+				// The target can disappear while ingest is in flight. Do not turn
+				// that race into an unintended new asset under the adapter's id.
+				throw makeUnknownAssetMutationError("replace", assetId);
 			}
 			return project(replaced);
 		},

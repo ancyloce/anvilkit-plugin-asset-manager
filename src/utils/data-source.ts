@@ -25,13 +25,17 @@ import { createFolderStore, type FolderStore } from "./folders.js";
 import { paginateMatches, prepareAssetMatcher } from "./registry.js";
 
 /**
- * Binary ingest used by `replace` — the same `uploadAsset`-bound callback the
- * `StudioAssetSource` already threads, so the security pipeline is single-sourced.
+ * Binary ingest used by `replace`. The callback runs the same validation and
+ * adapter pipeline as a normal upload, but does not register or dispatch the
+ * adapter's fresh id before the replacement preserves the catalog id.
  */
-export type UploadFn = (
+export type IngestFn = (
 	file: File,
 	options?: { readonly signal?: AbortSignal },
 ) => Promise<UploadResult>;
+
+/** @deprecated Use {@link IngestFn}; retained for internal test compatibility. */
+export type UploadFn = IngestFn;
 
 /** Fully-resolved data plane (no optional methods) stored on the runtime state. */
 export interface ResolvedAssetDataSource {
@@ -77,7 +81,8 @@ export interface ResolvedAssetDataSource {
 
 export interface CreateInMemoryDataSourceOptions {
 	readonly registry: AssetRegistry;
-	readonly upload: UploadFn;
+	/** Must ingest without registering or dispatching the returned fresh id. */
+	readonly upload: IngestFn;
 	/** Shared folder store — injected by the factory so the UI sees the same one. */
 	readonly folderStore?: FolderStore;
 	/** Max nesting depth from `FolderOptions`. */
@@ -191,10 +196,25 @@ export function createInMemoryDataSource(
 		},
 
 		async replace(id, payload, signal) {
+			if (registry.get(id) === undefined) {
+				throw new AssetSourceError(
+					"ASSET_MUTATION_REJECTED",
+					`Cannot replace unknown asset "${id}".`,
+				);
+			}
 			const result = await upload(payload, signal ? { signal } : undefined);
 			if (signal?.aborted) throw makeAbortError();
 			const replaced = registry.replace(id, result);
-			return replaced ?? result;
+			if (replaced === undefined) {
+				// The target can disappear while binary ingest is in flight. Never
+				// register the adapter's fresh id as a fallback: that would turn a
+				// failed replacement into an unintended new catalog entry.
+				throw new AssetSourceError(
+					"ASSET_MUTATION_REJECTED",
+					`Cannot replace unknown asset "${id}".`,
+				);
+			}
+			return replaced;
 		},
 
 		rename(id, name) {
