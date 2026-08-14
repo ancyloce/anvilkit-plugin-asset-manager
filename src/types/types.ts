@@ -85,10 +85,10 @@ export type UploadAdapter = (
 ) => Promise<UploadResult>;
 
 /**
- * Lifecycle hook fired when an asset is deleted through the asset source, with
- * the record as it existed at deletion time. Lets a host release backend
- * objects tied to the upload (e.g. delete the stored S3 object, revoke a
- * `blob:` URL). Awaited; throwing rejects the delete.
+ * Lifecycle hook fired when an asset is deleted or its URL is superseded, with
+ * the record as it existed before removal/replacement. Lets a host release its
+ * backing object (e.g. delete the stored S3 object or revoke a `blob:` URL).
+ * Awaited; throwing rejects the mutation.
  */
 export type AssetDeletedHook = (asset: UploadResult) => void | Promise<void>;
 

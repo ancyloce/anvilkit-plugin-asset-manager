@@ -116,12 +116,13 @@ export interface AssetManagerOptions {
 	 */
 	readonly transformResolver?: TransformResolver;
 	/**
-	 * Called when an asset is deleted through the source (default in-memory data
-	 * plane / lightweight registry source), with the record at deletion time.
-	 * Use it to release backend objects tied to the upload. `blob:` URLs minted
-	 * by the built-in `inMemoryUploader` are revoked automatically regardless of
-	 * this hook. Not invoked when a host-owned `dataSource` owns the asset plane
-	 * — that backend owns its own deletion.
+	 * Called when an asset is deleted or its backing URL is superseded through the
+	 * source (default in-memory data plane / lightweight registry source), with
+	 * the record as it existed before removal or replacement. Use it to release
+	 * backend objects tied to the upload. `blob:` URLs minted by the built-in
+	 * `inMemoryUploader` are revoked automatically regardless of this hook. Not
+	 * invoked when a host-owned `dataSource` owns the asset plane — that backend
+	 * owns its own deletion and replacement lifecycle.
 	 */
 	readonly onAssetDeleted?: AssetDeletedHook;
 }
