@@ -23,6 +23,7 @@
 	"assetManager.dialog.replaceProgress": "替换中…",
 	"assetManager.dialog.newFolderTitle": "新建文件夹",
 	"assetManager.dialog.folderSaveError": "无法保存文件夹。",
+	"assetManager.error.mutationRetry": "请重试或取消。",
 	"assetManager.dialog.folderNamePlaceholder": "文件夹名称",
 	"assetManager.dialog.saveProgress": "保存中…",
 	"assetManager.dialog.deleteFolderTitle": "删除文件夹？",

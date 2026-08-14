@@ -23,6 +23,7 @@
 	"assetManager.dialog.replaceProgress": "置き換え中…",
 	"assetManager.dialog.newFolderTitle": "新しいフォルダー",
 	"assetManager.dialog.folderSaveError": "フォルダーを保存できませんでした。",
+	"assetManager.error.mutationRetry": "もう一度お試しいただくか、キャンセルしてください。",
 	"assetManager.dialog.folderNamePlaceholder": "フォルダー名",
 	"assetManager.dialog.saveProgress": "保存中…",
 	"assetManager.dialog.deleteFolderTitle": "フォルダーを削除しますか？",

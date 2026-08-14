@@ -23,6 +23,7 @@
 	"assetManager.dialog.replaceProgress": "교체 중…",
 	"assetManager.dialog.newFolderTitle": "새 폴더",
 	"assetManager.dialog.folderSaveError": "폴더를 저장할 수 없습니다.",
+	"assetManager.error.mutationRetry": "다시 시도하거나 취소하세요.",
 	"assetManager.dialog.folderNamePlaceholder": "폴더 이름",
 	"assetManager.dialog.saveProgress": "저장 중…",
 	"assetManager.dialog.deleteFolderTitle": "폴더를 삭제하시겠습니까?",

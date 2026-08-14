@@ -23,6 +23,7 @@
 	"assetManager.dialog.replaceProgress": "Replacing…",
 	"assetManager.dialog.newFolderTitle": "New folder",
 	"assetManager.dialog.folderSaveError": "Could not save the folder.",
+	"assetManager.error.mutationRetry": "Try again or cancel.",
 	"assetManager.dialog.folderNamePlaceholder": "Folder name",
 	"assetManager.dialog.saveProgress": "Saving…",
 	"assetManager.dialog.deleteFolderTitle": "Delete folder?",
