@@ -82,6 +82,17 @@ function createAssetManagerPlugin(options: AssetManagerOptions): StudioPlugin;
 | `sniffContent`              | `boolean`                                      | `false`   | When `true`, reject a file whose magic-byte content contradicts its declared `file.type` (defense-in-depth beyond MIME/extension). |
 | `onAssetDeleted`            | `(asset: UploadResult) => void \| Promise<void>` | none    | Lifecycle hook fired when an asset is deleted via the default source; release backend objects here (`blob:` URLs are auto-revoked). |
 
+`unsplash.proxyEndpoint` is an API base, not a search-only route. The provider
+appends every Unsplash path to it, including the mandatory
+`/photos/:id/download` trigger, so the proxy must forward those paths and inject
+the `Client-ID` server-side. Both relative bases such as `/api/unsplash` and
+absolute bases such as `https://example.com/api/unsplash` are supported.
+
+Set `unsplash.rehostOnPick: true` to download a selected image and pass it
+through the configured uploader before insertion. The resulting local asset
+keeps the Unsplash attribution metadata and still fires the mandatory download
+trigger; the default remains a compliant Unsplash hotlink.
+
 ### Imperative API on the plugin context
 
 | Function               | Signature                                       | Purpose                                                    |
@@ -311,12 +322,16 @@ Pass `s3Multipart: { endpoint, bucketHost?, publicHost? }` (single or array) alo
 | Component             | Key props                                     |
 | --------------------- | --------------------------------------------- |
 | `UploadButton`        | `{ onUpload, onProgress?, disabled? }`        |
-| `AssetBrowser`        | `{ registry, onSelect, maxWidth? }`           |
+| `AssetBrowser`        | `{ assets, onInsert, categories?, facets?, onFilterChange? }` |
 | `AssetCommandPalette` | `{ registry, onSelect }`                      |
 | `MetadataPanel`       | `{ asset, registry, onClose }`                |
 | `ReplaceAssetDialog`  | `{ asset, onReplace, onCancel }`              |
 | `DeleteAssetDialog`   | `{ asset, onDelete, onCancel }`               |
-| `AssetManagerUI`      | `{ registry, plugin, maxWidth? }` (composite) |
+| `AssetManagerUI`      | `{ uploader, registry, categories?, facets?, onFilterChange? }` (composite) |
+
+Configured category and facet controls load lazily. Local definitions filter
+with AND composition; provider categories and remote facets remain in the
+emitted `AssetFilter` so the source can route them.
 
 `UploadProgressSnapshot` is `{ inFlight: number; completed: number }`.
 
