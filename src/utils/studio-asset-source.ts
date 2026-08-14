@@ -69,7 +69,7 @@ export interface CreateStudioAssetSourceOptions {
 	/**
 	 * Maximum number of uploads in flight. Defaults to
 	 * `MAX_CONCURRENT_UPLOADS` (3). Set to 1 to restore the previous
-	 * sequential behavior.
+	 * sequential behavior. Must be a positive integer.
 	 */
 	readonly maxConcurrentUploads?: number;
 	/** Fired with the removed record after a successful delete. */
@@ -82,10 +82,10 @@ export function createStudioAssetSource(
 ): StudioAssetSource {
 	const { registry, upload, getThumbnail, onDelete } = options;
 	const ingest = options.ingest ?? upload;
-	const maxConcurrent = Math.max(
-		1,
-		options.maxConcurrentUploads ?? MAX_CONCURRENT_UPLOADS,
-	);
+	const maxConcurrent = options.maxConcurrentUploads ?? MAX_CONCURRENT_UPLOADS;
+	if (maxConcurrent < 1 || maxConcurrent % 1 !== 0) {
+		throw new RangeError("maxConcurrentUploads must be a positive integer.");
+	}
 
 	const project = (entry: UploadResult): StudioAsset =>
 		toStudioAsset(entry, getThumbnail);

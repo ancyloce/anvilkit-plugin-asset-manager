@@ -241,6 +241,26 @@ describe("StudioAssetSource.upload concurrency", () => {
 		await promise;
 	});
 
+	it.each([
+		Number.NaN,
+		Number.POSITIVE_INFINITY,
+		Number.NEGATIVE_INFINITY,
+		0,
+		-1,
+		1.5,
+	])(
+		"rejects invalid maxConcurrentUploads value %s when creating the source",
+		(maxConcurrentUploads) => {
+			expect(() =>
+				createStudioAssetSource({
+					registry: createAssetRegistry(),
+					upload: async () => ({ id: "unused", url: "https://x/unused" }),
+					maxConcurrentUploads,
+				}),
+			).toThrowError(/maxConcurrentUploads must be a positive integer/i);
+		},
+	);
+
 	it("a throwing upload subscriber/listener does not reject the batch (C1)", async () => {
 		const registry = createAssetRegistry();
 		let subscriberHits = 0;

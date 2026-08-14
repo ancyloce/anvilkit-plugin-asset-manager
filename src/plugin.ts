@@ -554,7 +554,7 @@ function getRuntimeState<UserConfig extends PuckConfig = PuckConfig>(
 	ctx: StudioPluginContext<UserConfig>,
 ): AssetManagerRuntimeState {
 	const token = tokenByContext.get(ctx);
-	const state = token ? stateByToken.get(token) : undefined;
+	const state = token && stateByToken.get(token);
 	if (!state) {
 		throw new Error(
 			"createAssetManagerPlugin: uploadAsset called before the plugin runtime was initialized.",
