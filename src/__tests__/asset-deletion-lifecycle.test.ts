@@ -47,6 +47,51 @@ describe("createStudioAssetSource onDelete", () => {
 		await expect(source.delete?.("missing")).rejects.toBeTruthy();
 		expect(onDelete).not.toHaveBeenCalled();
 	});
+
+	it("cleans up the superseded record after replacement", async () => {
+		const registry = createAssetRegistry();
+		const original = { id: "a1", url: "blob:asset-manager/original" };
+		registry.register(original);
+		const onDelete = vi.fn();
+		const source = createStudioAssetSource({
+			registry,
+			upload: async () => ({
+				id: "fresh-id",
+				url: "blob:asset-manager/replacement",
+			}),
+			onDelete,
+		});
+
+		await source.replace?.(
+			"a1",
+			new File(["replacement"], "replacement.png", { type: "image/png" }),
+		);
+
+		expect(onDelete).toHaveBeenCalledOnce();
+		expect(onDelete).toHaveBeenCalledWith(expect.objectContaining(original));
+		expect(registry.get("a1")?.url).toBe("blob:asset-manager/replacement");
+	});
+
+	it("keeps a backing object alive when replacement reuses its URL", async () => {
+		const registry = createAssetRegistry();
+		registry.register({ id: "a1", url: "https://cdn.example/stable-key" });
+		const onDelete = vi.fn();
+		const source = createStudioAssetSource({
+			registry,
+			upload: async () => ({
+				id: "fresh-id",
+				url: "https://cdn.example/stable-key",
+			}),
+			onDelete,
+		});
+
+		await source.replace?.(
+			"a1",
+			new File(["replacement"], "replacement.png", { type: "image/png" }),
+		);
+
+		expect(onDelete).not.toHaveBeenCalled();
+	});
 });
 
 describe("createInMemoryDataSource onDelete", () => {
@@ -94,6 +139,30 @@ describe("createInMemoryDataSource onDelete", () => {
 			"a1",
 			"a2",
 		]);
+	});
+
+	it("cleans up the superseded record after replacement", async () => {
+		const registry = createAssetRegistry();
+		const original = { id: "a1", url: "blob:asset-manager/original" };
+		registry.register(original);
+		const onDelete = vi.fn();
+		const source = createInMemoryDataSource({
+			registry,
+			upload: async () => ({
+				id: "fresh-id",
+				url: "blob:asset-manager/replacement",
+			}),
+			onDelete,
+		});
+
+		await source.replace(
+			"a1",
+			new File(["replacement"], "replacement.png", { type: "image/png" }),
+		);
+
+		expect(onDelete).toHaveBeenCalledOnce();
+		expect(onDelete).toHaveBeenCalledWith(expect.objectContaining(original));
+		expect(registry.get("a1")?.url).toBe("blob:asset-manager/replacement");
 	});
 });
 
@@ -149,5 +218,67 @@ describe("plugin asset-deletion lifecycle", () => {
 		await source?.delete?.(id as string);
 		expect(revoke).toHaveBeenCalledWith(expect.stringMatching(/^blob:/));
 		expect(onAssetDeleted).toHaveBeenCalledTimes(1);
+	});
+
+	it("releases the superseded blob after replacement", async () => {
+		const revoke = vi.fn();
+		Object.defineProperty(URL, "revokeObjectURL", {
+			value: revoke,
+			configurable: true,
+			writable: true,
+		});
+
+		const onAssetDeleted = vi.fn();
+		let source: StudioAssetSource | undefined;
+		const base = createFakeStudioContext({
+			getData: () =>
+				({ root: { props: {} }, content: [], zones: {} }) as unknown as Data,
+		});
+		const ctx = {
+			...base,
+			registerAssetSource: (s: StudioAssetSource) => {
+				source = s;
+				return () => undefined;
+			},
+		} as unknown as StudioPluginContext;
+
+		let uploadCount = 0;
+		const plugin = createAssetManagerPlugin({
+			uploader: async () => {
+				uploadCount += 1;
+				return {
+					id: `adapter-${uploadCount}`,
+					url: `blob:asset-manager/${uploadCount}`,
+				};
+			},
+			folders: false,
+			onAssetDeleted,
+		});
+		const installed = await registerPlugin(plugin, { ctx });
+		await installed.runInit();
+
+		const [uploaded] =
+			(await source?.upload([
+				new File(["old"], "old.png", { type: "image/png" }),
+			])) ?? [];
+		expect(uploaded).toBeDefined();
+
+		const replacement = await source?.replace?.(
+			uploaded?.id as string,
+			new File(["new"], "new.png", { type: "image/png" }),
+		);
+
+		expect(replacement?.id).toBe(uploaded?.id);
+		expect(replacement?.url).toBe(uploaded?.url);
+		expect(revoke).toHaveBeenCalledOnce();
+		expect(revoke).toHaveBeenCalledWith("blob:asset-manager/1");
+		expect(revoke).not.toHaveBeenCalledWith("blob:asset-manager/2");
+		expect(onAssetDeleted).toHaveBeenCalledOnce();
+		expect(onAssetDeleted).toHaveBeenCalledWith(
+			expect.objectContaining({
+				id: uploaded?.id,
+				url: "blob:asset-manager/1",
+			}),
+		);
 	});
 });
