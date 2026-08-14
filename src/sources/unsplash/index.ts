@@ -4,7 +4,8 @@
  * subpath: `@anvilkit/plugin-asset-manager/providers/unsplash`.
  *
  * Compliance baked in: search returns hotlinked `urls.regular` + full
- * attribution metadata; `pickResult` fires the MANDATORY download trigger.
+ * attribution metadata; `pickResult` fires the MANDATORY download trigger and
+ * can optionally route the image bytes through the plugin's ingest pipeline.
  */
 
 import type { StudioAsset } from "@anvilkit/core/types";
@@ -12,6 +13,7 @@ import type { StudioAsset } from "@anvilkit/core/types";
 import type { AssetFilter, AssetListPage } from "../../types/filter.js";
 import type { UploadResult } from "../../types/types.js";
 import type { UnsplashSourceOptions } from "../../types/unsplash.js";
+import { AssetSourceError } from "../../utils/errors.js";
 import type { AssetSourceProvider, AssetTheme } from "../provider.js";
 import { createUnsplashClient, type UnsplashPhoto } from "./client.js";
 import {
@@ -34,6 +36,12 @@ export const UNSPLASH_THEME_FACET = "unsplash:theme";
  */
 const BYID_MAX_ENTRIES = 512;
 
+/** Binary ingest callback used when {@link UnsplashSourceOptions.rehostOnPick} is enabled. */
+export type UnsplashRehostIngest = (
+	file: File,
+	options?: { readonly signal?: AbortSignal },
+) => Promise<UploadResult>;
+
 /** Enabled when a proxy endpoint or access key is present (or forced via `enabled`). */
 export function unsplashEnabled(options: UnsplashSourceOptions): boolean {
 	return (
@@ -49,6 +57,7 @@ function clamp(value: number, min: number, max: number): number {
 /** Create the Unsplash-backed read-only asset source provider. */
 export function createUnsplashProvider(
 	options: UnsplashSourceOptions,
+	ingest?: UnsplashRehostIngest,
 ): AssetSourceProvider {
 	const client = createUnsplashClient({
 		...(options.proxyEndpoint !== undefined
@@ -92,11 +101,12 @@ export function createUnsplashProvider(
 			console.warn("asset-manager: Unsplash download tracking failed.", error);
 		});
 	};
+	const fetchImpl = options.fetch ?? globalThis.fetch;
 
 	const toUploadResult = (photo: UnsplashPhoto): UploadResult =>
 		Object.freeze({
 			id: `unsplash:${photo.id}`,
-			url: photo.urls.regular, // hotlink — never re-hosted
+			url: photo.urls.regular, // browse hotlink; optionally rehosted on pick
 			name:
 				photo.description?.trim() ||
 				photo.alt_description?.trim() ||
@@ -192,30 +202,63 @@ export function createUnsplashProvider(
 		asset: StudioAsset,
 		signal?: AbortSignal,
 	): Promise<UploadResult> => {
-		const cached = byId.get(asset.id, Date.now());
-		if (cached?.meta?.attribution !== undefined) {
-			// Mandatory trigger, fire-and-forget so it never blocks insert.
-			trackDownload(cached.meta.attribution.downloadLocation, signal);
-			return cached;
-		}
-		// Cache miss (e.g. the provider was recreated since the search). The photo
-		// id is embedded in `asset.id`, so refetch the photo and STILL fire the
-		// mandatory download trigger — Unsplash compliance must never be skipped.
-		const photoId = asset.id.startsWith("unsplash:")
-			? asset.id.slice("unsplash:".length)
-			: asset.id;
-		try {
-			const result = toUploadResult(await client.getPhoto(photoId, signal));
-			byId.set(result.id, result, Date.now());
-			if (result.meta?.attribution !== undefined) {
-				trackDownload(result.meta.attribution.downloadLocation, signal);
+		throwIfAborted(signal);
+		let result = byId.get(asset.id, Date.now());
+		if (result?.meta?.attribution === undefined) {
+			// Cache miss (e.g. the provider was recreated since the search). The
+			// photo id is embedded in `asset.id`, so refetch it before tracking or
+			// rehosting. Rehosting cannot safely fall back to the bare asset because
+			// that URL may itself be an unresolved `asset://` reference.
+			const photoId = unsplashPhotoId(asset.id);
+			try {
+				result = toUploadResult(await client.getPhoto(photoId, signal));
+				byId.set(result.id, result, Date.now());
+			} catch (error) {
+				if (
+					signal?.aborted ||
+					isAbortError(error) ||
+					options.rehostOnPick === true
+				) {
+					throw error;
+				}
+				// Default hotlink mode preserves its existing best-effort cache-miss
+				// fallback rather than fabricating attribution or a download trigger.
+				return { id: asset.id, url: asset.url };
 			}
-			return result;
-		} catch {
-			// Could not recover the photo — return the bare reference rather than
-			// fabricate a (non-compliant) trigger for a download_location we lack.
-			return { id: asset.id, url: asset.url };
 		}
+
+		const attribution = result.meta?.attribution;
+		if (attribution !== undefined) {
+			// Mandatory trigger, fire-and-forget so tracking failures do not block
+			// insertion; client errors are reported by `trackDownload` above.
+			trackDownload(attribution.downloadLocation, signal);
+		}
+		if (options.rehostOnPick !== true) return result;
+		if (ingest === undefined) {
+			throw new AssetSourceError(
+				"ASSET_MUTATION_REJECTED",
+				"Unsplash rehostOnPick requires an asset ingest pipeline.",
+			);
+		}
+
+		const file = await downloadForRehost(
+			fetchImpl,
+			result,
+			unsplashPhotoId(asset.id),
+			signal,
+		);
+		throwIfAborted(signal);
+		const hosted = await ingest(file, signal ? { signal } : undefined);
+		throwIfAborted(signal);
+		return {
+			...hosted,
+			...(result.name !== undefined ? { name: result.name } : {}),
+			meta: {
+				...(result.meta ?? {}),
+				...(hosted.meta ?? {}),
+				...(attribution !== undefined ? { attribution } : {}),
+			},
+		};
 	};
 
 	const listThemes = (): readonly AssetTheme[] => themes;
@@ -231,11 +274,108 @@ export function createUnsplashProvider(
 			folders: false,
 		},
 		requiredCsp: () => ({
-			connectSrc: ["https://api.unsplash.com"],
+			connectSrc: [
+				"https://api.unsplash.com",
+				...(options.rehostOnPick === true
+					? ["https://images.unsplash.com"]
+					: []),
+			],
 			imgSrc: ["https://images.unsplash.com"],
 		}),
 		listThemes,
 		search,
 		pickResult,
 	};
+}
+
+async function downloadForRehost(
+	fetchImpl: typeof globalThis.fetch,
+	result: UploadResult,
+	photoId: string,
+	signal?: AbortSignal,
+): Promise<File> {
+	throwIfAborted(signal);
+	let response: Response;
+	try {
+		response = await fetchImpl(result.url, signal ? { signal } : undefined);
+	} catch (error) {
+		if (signal?.aborted || isAbortError(error)) throw error;
+		throw new AssetSourceError(
+			"PROVIDER_NETWORK",
+			"Could not download the selected Unsplash image for rehosting.",
+			{ cause: error, retryable: true },
+		);
+	}
+	if (!response.ok) {
+		throw new AssetSourceError(
+			"PROVIDER_BAD_RESPONSE",
+			`Unsplash image download returned HTTP ${response.status}.`,
+			{ status: response.status, retryable: response.status >= 500 },
+		);
+	}
+
+	let blob: Blob;
+	try {
+		blob = await response.blob();
+	} catch (error) {
+		if (signal?.aborted || isAbortError(error)) throw error;
+		throw new AssetSourceError(
+			"PROVIDER_BAD_RESPONSE",
+			"Unsplash image download returned an unreadable body.",
+			{ cause: error },
+		);
+	}
+	throwIfAborted(signal);
+	const mimeType =
+		response.headers.get("content-type")?.split(";", 1)[0]?.trim() ||
+		blob.type ||
+		result.meta?.mimeType ||
+		"image/jpeg";
+	if (!mimeType.toLowerCase().startsWith("image/")) {
+		throw new AssetSourceError(
+			"PROVIDER_BAD_RESPONSE",
+			`Unsplash image download returned non-image content (${mimeType}).`,
+		);
+	}
+	return new File([blob], `unsplash-${photoId}.${fileExtension(mimeType)}`, {
+		type: mimeType,
+	});
+}
+
+function unsplashPhotoId(assetId: string): string {
+	return assetId.startsWith("unsplash:")
+		? assetId.slice("unsplash:".length)
+		: assetId;
+}
+
+function fileExtension(mimeType: string): string {
+	switch (mimeType.toLowerCase()) {
+		case "image/png":
+			return "png";
+		case "image/webp":
+			return "webp";
+		case "image/avif":
+			return "avif";
+		default:
+			return "jpg";
+	}
+}
+
+function throwIfAborted(signal?: AbortSignal): void {
+	if (!signal?.aborted) return;
+	if (signal.reason instanceof Error) throw signal.reason;
+	if (typeof DOMException !== "undefined") {
+		throw new DOMException("Aborted", "AbortError");
+	}
+	const error = new Error("Aborted");
+	error.name = "AbortError";
+	throw error;
+}
+
+function isAbortError(error: unknown): boolean {
+	return (
+		error !== null &&
+		typeof error === "object" &&
+		(error as { readonly name?: unknown }).name === "AbortError"
+	);
 }

@@ -17,14 +17,36 @@ import type { AssetSourceProvider } from "./provider.js";
 
 type CompositeCursor = Record<string, string | undefined>;
 
+interface BufferedSourceCursor {
+	readonly cursor?: string;
+	readonly items?: readonly UploadResult[];
+}
+
+interface BufferedCompositeCursor {
+	readonly version: 1;
+	readonly sources: Readonly<Record<string, BufferedSourceCursor>>;
+	readonly totals?: Readonly<Record<string, number>>;
+}
+
+const DEFAULT_FEDERATED_LIMIT = 50;
+
 function toBase64Url(json: string): string {
-	return btoa(json).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+	const binary = Array.from(new TextEncoder().encode(json), (byte) =>
+		String.fromCharCode(byte),
+	).join("");
+	return btoa(binary)
+		.replace(/\+/g, "-")
+		.replace(/\//g, "_")
+		.replace(/=+$/, "");
 }
 
 function fromBase64Url(token: string): string {
 	const padded =
 		token.length % 4 === 0 ? token : token + "=".repeat(4 - (token.length % 4));
-	return atob(padded.replace(/-/g, "+").replace(/_/g, "/"));
+	const binary = atob(padded.replace(/-/g, "+").replace(/_/g, "/"));
+	return new TextDecoder().decode(
+		Uint8Array.from(binary, (character) => character.charCodeAt(0)),
+	);
 }
 
 export function encodeCompositeCursor(cursor: CompositeCursor): string {
@@ -37,12 +59,80 @@ export function decodeCompositeCursor(
 	if (token === undefined || token === "") return {};
 	try {
 		const parsed = JSON.parse(fromBase64Url(token));
+		if (isBufferedCompositeCursor(parsed)) {
+			return Object.fromEntries(
+				Object.entries(parsed.sources).map(([id, source]) => [
+					id,
+					source.cursor,
+				]),
+			);
+		}
 		return typeof parsed === "object" && parsed !== null
 			? (parsed as CompositeCursor)
 			: {};
 	} catch {
 		return {};
 	}
+}
+
+function isBufferedCompositeCursor(
+	value: unknown,
+): value is BufferedCompositeCursor {
+	if (value === null || typeof value !== "object") return false;
+	const candidate = value as { version?: unknown; sources?: unknown };
+	return (
+		candidate.version === 1 &&
+		candidate.sources !== null &&
+		typeof candidate.sources === "object"
+	);
+}
+
+function decodeBufferedCursor(token: string | undefined): {
+	readonly continuation: boolean;
+	readonly sources: Readonly<Record<string, BufferedSourceCursor>>;
+	readonly totals: Readonly<Record<string, number>>;
+} {
+	if (token === undefined || token === "") {
+		return { continuation: false, sources: {}, totals: {} };
+	}
+	try {
+		const parsed: unknown = JSON.parse(fromBase64Url(token));
+		if (isBufferedCompositeCursor(parsed)) {
+			return {
+				continuation: true,
+				sources: parsed.sources,
+				totals: parsed.totals ?? {},
+			};
+		}
+		if (parsed !== null && typeof parsed === "object") {
+			const sources = Object.fromEntries(
+				Object.entries(parsed).flatMap(([id, cursor]) =>
+					typeof cursor === "string" ? [[id, { cursor }]] : [],
+				),
+			);
+			return {
+				continuation: Object.keys(sources).length > 0,
+				sources,
+				totals: {},
+			};
+		}
+	} catch {
+		// A malformed cursor retains the historic behavior: restart at page one.
+	}
+	return { continuation: false, sources: {}, totals: {} };
+}
+
+function encodeBufferedCursor(
+	sources: Readonly<Record<string, BufferedSourceCursor>>,
+	totals: Readonly<Record<string, number>>,
+): string {
+	return toBase64Url(
+		JSON.stringify({
+			version: 1,
+			sources,
+			totals,
+		} satisfies BufferedCompositeCursor),
+	);
 }
 
 /** A provider is eligible only if it can satisfy every required axis of the filter. */
@@ -111,48 +201,12 @@ function compareEntries(
 
 type SourceErrorMap = Record<string, { message: string; code?: string }>;
 
-function mergePages(
-	pages: readonly { provider: AssetSourceProvider; page: AssetListPage }[],
-	filter: AssetFilter,
-	carryForward: CompositeCursor = {},
-	sourceErrors: SourceErrorMap = {},
-): AssetListPage {
-	const field = filter.sort?.field ?? "recent";
-	const comparable = field === "name" || field === "size" || field === "kind";
-
-	// Each provider already returned a page (limited by its own sub-cursor).
-	const items: UploadResult[] = pages.flatMap((p) => [...p.page.items]);
-	if (comparable) {
-		const dir = filter.sort?.direction ?? (field === "name" ? "asc" : "desc");
-		const sign = dir === "asc" ? 1 : -1;
-		items.sort((a, b) => compareEntries(a, b, field) * sign);
-	}
-	// Otherwise: provider-grouped order (caller passes local first).
-
-	const total = pages.reduce((n, p) => n + p.page.total, 0);
-	// Seed with the carry-forward sub-cursors of any provider that FAILED this
-	// page (C2) so it resumes from the same position; successful providers then
-	// overwrite their own slot with the real next cursor below.
-	const sourceCursors: Record<string, string | undefined> = { ...carryForward };
-	const next: CompositeCursor = { ...carryForward };
-	let hasNext = Object.keys(carryForward).length > 0;
-	for (const { provider, page } of pages) {
-		sourceCursors[provider.id] = page.nextCursor;
-		if (page.nextCursor !== undefined) {
-			next[provider.id] = page.nextCursor;
-			hasNext = true;
-		}
-	}
-
-	return {
-		items: Object.freeze(items),
-		total,
-		nextCursor: hasNext ? encodeCompositeCursor(next) : undefined,
-		sourceCursors,
-		...(Object.keys(sourceErrors).length > 0
-			? { sourceErrors: Object.freeze(sourceErrors) }
-			: {}),
-	};
+interface WorkingSourceState {
+	readonly provider: AssetSourceProvider;
+	readonly fetchedCursors: Set<string>;
+	items: UploadResult[];
+	cursor?: string;
+	needsFetch: boolean;
 }
 
 /** Normalize a rejected provider search into a `{ message, code? }` pair. */
@@ -201,53 +255,196 @@ export async function federatedSearch(
 	input: FederatedSearchInput,
 ): Promise<AssetListPage> {
 	const { providers, filter, signal } = input;
-	const cursors = decodeCompositeCursor(filter.cursor);
-	// A continuation page carries per-source sub-cursors. A provider absent from
-	// the composite cursor was exhausted on an earlier page (or never started);
-	// re-querying it with no sub-cursor would restart its pagination and
-	// duplicate already-seen results, so on a continuation page only providers
-	// that still have a sub-cursor are queried.
-	const isContinuation =
-		filter.cursor !== undefined && Object.keys(cursors).length > 0;
+	const decoded = decodeBufferedCursor(filter.cursor);
 	const eligible = providers.filter((p) => providerCanSatisfy(p, filter));
 	const requestedSources = new Set(filter.sources ?? []);
 	const sourceScoped =
 		requestedSources.size > 0
 			? eligible.filter((p) => requestedSources.has(p.id))
 			: eligible;
-	const targets = isContinuation
-		? sourceScoped.filter((p) => cursors[p.id] !== undefined)
+	const targets = decoded.continuation
+		? sourceScoped.filter(
+				(provider) => decoded.sources[provider.id] !== undefined,
+			)
 		: sourceScoped;
 
 	if (targets.length === 0) {
 		return { items: Object.freeze([]), total: 0, nextCursor: undefined };
 	}
 
-	const settled = await Promise.allSettled(
-		targets.map((p) => p.search(filter, cursors[p.id], signal)),
-	);
-
+	const limit =
+		filter.limit !== undefined &&
+		Number.isFinite(filter.limit) &&
+		filter.limit > 0
+			? Math.floor(filter.limit)
+			: DEFAULT_FEDERATED_LIMIT;
+	const field = filter.sort?.field ?? "recent";
+	const comparable = field === "name" || field === "size" || field === "kind";
+	const direction =
+		filter.sort?.direction ?? (field === "name" ? "asc" : "desc");
+	const sign = direction === "asc" ? 1 : -1;
+	const totals: Record<string, number> = { ...decoded.totals };
+	const states: WorkingSourceState[] = targets.map((provider) => {
+		const buffered = decoded.sources[provider.id];
+		const items = Array.isArray(buffered?.items) ? [...buffered.items] : [];
+		return {
+			provider,
+			fetchedCursors: new Set<string>(),
+			items,
+			cursor: buffered?.cursor,
+			needsFetch:
+				!decoded.continuation ||
+				(items.length === 0 && buffered?.cursor !== undefined),
+		};
+	});
+	const fetchTargets = states.filter((state) => state.needsFetch);
+	const providerFilter: AssetFilter = {
+		...filter,
+		cursor: undefined,
+		limit,
+	};
 	// Resilient: a failed provider is dropped from THIS page (successful
-	// providers still return), but its incoming sub-cursor is carried forward
-	// (C2) so the next page retries it from the same position instead of
-	// silently resetting it to page 1 — which would skip the failed page and
-	// repeat earlier ones. The error is ALSO surfaced per-source via
+	// providers still return), but its incoming sub-cursor remains in its state
+	// so the next page retries it from the same position. The error is surfaced via
 	// `sourceErrors` so the sidebar can show a non-blocking degraded hint
 	// instead of silently dropping the failure.
-	const ok: { provider: AssetSourceProvider; page: AssetListPage }[] = [];
-	const carryForward: CompositeCursor = {};
 	const sourceErrors: SourceErrorMap = {};
-	settled.forEach((result, index) => {
-		const provider = targets[index];
-		if (provider === undefined) return;
-		if (result.status === "fulfilled") {
-			ok.push({ provider, page: result.value });
-		} else {
-			const incoming = cursors[provider.id];
-			if (incoming !== undefined) carryForward[provider.id] = incoming;
-			sourceErrors[provider.id] = describeReason(result.reason);
+	const failed = new Set<string>();
+	const visibleSourceCursors = new Set(
+		decoded.continuation ? Object.keys(decoded.sources) : [],
+	);
+	const fetchState = async (state: WorkingSourceState): Promise<boolean> => {
+		const incomingCursor = state.cursor;
+		const cursorKey =
+			incomingCursor === undefined ? "initial" : `next:${incomingCursor}`;
+		if (state.fetchedCursors.has(cursorKey)) return false;
+		state.fetchedCursors.add(cursorKey);
+		state.needsFetch = false;
+		try {
+			const page = await state.provider.search(
+				providerFilter,
+				incomingCursor,
+				signal,
+			);
+			const pageItems = [...page.items];
+			if (comparable) {
+				pageItems.sort(
+					(a, b) =>
+						compareEntries(a, b, field as "name" | "size" | "kind") * sign,
+				);
+			}
+			state.items.push(...pageItems);
+			state.cursor = page.nextCursor;
+			totals[state.provider.id] = page.total;
+			visibleSourceCursors.add(state.provider.id);
+			return true;
+		} catch (reason) {
+			failed.add(state.provider.id);
+			sourceErrors[state.provider.id] = describeReason(reason);
+			return false;
 		}
-	});
+	};
+	await Promise.all(fetchTargets.map(fetchState));
 
-	return mergePages(ok, filter, carryForward, sourceErrors);
+	const items: UploadResult[] = [];
+	if (comparable) {
+		while (items.length < limit) {
+			const missingHeads = states.filter(
+				(state) =>
+					state.items.length === 0 &&
+					state.cursor !== undefined &&
+					!failed.has(state.provider.id),
+			);
+			if (missingHeads.length > 0) {
+				await Promise.all(missingHeads.map(fetchState));
+			}
+			// If a provider did not advance its cursor, its next sort key is unknown.
+			// Stop rather than emit another provider out of global order.
+			if (
+				states.some(
+					(state) =>
+						state.items.length === 0 &&
+						state.cursor !== undefined &&
+						!failed.has(state.provider.id),
+				)
+			) {
+				break;
+			}
+			const candidates = states.filter((state) => state.items.length > 0);
+			if (candidates.length === 0) break;
+			let winner = candidates[0];
+			if (winner === undefined) break;
+			for (const candidate of candidates.slice(1)) {
+				const winnerItem = winner.items[0];
+				const candidateItem = candidate.items[0];
+				if (
+					winnerItem !== undefined &&
+					candidateItem !== undefined &&
+					compareEntries(
+						candidateItem,
+						winnerItem,
+						field as "name" | "size" | "kind",
+					) *
+						sign <
+						0
+				) {
+					winner = candidate;
+				}
+			}
+			const next = winner.items.shift();
+			if (next !== undefined) items.push(next);
+		}
+	} else {
+		// `recent` and `relevance` have no cross-provider comparable key. Preserve
+		// provider-grouped order across calls by fully draining each source before
+		// moving to the next one.
+		for (const state of states) {
+			while (items.length < limit) {
+				const next = state.items.shift();
+				if (next !== undefined) {
+					items.push(next);
+					continue;
+				}
+				break;
+			}
+			if (items.length === limit) break;
+			if (state.cursor !== undefined && !failed.has(state.provider.id)) {
+				break;
+			}
+		}
+	}
+
+	const nextSources: Record<string, BufferedSourceCursor> = {};
+	for (const state of states) {
+		if (state.items.length > 0 || state.cursor !== undefined) {
+			nextSources[state.provider.id] = {
+				...(state.cursor !== undefined ? { cursor: state.cursor } : {}),
+				...(state.items.length > 0 ? { items: state.items } : {}),
+			};
+		}
+	}
+	const sourceCursors = Object.fromEntries(
+		states.flatMap((state) =>
+			visibleSourceCursors.has(state.provider.id)
+				? [[state.provider.id, state.cursor]]
+				: [],
+		),
+	);
+	const total = sourceScoped.reduce(
+		(sum, provider) => sum + (totals[provider.id] ?? 0),
+		0,
+	);
+
+	return {
+		items: Object.freeze(items),
+		total,
+		nextCursor:
+			Object.keys(nextSources).length > 0
+				? encodeBufferedCursor(nextSources, totals)
+				: undefined,
+		sourceCursors,
+		...(Object.keys(sourceErrors).length > 0
+			? { sourceErrors: Object.freeze(sourceErrors) }
+			: {}),
+	};
 }

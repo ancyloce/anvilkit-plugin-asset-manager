@@ -16,7 +16,10 @@ import type {
 	StudioAssetSource,
 	StudioAssetTheme,
 } from "@anvilkit/core/types";
-
+import type {
+	AssetCategory,
+	AssetFacetDefinition,
+} from "../types/categories.js";
 import type { AssetFilter, AssetListPage } from "../types/filter.js";
 import type { AssetFolder, FolderId } from "../types/folders.js";
 import type { AssetRegistry, UploadResult } from "../types/types.js";
@@ -40,6 +43,9 @@ export interface CreateCompositeAssetSourceOptions {
 	readonly getThumbnail?: (entry: UploadResult) => string | undefined;
 	/** External read-only sources (e.g. Unsplash) federated alongside the local library. */
 	readonly providers?: readonly AssetSourceProvider[];
+	/** Browser configuration retained for plugin-registered UI consumers. */
+	readonly categories?: readonly AssetCategory[];
+	readonly facets?: readonly AssetFacetDefinition[];
 }
 
 /**
@@ -48,6 +54,8 @@ export interface CreateCompositeAssetSourceOptions {
  * ignores what it doesn't know until its sidebar types adopt them.
  */
 export interface CompositeAssetSource extends StudioAssetSource {
+	readonly categories?: readonly AssetCategory[];
+	readonly facets?: readonly AssetFacetDefinition[];
 	createFolder(parentId: FolderId | null, name: string): Promise<AssetFolder>;
 	renameFolder(id: FolderId, name: string): Promise<AssetFolder>;
 	removeFolder(
@@ -118,6 +126,8 @@ export function createCompositeAssetSource(
 			: federatedSearch({ providers, filter, signal });
 
 	return {
+		...(options.categories ? { categories: options.categories } : {}),
+		...(options.facets ? { facets: options.facets } : {}),
 		async list() {
 			const page = await runList({});
 			return Object.freeze(page.items.map(project));
