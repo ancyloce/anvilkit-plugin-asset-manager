@@ -51,6 +51,23 @@ function routingFetch() {
 	});
 }
 
+function rehostRoutingFetch(imageStatus = 200) {
+	return vi.fn(async (url: unknown) => {
+		const u = String(url);
+		if (u.startsWith("https://images.unsplash.com/")) {
+			return new Response(new Uint8Array([0xff, 0xd8, 0xff, 0xd9]), {
+				status: imageStatus,
+				headers: { "content-type": "image/jpeg" },
+			});
+		}
+		if (u.includes("/search/photos"))
+			return makeResponse(200, { total: 100, results: [photo] });
+		if (u.includes("/download")) return makeResponse(200, {});
+		if (u.includes("/photos/")) return makeResponse(200, photo);
+		return makeResponse(200, {});
+	});
+}
+
 describe("unsplashEnabled", () => {
 	it("is enabled with a key or proxy, disabled bare, and respects `enabled`", () => {
 		expect(unsplashEnabled({ appName: "d", accessKey: "K" })).toBe(true);
@@ -162,11 +179,15 @@ describe("createUnsplashProvider — search projection", () => {
 describe("createUnsplashProvider — pickResult", () => {
 	it("fires the mandatory download trigger and returns the hotlinked result", async () => {
 		const fetchMock = routingFetch();
-		const provider = createUnsplashProvider({
-			appName: "demo",
-			accessKey: "K",
-			fetch: fetchMock,
-		});
+		const ingest = vi.fn(async () => ({ id: "local-p1", url: "local-url" }));
+		const provider = createUnsplashProvider(
+			{
+				appName: "demo",
+				accessKey: "K",
+				fetch: fetchMock,
+			},
+			ingest,
+		);
 		await provider.search({ query: "mountains" }, undefined); // populates the byId cache
 		const result = await provider.pickResult({
 			id: "unsplash:p1",
@@ -180,6 +201,123 @@ describe("createUnsplashProvider — pickResult", () => {
 				(c) => c[0] === "https://api.unsplash.com/photos/p1/download",
 			),
 		).toBe(true);
+		expect(ingest).not.toHaveBeenCalled();
+	});
+
+	it("rehosts through ingest while preserving attribution and tracking", async () => {
+		const fetchMock = rehostRoutingFetch();
+		const ingest = vi.fn(async (file: File) => ({
+			id: "local-p1",
+			url: "https://cdn.example/local-p1.jpg",
+			name: file.name,
+			meta: { size: file.size, mimeType: file.type },
+		}));
+		const provider = createUnsplashProvider(
+			{
+				appName: "demo",
+				accessKey: "K",
+				fetch: fetchMock,
+				rehostOnPick: true,
+			},
+			ingest,
+		);
+		await provider.search({ query: "mountains" }, undefined);
+
+		const result = await provider.pickResult({
+			id: "unsplash:p1",
+			kind: "image",
+			name: "A mountain",
+			url: "asset://unsplash:p1",
+		});
+
+		expect(ingest).toHaveBeenCalledOnce();
+		const file = ingest.mock.calls[0]?.[0];
+		expect(file).toBeInstanceOf(File);
+		expect(file?.name).toBe("unsplash-p1.jpg");
+		expect(file?.type).toBe("image/jpeg");
+		expect(result).toMatchObject({
+			id: "local-p1",
+			url: "https://cdn.example/local-p1.jpg",
+			name: "A mountain",
+			meta: {
+				width: 4000,
+				height: 3000,
+				mimeType: "image/jpeg",
+				attribution: {
+					source: "unsplash",
+					photographerName: "Jane Doe",
+				},
+			},
+		});
+		expect(
+			fetchMock.mock.calls.some(
+				([url]) => url === "https://api.unsplash.com/photos/p1/download",
+			),
+		).toBe(true);
+		expect(provider.requiredCsp?.().connectSrc).toContain(
+			"https://images.unsplash.com",
+		);
+	});
+
+	it("surfaces image download failure without invoking ingest", async () => {
+		const fetchMock = rehostRoutingFetch(502);
+		const ingest = vi.fn(async () => ({ id: "local-p1", url: "local-url" }));
+		const provider = createUnsplashProvider(
+			{
+				appName: "demo",
+				accessKey: "K",
+				fetch: fetchMock,
+				rehostOnPick: true,
+			},
+			ingest,
+		);
+		await provider.search({ query: "mountains" }, undefined);
+
+		await expect(
+			provider.pickResult({
+				id: "unsplash:p1",
+				kind: "image",
+				name: "A mountain",
+				url: "asset://unsplash:p1",
+			}),
+		).rejects.toMatchObject({
+			code: "PROVIDER_BAD_RESPONSE",
+			status: 502,
+			retryable: true,
+		});
+		expect(ingest).not.toHaveBeenCalled();
+	});
+
+	it("honors an aborted pick before tracking, downloading, or ingesting", async () => {
+		const fetchMock = rehostRoutingFetch();
+		const ingest = vi.fn(async () => ({ id: "local-p1", url: "local-url" }));
+		const provider = createUnsplashProvider(
+			{
+				appName: "demo",
+				accessKey: "K",
+				fetch: fetchMock,
+				rehostOnPick: true,
+			},
+			ingest,
+		);
+		await provider.search({ query: "mountains" }, undefined);
+		const controller = new AbortController();
+		controller.abort();
+		const callsBeforePick = fetchMock.mock.calls.length;
+
+		await expect(
+			provider.pickResult(
+				{
+					id: "unsplash:p1",
+					kind: "image",
+					name: "A mountain",
+					url: "asset://unsplash:p1",
+				},
+				controller.signal,
+			),
+		).rejects.toMatchObject({ name: "AbortError" });
+		expect(fetchMock.mock.calls).toHaveLength(callsBeforePick);
+		expect(ingest).not.toHaveBeenCalled();
 	});
 
 	it("refetches + fires the trigger on a cache miss (provider recreated)", async () => {

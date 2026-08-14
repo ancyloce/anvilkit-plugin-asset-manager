@@ -2,7 +2,10 @@ import {
 	createFakeStudioContext,
 	registerPlugin,
 } from "@anvilkit/core/testing";
-import type { StudioPluginContext } from "@anvilkit/core/types";
+import type {
+	StudioAssetSource,
+	StudioPluginContext,
+} from "@anvilkit/core/types";
 import type { Data } from "@puckeditor/core";
 import { describe, expect, it, vi } from "vitest";
 
@@ -14,13 +17,14 @@ import {
 } from "../plugin.js";
 
 function fakePuckCtx() {
+	let assetSource: StudioAssetSource | undefined;
 	let currentData: Record<string, unknown> = {
 		root: { props: {} },
 		content: [],
 		zones: {},
 		assets: [],
 	};
-	const ctx = createFakeStudioContext({
+	const base = createFakeStudioContext({
 		getData: () => currentData as unknown as Data,
 		getPuckApi: (() => ({
 			dispatch(action: unknown) {
@@ -36,7 +40,24 @@ function fakePuckCtx() {
 			},
 		})) as StudioPluginContext["getPuckApi"],
 	});
-	return { ctx };
+	const ctx = {
+		...base,
+		registerAssetSource(source: StudioAssetSource) {
+			assetSource = source;
+			return () => {
+				if (assetSource === source) assetSource = undefined;
+			};
+		},
+	} as typeof base & StudioPluginContext;
+	return {
+		ctx,
+		getAssetSource(): StudioAssetSource {
+			if (assetSource === undefined) {
+				throw new Error("Expected the asset source to be registered.");
+			}
+			return assetSource;
+		},
+	};
 }
 
 function countingUploader() {
@@ -90,6 +111,132 @@ describe("content dedup (opt-in)", () => {
 		expect(uploader).toHaveBeenCalledTimes(1);
 		expect(second.id).toBe(first.id);
 		// Only one asset in the registry.
+		expect(getAssetRegistry(ctx)?.list()).toHaveLength(1);
+	});
+
+	it("single-flights identical files in the normal concurrent batch", async () => {
+		const { ctx, getAssetSource } = fakePuckCtx();
+		let finishUpload!: (result: {
+			id: string;
+			url: string;
+			name: string;
+		}) => void;
+		const uploader = vi.fn(
+			(file: File) =>
+				new Promise<{ id: string; url: string; name: string }>((resolve) => {
+					finishUpload = resolve;
+					void file;
+				}),
+		);
+		const plugin = createAssetManagerPlugin({
+			uploader,
+			folders: false,
+			dedupe: true,
+		});
+		const installed = await registerPlugin(plugin, { ctx });
+		await installed.runInit();
+
+		const batch = getAssetSource().upload([
+			png("concurrent bytes"),
+			png("concurrent bytes"),
+		]);
+		await vi.waitFor(() => expect(uploader).toHaveBeenCalledTimes(1));
+		finishUpload({
+			id: "shared",
+			url: "https://cdn.example/shared.png",
+			name: "a.png",
+		});
+
+		const results = await batch;
+		expect(results.map((asset) => asset.id)).toEqual(["shared", "shared"]);
+		expect(getAssetRegistry(ctx)?.list()).toHaveLength(1);
+		const uploadedEvents = ctx._mocks.emitCalls.filter(
+			([event]) => event === ASSET_MANAGER_UPLOADED_EVENT,
+		);
+		expect(uploadedEvents).toHaveLength(2);
+	});
+
+	it("keeps the shared transport alive when only one waiter aborts", async () => {
+		const { ctx } = fakePuckCtx();
+		let finishUpload!: (result: { id: string; url: string }) => void;
+		let transportSignal: AbortSignal | undefined;
+		const uploader = vi.fn(
+			(_file: File, options?: { readonly signal?: AbortSignal }) =>
+				new Promise<{ id: string; url: string }>((resolve, reject) => {
+					finishUpload = resolve;
+					transportSignal = options?.signal;
+					options?.signal?.addEventListener(
+						"abort",
+						() =>
+							reject(
+								Object.assign(new Error("aborted"), { name: "AbortError" }),
+							),
+						{ once: true },
+					);
+				}),
+		);
+		const plugin = createAssetManagerPlugin({
+			uploader,
+			folders: false,
+			dedupe: true,
+		});
+		const installed = await registerPlugin(plugin, { ctx });
+		await installed.runInit();
+
+		const firstController = new AbortController();
+		const secondController = new AbortController();
+		const first = uploadAsset(ctx, png("shared bytes"), firstController.signal);
+		const second = uploadAsset(
+			ctx,
+			png("shared bytes"),
+			secondController.signal,
+		);
+		await vi.waitFor(() => expect(uploader).toHaveBeenCalledTimes(1));
+		firstController.abort();
+
+		await expect(first).rejects.toMatchObject({ name: "AbortError" });
+		expect(transportSignal?.aborted).toBe(false);
+		finishUpload({ id: "survivor", url: "https://cdn.example/survivor.png" });
+		await expect(second).resolves.toMatchObject({ id: "survivor" });
+		expect(getAssetRegistry(ctx)?.list()).toHaveLength(1);
+	});
+
+	it("clears a failed flight so an identical upload can retry", async () => {
+		const { ctx } = fakePuckCtx();
+		let rejectFirst!: (reason: unknown) => void;
+		const uploader = vi
+			.fn()
+			.mockImplementationOnce(
+				() =>
+					new Promise((_resolve, reject) => {
+						rejectFirst = reject;
+					}),
+			)
+			.mockResolvedValueOnce({
+				id: "retry",
+				url: "https://cdn.example/retry.png",
+			});
+		const plugin = createAssetManagerPlugin({
+			uploader,
+			folders: false,
+			dedupe: true,
+		});
+		const installed = await registerPlugin(plugin, { ctx });
+		await installed.runInit();
+
+		const first = uploadAsset(ctx, png("retry bytes"));
+		const joined = uploadAsset(ctx, png("retry bytes"));
+		await vi.waitFor(() => expect(uploader).toHaveBeenCalledTimes(1));
+		rejectFirst(new Error("temporary outage"));
+		await expect(Promise.allSettled([first, joined])).resolves.toEqual([
+			expect.objectContaining({ status: "rejected" }),
+			expect.objectContaining({ status: "rejected" }),
+		]);
+
+		await expect(uploadAsset(ctx, png("retry bytes"))).resolves.toMatchObject({
+			id: "retry",
+		});
+		expect(uploader).toHaveBeenCalledTimes(2);
 		expect(getAssetRegistry(ctx)?.list()).toHaveLength(1);
 	});
 

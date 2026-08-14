@@ -30,6 +30,7 @@ import { uploadAssetAction } from "./utils/header-action.js";
 import { inferAssetKind } from "./utils/infer-kind.js";
 import { createAssetRegistry } from "./utils/registry.js";
 import { createIRAssetResolver } from "./utils/resolver.js";
+import type { SingleFlight } from "./utils/single-flight.js";
 import { createStudioAssetSource } from "./utils/studio-asset-source.js";
 import { validateSelectedFile } from "./utils/validate-selected-file.js";
 import { validateUploadResult } from "./utils/validate-upload-result.js";
@@ -81,6 +82,7 @@ const META = {
 interface AssetManagerRuntimeState {
 	readonly options: NormalizedAssetManagerOptions;
 	readonly registry: AssetRegistry;
+	readonly dedupeFlights: Map<string, SingleFlight<UploadResult>>;
 	readonly cleanups: Array<() => void>;
 }
 
@@ -138,6 +140,7 @@ export function createAssetManagerPlugin<
 						stateByToken.set(token, {
 							options: normalizedOptions,
 							registry,
+							dedupeFlights: new Map(),
 							cleanups,
 						});
 						tokenByContext.set(initCtx, token);
@@ -278,6 +281,8 @@ async function processAsset<UserConfig extends PuckConfig = PuckConfig>(
 		// still dispatched so the drop inserts the (existing) asset.
 		let contentHash: string | undefined;
 		if (options.dedupe === true) {
+			const { computeFileHash, getOrCreateSingleFlight, waitForSingleFlight } =
+				await import("./utils/single-flight.js");
 			// Don't read/hash a whole (possibly large) file for an already-cancelled
 			// upload.
 			if (signal?.aborted) {
@@ -292,15 +297,37 @@ async function processAsset<UserConfig extends PuckConfig = PuckConfig>(
 					.list()
 					.find((entry) => entry.meta?.hash === contentHash);
 				if (existing !== undefined) {
-					if (commit) {
-						dispatchAssetReference(ctx, existing);
-						ctx.emit(ASSET_MANAGER_UPLOADED_EVENT, {
-							asset: existing,
-							reference: createAssetReference(existing.id),
-						});
-					}
+					if (commit) commitAsset(ctx, existing);
 					return existing;
 				}
+
+				// Share the backend operation by digest. Each caller remains an
+				// independent, abort-aware waiter; the shared transport is cancelled
+				// only when every waiter has left. The flight itself is ingest-only so
+				// replacement callers never leak a fresh registry row or reference.
+				const uploaded = await waitForSingleFlight(
+					getOrCreateSingleFlight(
+						state.dedupeFlights,
+						contentHash,
+						(sharedSignal) =>
+							performAndPrepareUpload(
+								state.options,
+								file,
+								sharedSignal,
+								contentHash,
+							),
+					),
+					signal,
+				);
+				if (!commit) return uploaded;
+
+				// A sibling committed the same flight while this waiter resumed.
+				// Reuse its frozen row instead of notifying registry subscribers twice.
+				const stored =
+					registry.list().find((entry) => entry.meta?.hash === contentHash) ??
+					registry.register(uploaded);
+				commitAsset(ctx, stored);
+				return stored;
 			}
 		}
 
@@ -310,34 +337,10 @@ async function processAsset<UserConfig extends PuckConfig = PuckConfig>(
 		if (signal?.aborted) {
 			throw makePluginAbortError();
 		}
-		const uploadResult = await performUpload(options, file, signal);
-		// Adapters may ignore or only partially honor the abort signal — bail
-		// here BEFORE registering or dispatching so a cancelled batch can't
-		// mutate the registry / Puck data after unmount.
-		if (signal?.aborted) {
-			throw makePluginAbortError();
-		}
-		const validated = validateUploadResult(
-			mergeUploadMeta(uploadResult, file),
-			options,
-		);
-		// Stamp the computed digest so future uploads can dedup against it.
-		const hashed =
-			contentHash !== undefined
-				? {
-						...validated,
-						meta: { ...(validated.meta ?? {}), hash: contentHash },
-					}
-				: validated;
-		const tagged = withDerivedTags(hashed, file);
+		const tagged = await performAndPrepareUpload(options, file, signal);
 		const stored = commit ? registry.register(tagged) : tagged;
 		if (commit) {
-			dispatchAssetReference(ctx, stored);
-			const payload: AssetManagerUploadedEvent = {
-				asset: stored,
-				reference: createAssetReference(stored.id),
-			};
-			ctx.emit(ASSET_MANAGER_UPLOADED_EVENT, payload);
+			commitAsset(ctx, stored);
 		}
 
 		return stored;
@@ -368,6 +371,42 @@ async function processAsset<UserConfig extends PuckConfig = PuckConfig>(
 		});
 		throw normalizedError;
 	}
+}
+
+async function performAndPrepareUpload(
+	options: NormalizedAssetManagerOptions,
+	file: File,
+	signal: AbortSignal | undefined,
+	contentHash?: string,
+): Promise<UploadResult> {
+	const uploadResult = await performUpload(options, file, signal);
+	// Adapters may ignore or only partially honor the abort signal — bail here
+	// before any caller can register, dispatch, or emit for a cancelled upload.
+	if (signal?.aborted) throw makePluginAbortError();
+
+	const validated = validateUploadResult(
+		mergeUploadMeta(uploadResult, file),
+		options,
+	);
+	const hashed =
+		contentHash !== undefined
+			? {
+					...validated,
+					meta: { ...(validated.meta ?? {}), hash: contentHash },
+				}
+			: validated;
+	return withDerivedTags(hashed, file);
+}
+
+function commitAsset<UserConfig extends PuckConfig = PuckConfig>(
+	ctx: StudioPluginContext<UserConfig>,
+	asset: UploadResult,
+): void {
+	dispatchAssetReference(ctx, asset);
+	ctx.emit(ASSET_MANAGER_UPLOADED_EVENT, {
+		asset,
+		reference: createAssetReference(asset.id),
+	});
 }
 
 /**
@@ -478,27 +517,6 @@ function revokeBlobUrl(url: string): void {
 }
 
 /**
- * SHA-256 of the file bytes as lowercase hex, or `undefined` when the platform
- * lacks `crypto.subtle` / `File.arrayBuffer` (e.g. older runtimes) — dedup then
- * degrades to a normal upload rather than failing.
- */
-async function computeFileHash(file: File): Promise<string | undefined> {
-	const subtle = globalThis.crypto?.subtle;
-	if (subtle === undefined || typeof file.arrayBuffer !== "function") {
-		return undefined;
-	}
-	try {
-		const digest = await subtle.digest("SHA-256", await file.arrayBuffer());
-		const bytes = new Uint8Array(digest);
-		let hex = "";
-		for (const byte of bytes) hex += byte.toString(16).padStart(2, "0");
-		return hex;
-	} catch {
-		return undefined;
-	}
-}
-
-/**
  * Opt-in magic-byte check: reject an upload whose real (sniffed) type
  * contradicts a declared, specific `file.type`. The sniffer is lazy-imported so
  * its signature table never enters the eager entry; unsignable types and
@@ -556,9 +574,13 @@ function getRuntimeState<UserConfig extends PuckConfig = PuckConfig>(
 function needsRichSource(options: NormalizedAssetManagerOptions): boolean {
 	return (
 		options.folders !== false ||
-		options.dataSource !== undefined ||
-		(options.providers !== undefined && options.providers.length > 0) ||
-		options.unsplash !== undefined
+		Boolean(
+			options.dataSource ||
+				options.unsplash ||
+				options.categories?.length ||
+				options.facets?.length ||
+				options.providers?.length,
+		)
 	);
 }
 
@@ -588,6 +610,7 @@ async function loadRichSource<UserConfig extends PuckConfig = PuckConfig>(
 		upload: ingest,
 		onDelete: createAssetDeletedHandler(options, !hostOwnsAssetPlane(options)),
 		...(options.dataSource ? { hostDataSource: options.dataSource } : {}),
+		...(options.facets ? { facets: options.facets } : {}),
 		...(maxDepth !== undefined ? { maxDepth } : {}),
 		...(allowMove !== undefined ? { allowMove } : {}),
 		warn: (message) => ctx.log("warn", message),
@@ -609,7 +632,7 @@ async function loadRichSource<UserConfig extends PuckConfig = PuckConfig>(
 					"asset-manager: the Unsplash accessKey is public in the browser — use a server proxy (proxyEndpoint) in production.",
 				);
 			}
-			providers.push(createUnsplashProvider(options.unsplash));
+			providers.push(createUnsplashProvider(options.unsplash, ingest));
 		}
 	}
 
@@ -618,6 +641,8 @@ async function loadRichSource<UserConfig extends PuckConfig = PuckConfig>(
 		registry,
 		upload,
 		ingest,
+		...(options.categories ? { categories: options.categories } : {}),
+		...(options.facets ? { facets: options.facets } : {}),
 		...(providers.length > 0 ? { providers } : {}),
 		...(options.getThumbnail ? { getThumbnail: options.getThumbnail } : {}),
 	});

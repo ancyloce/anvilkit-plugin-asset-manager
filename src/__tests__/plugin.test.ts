@@ -9,7 +9,7 @@ import type {
 } from "@anvilkit/core/types";
 import { puckDataToIR } from "@anvilkit/ir";
 import type { Config, Data } from "@puckeditor/core";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { inMemoryUploader } from "../adapters/in-memory.js";
 import {
@@ -17,6 +17,11 @@ import {
 	getAssetRegistry,
 	uploadAsset,
 } from "../plugin.js";
+import type { CompositeAssetSource } from "../sources/composite-source.js";
+import type {
+	AssetCategory,
+	AssetFacetDefinition,
+} from "../types/categories.js";
 
 describe("createAssetManagerPlugin", () => {
 	it("compiles through compilePlugins and binds a registry for the plugin lifecycle", async () => {
@@ -58,6 +63,51 @@ describe("createAssetManagerPlugin", () => {
 
 		await harness.runDestroy();
 		expect(getAssetRegistry(ctx)).toBeUndefined();
+	});
+
+	it("threads configured categories and facets into the registered rich source", async () => {
+		let source: CompositeAssetSource | StudioAssetSource | undefined;
+		const base = createFakeStudioContext();
+		const ctx = {
+			...base,
+			registerAssetSource(next: StudioAssetSource) {
+				source = next;
+				return () => undefined;
+			},
+		} as StudioPluginContext;
+		const categories: readonly AssetCategory[] = [
+			{ id: "brand", label: "Brand", match: { tags: ["brand"] } },
+		];
+		const facets: readonly AssetFacetDefinition[] = [
+			{
+				id: "license",
+				label: "License",
+				selection: "single",
+				valueOf: (asset) => asset.tags,
+				options: [{ value: "cc0", label: "CC0" }],
+			},
+		];
+		const plugin = createAssetManagerPlugin({
+			folders: false,
+			categories,
+			facets,
+		});
+		const harness = await registerPlugin(plugin, { ctx });
+		await harness.runInit();
+		await vi.waitFor(() => {
+			expect((source as CompositeAssetSource | undefined)?.categories).toBe(
+				categories,
+			);
+		});
+		expect((source as CompositeAssetSource).facets).toBe(facets);
+
+		const registry = getAssetRegistry(ctx);
+		registry?.register({ id: "cc0", url: "blob:cc0", tags: ["cc0"] });
+		registry?.register({ id: "paid", url: "blob:paid", tags: ["paid"] });
+		const page = await source?.listPaginated?.({
+			facets: { license: ["cc0"] },
+		});
+		expect(page?.items.map((asset) => asset.id)).toEqual(["cc0"]);
 	});
 
 	it("replaces through ingest without registering or dispatching the adapter's fresh id", async () => {

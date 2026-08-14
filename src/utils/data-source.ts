@@ -6,6 +6,7 @@
  * owns. Lazy-importable so flat callers pay nothing for folder code.
  */
 
+import type { AssetFacetDefinition } from "../types/categories.js";
 import type {
 	AssetDataSource,
 	AssetSourceStatus,
@@ -22,6 +23,7 @@ import type {
 } from "../types/types.js";
 import { AssetSourceError } from "./errors.js";
 import { createFolderStore, type FolderStore } from "./folders.js";
+import { inferAssetKind } from "./infer-kind.js";
 import { paginateMatches, prepareAssetMatcher } from "./registry.js";
 
 /**
@@ -91,6 +93,8 @@ export interface CreateInMemoryDataSourceOptions {
 	readonly allowMove?: boolean;
 	/** Fired with the removed record after a successful asset delete. */
 	readonly onDelete?: AssetDeletedHook;
+	/** Host facet definitions whose local `valueOf` selectors apply to lists. */
+	readonly facets?: readonly AssetFacetDefinition[];
 }
 
 /** Union of the direct asset ids across `root` and all its descendant folders. */
@@ -103,6 +107,91 @@ function collectSubtreeAssetIds(
 		out.push(...folders.directAssetIds(fid));
 	}
 	return out;
+}
+
+interface ActiveLocalFacet {
+	readonly selected: ReadonlySet<string>;
+	readonly valueOf: NonNullable<AssetFacetDefinition["valueOf"]>;
+}
+
+/** Compile host facets once per list call; selections are ANDed across facets. */
+function prepareLocalFacetMatcher(
+	query: AssetFilter,
+	definitions: readonly AssetFacetDefinition[] | undefined,
+): (asset: UploadResult) => boolean {
+	if (query.facets === undefined || definitions === undefined)
+		return () => true;
+
+	const definitionsById = new Map(
+		definitions.map((definition) => [definition.id, definition] as const),
+	);
+	const active: ActiveLocalFacet[] = [];
+	for (const [id, rawSelections] of Object.entries(query.facets)) {
+		const selected = new Set(rawSelections);
+		if (selected.size === 0) continue;
+		const definition = definitionsById.get(id);
+		if (
+			definition?.remote === true ||
+			definition?.valueOf === undefined ||
+			(definition.appliesTo !== undefined &&
+				!definition.appliesTo.includes("local"))
+		) {
+			// Remote/non-local facets remain in the query for their owning provider;
+			// an in-memory list must neither evaluate nor reject them.
+			continue;
+		}
+		active.push({ selected, valueOf: definition.valueOf });
+	}
+
+	return (asset) => {
+		for (const facet of active) {
+			const values = facet.valueOf(asset);
+			if (values === undefined) return false;
+			if (!values.some((value) => facet.selected.has(value))) return false;
+		}
+		return true;
+	};
+}
+
+/** Stable local ordering. Registry insertion order is the recency surrogate. */
+function sortLocalMatches(
+	matches: UploadResult[],
+	allEntries: readonly UploadResult[],
+	query: AssetFilter,
+): void {
+	const field = query.sort?.field ?? "recent";
+	const direction =
+		query.sort?.direction ?? (field === "name" ? "asc" : "desc");
+	const sign = direction === "asc" ? 1 : -1;
+	const insertionRank = new Map(
+		allEntries.map((entry, index) => [entry.id, index] as const),
+	);
+	const rankOf = (entry: UploadResult): number =>
+		insertionRank.get(entry.id) ?? Number.MAX_SAFE_INTEGER;
+
+	matches.sort((a, b) => {
+		let primary: number;
+		switch (field) {
+			case "name":
+				primary = (a.name ?? "")
+					.toLowerCase()
+					.localeCompare((b.name ?? "").toLowerCase());
+				break;
+			case "size":
+				primary = (a.meta?.size ?? 0) - (b.meta?.size ?? 0);
+				break;
+			case "kind":
+				primary = inferAssetKind(a).localeCompare(inferAssetKind(b));
+				break;
+			case "recent":
+			case "relevance":
+				primary = rankOf(a) - rankOf(b);
+				break;
+		}
+		if (primary !== 0) return primary * sign;
+		// Stable ties never reshuffle between pages when direction changes.
+		return rankOf(a) - rankOf(b);
+	});
 }
 
 function makeAbortError(): Error {
@@ -148,35 +237,46 @@ export function createInMemoryDataSource(
 		folders,
 
 		list(query) {
-			if (query.folderId === undefined) {
-				return Promise.resolve(buildPage(registry.search(query), query));
-			}
-			const target = resolveFolderId(query.folderId);
-			const recursive = query.recursive === true;
-			// Compile the query/kind/tag matcher once, not per asset.
+			const allEntries = registry.list();
+			const target =
+				query.folderId === undefined
+					? undefined
+					: resolveFolderId(query.folderId);
+			// Compile every non-folder axis once, then paginate only after the final
+			// filtered order is known. Offset cursors therefore address the same stable
+			// sequence for unscoped, root, and nested-folder queries.
 			const matchesFilter = prepareAssetMatcher(query);
-			let matches: UploadResult[];
-			if (target === null) {
+			const matchesFacets = prepareLocalFacetMatcher(query, options.facets);
+			let scoped: readonly UploadResult[];
+			if (target === undefined) {
+				scoped = allEntries;
+			} else if (target === null) {
+				const recursive = query.recursive === true;
 				// Root scope is inherently a full pass: non-recursive lists the
 				// un-foldered assets ("not in any folder"), recursive lists every
 				// asset — neither is answerable from the folder→assets index alone.
-				matches = registry.list().filter((entry) => {
-					const folderOk = recursive || folders.folderOf(entry.id) === null;
-					return folderOk && matchesFilter(entry);
-				});
+				scoped = recursive
+					? allEntries
+					: allEntries.filter((entry) => folders.folderOf(entry.id) === null);
 			} else {
 				// Non-root: pull only this folder's (or its subtree's) members from
 				// the folder→assets reverse index instead of scanning the whole
 				// registry (P4).
-				const ids = recursive
-					? collectSubtreeAssetIds(folders, target)
-					: folders.directAssetIds(target);
-				matches = [];
+				const ids =
+					query.recursive === true
+						? collectSubtreeAssetIds(folders, target)
+						: folders.directAssetIds(target);
+				const entries: UploadResult[] = [];
 				for (const id of ids) {
 					const entry = registry.get(id);
-					if (entry !== undefined && matchesFilter(entry)) matches.push(entry);
+					if (entry !== undefined) entries.push(entry);
 				}
+				scoped = entries;
 			}
+			const matches = scoped.filter(
+				(entry) => matchesFilter(entry) && matchesFacets(entry),
+			);
+			sortLocalMatches(matches, allEntries, query);
 			return Promise.resolve(buildPage(paginateMatches(matches, query), query));
 		},
 
@@ -235,6 +335,14 @@ export function createInMemoryDataSource(
 		move(id, folderId) {
 			if (options.allowMove === false) {
 				return Promise.reject(makeMoveDisabledError());
+			}
+			if (registry.get(id) === undefined) {
+				return Promise.reject(
+					new AssetSourceError(
+						"ASSET_MUTATION_REJECTED",
+						`Cannot move unknown asset "${id}".`,
+					),
+				);
 			}
 			folders.moveAsset(id, folderId);
 			return Promise.resolve();

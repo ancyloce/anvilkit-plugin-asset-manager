@@ -63,6 +63,10 @@ export interface UnsplashSourceOptions {
 	readonly requestTimeoutMs?: number;
 	/** Injectable fetch for tests / SSR. */
 	readonly fetch?: typeof globalThis.fetch;
-	/** Opt-in re-host instead of hotlinking. Default false. */
+	/**
+	 * Opt into downloading a picked image and passing it through the configured
+	 * asset-manager uploader. The returned local asset keeps Unsplash attribution
+	 * and the mandatory download trigger still fires. Default `false` (hotlink).
+	 */
 	readonly rehostOnPick?: boolean;
 }

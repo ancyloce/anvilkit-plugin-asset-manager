@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { AssetFacetDefinition } from "../types/categories.js";
 import {
 	createInMemoryDataSource,
 	type ResolvedAssetDataSource,
@@ -80,6 +81,191 @@ describe("list — folder scoping", () => {
 		registry.setTags("a1", ["hero"]);
 		const page = await ds.list({ folderId: f.id, tags: ["hero"] });
 		expect(page.items.map((a) => a.id)).toEqual(["a1"]);
+	});
+});
+
+describe("list — local facets, sorting, and pagination", () => {
+	const facets: readonly AssetFacetDefinition[] = [
+		{
+			id: "license",
+			label: "License",
+			selection: "multi",
+			valueOf: (asset) =>
+				asset.tags
+					?.filter((tag) => tag.startsWith("license:"))
+					.map((tag) => tag.slice("license:".length)),
+		},
+		{
+			id: "layout",
+			label: "Layout",
+			selection: "single",
+			appliesTo: ["local"],
+			valueOf: (asset) =>
+				asset.tags
+					?.filter((tag) => tag.startsWith("layout:"))
+					.map((tag) => tag.slice("layout:".length)),
+		},
+		{
+			id: "remote-topic",
+			label: "Remote topic",
+			selection: "single",
+			remote: true,
+			valueOf: () => [],
+		},
+		{
+			id: "unsplash-only",
+			label: "Unsplash only",
+			selection: "single",
+			appliesTo: ["unsplash"],
+			valueOf: () => [],
+		},
+	];
+
+	beforeEach(() => {
+		({ registry, folders } = setup());
+		ds = createInMemoryDataSource({
+			registry,
+			upload,
+			folderStore: folders,
+			facets,
+		});
+		registry.register({
+			id: "old-z",
+			url: "https://x/z.png",
+			name: "Zebra",
+			meta: { size: 10, mimeType: "image/png" },
+			tags: ["license:cc0", "layout:wide"],
+		});
+		registry.register({
+			id: "mid-a",
+			url: "https://x/a.mp4",
+			name: "alpha",
+			meta: { size: 30, mimeType: "video/mp4" },
+			tags: ["license:paid", "layout:tall"],
+		});
+		registry.register({
+			id: "new-b",
+			url: "https://x/b.mp3",
+			name: "Beta",
+			meta: { size: 20, mimeType: "audio/mpeg" },
+			tags: ["license:cc0", "layout:tall"],
+		});
+	});
+
+	it("ORs selections within a facet and ANDs active local facets", async () => {
+		const page = await ds.list({
+			facets: {
+				license: ["cc0", "paid"],
+				layout: ["tall"],
+				"remote-topic": ["nature"],
+				"unsplash-only": ["editorial"],
+			},
+			sort: { field: "name", direction: "asc" },
+		});
+
+		expect(page.items.map((asset) => asset.id)).toEqual(["mid-a", "new-b"]);
+		expect(page.total).toBe(2);
+	});
+
+	it("supports stable asc/desc ordering for every local sort field", async () => {
+		const ids = async (
+			field: "recent" | "relevance" | "name" | "size" | "kind",
+			direction?: "asc" | "desc",
+		) =>
+			(
+				await ds.list({
+					sort: direction === undefined ? { field } : { field, direction },
+				})
+			).items.map((asset) => asset.id);
+
+		await expect(ids("name", "asc")).resolves.toEqual([
+			"mid-a",
+			"new-b",
+			"old-z",
+		]);
+		await expect(ids("name", "desc")).resolves.toEqual([
+			"old-z",
+			"new-b",
+			"mid-a",
+		]);
+		await expect(ids("size", "asc")).resolves.toEqual([
+			"old-z",
+			"new-b",
+			"mid-a",
+		]);
+		await expect(ids("size", "desc")).resolves.toEqual([
+			"mid-a",
+			"new-b",
+			"old-z",
+		]);
+		await expect(ids("kind", "asc")).resolves.toEqual([
+			"new-b",
+			"old-z",
+			"mid-a",
+		]);
+		await expect(ids("recent", "desc")).resolves.toEqual([
+			"new-b",
+			"mid-a",
+			"old-z",
+		]);
+		await expect(ids("relevance", "asc")).resolves.toEqual([
+			"old-z",
+			"mid-a",
+			"new-b",
+		]);
+		// Public defaults: name asc; every other field desc; omitted sort is recent.
+		await expect(ids("name")).resolves.toEqual(["mid-a", "new-b", "old-z"]);
+		await expect(ids("size")).resolves.toEqual(["mid-a", "new-b", "old-z"]);
+		expect((await ds.list({})).items.map((asset) => asset.id)).toEqual([
+			"new-b",
+			"mid-a",
+			"old-z",
+		]);
+	});
+
+	it("sorts and filters before applying an unscoped offset cursor", async () => {
+		const first = await ds.list({
+			facets: { license: ["cc0"] },
+			sort: { field: "name", direction: "asc" },
+			limit: 1,
+		});
+		const second = await ds.list({
+			facets: { license: ["cc0"] },
+			sort: { field: "name", direction: "asc" },
+			limit: 1,
+			cursor: first.nextCursor,
+		});
+
+		expect(first.items.map((asset) => asset.id)).toEqual(["new-b"]);
+		expect(first.total).toBe(2);
+		expect(first.nextCursor).toBe("1");
+		expect(second.items.map((asset) => asset.id)).toEqual(["old-z"]);
+		expect(second.nextCursor).toBeUndefined();
+	});
+
+	it("uses the same filtered order and cursor inside a folder", async () => {
+		const folder = folders.createFolder(null, "Scoped");
+		folders.moveAsset("old-z", folder.id);
+		folders.moveAsset("new-b", folder.id);
+		const first = await ds.list({
+			folderId: folder.id,
+			facets: { license: ["cc0"] },
+			sort: { field: "size", direction: "desc" },
+			limit: 1,
+		});
+		const second = await ds.list({
+			folderId: folder.id,
+			facets: { license: ["cc0"] },
+			sort: { field: "size", direction: "desc" },
+			limit: 1,
+			cursor: first.nextCursor,
+		});
+
+		expect(first.items.map((asset) => asset.id)).toEqual(["new-b"]);
+		expect(first.total).toBe(2);
+		expect(first.nextCursor).toBe("1");
+		expect(second.items.map((asset) => asset.id)).toEqual(["old-z"]);
+		expect(second.nextCursor).toBeUndefined();
 	});
 });
 
@@ -174,6 +360,22 @@ describe("asset mutations", () => {
 		expect(folders.folderOf("a1")).toBe(f.id);
 	});
 
+	it("rejects an unknown asset move without creating ghost membership", async () => {
+		const f = folders.createFolder(null, "F");
+		const listener = vi.fn();
+		const unsubscribe = ds.subscribe(listener);
+
+		await expect(ds.move("ghost", f.id)).rejects.toMatchObject({
+			code: "ASSET_MUTATION_REJECTED",
+		});
+
+		expect(folders.folderOf("ghost")).toBeNull();
+		expect(folders.directAssetIds(f.id)).toEqual([]);
+		expect(folders.get(f.id)?.counts.assets).toBe(0);
+		expect(listener).not.toHaveBeenCalled();
+		unsubscribe();
+	});
+
 	it("rejects asset moves when allowMove is false", async () => {
 		const f = folders.createFolder(null, "F");
 		const locked = createInMemoryDataSource({
@@ -185,7 +387,12 @@ describe("asset mutations", () => {
 		await expect(locked.move("a1", f.id)).rejects.toMatchObject({
 			code: "MOVE_REJECTED",
 		});
+		// Configuration rejection takes precedence even when the id is stale.
+		await expect(locked.move("ghost", f.id)).rejects.toMatchObject({
+			code: "MOVE_REJECTED",
+		});
 		expect(folders.folderOf("a1")).toBeNull();
+		expect(folders.folderOf("ghost")).toBeNull();
 	});
 });
 

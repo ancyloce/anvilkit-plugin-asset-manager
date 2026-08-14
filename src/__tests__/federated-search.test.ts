@@ -68,6 +68,11 @@ describe("composite cursor", () => {
 		expect(token).not.toMatch(/[+/=]/);
 		expect(decodeCompositeCursor(token)).toEqual(sub);
 	});
+
+	it("round-trips Unicode cursor data used by buffered asset names", () => {
+		const sub = { local: "下一頁", unsplash: "página-dos" };
+		expect(decodeCompositeCursor(encodeCompositeCursor(sub))).toEqual(sub);
+	});
 });
 
 describe("providerCanSatisfy", () => {
@@ -143,14 +148,34 @@ describe("federatedSearch — route vs federate", () => {
 
 describe("federatedSearch — cursors & sort", () => {
 	it("composes a next cursor and hands each provider its own sub-cursor", async () => {
-		const local = fakeProvider("local", [A], {
-			folders: true,
-			nextCursor: "5",
-		});
-		const remote = fakeProvider("unsplash", [B], { nextCursor: "2" });
+		const zulu: UploadResult = { id: "z", url: "https://x/z", name: "Zulu" };
+		const yankee: UploadResult = {
+			id: "y",
+			url: "https://x/y",
+			name: "Yankee",
+		};
+		const local: AssetSourceProvider = {
+			...fakeProvider("local", [], { folders: true }),
+			search: vi.fn(async (_filter, cursor) =>
+				cursor === "5"
+					? { items: [], total: 2 }
+					: { items: [A, zulu], total: 2, nextCursor: "5" },
+			),
+		};
+		const remote: AssetSourceProvider = {
+			...fakeProvider("unsplash", []),
+			search: vi.fn(async (_filter, cursor) =>
+				cursor === "2"
+					? { items: [], total: 2 }
+					: { items: [B, yankee], total: 2, nextCursor: "2" },
+			),
+		};
 		const first = await federatedSearch({
 			providers: [local, remote],
-			filter: {},
+			filter: {
+				limit: 2,
+				sort: { field: "name", direction: "asc" },
+			},
 		});
 		expect(decodeCompositeCursor(first.nextCursor)).toEqual({
 			local: "5",
@@ -160,7 +185,11 @@ describe("federatedSearch — cursors & sort", () => {
 
 		await federatedSearch({
 			providers: [local, remote],
-			filter: { cursor: first.nextCursor },
+			filter: {
+				cursor: first.nextCursor,
+				limit: 50,
+				sort: { field: "name", direction: "asc" },
+			},
 		});
 		expect(local.search).toHaveBeenLastCalledWith(
 			expect.anything(),
@@ -175,10 +204,12 @@ describe("federatedSearch — cursors & sort", () => {
 	});
 
 	it("carries a failed provider's cursor forward so the next page retries it (C2)", async () => {
-		const local = fakeProvider("local", [A], {
-			folders: true,
-			nextCursor: "L2",
-		});
+		const cherry: UploadResult = {
+			id: "c",
+			url: "https://x/c",
+			name: "Cherry",
+		};
+		const local = fakeProvider("local", [A, cherry], { folders: true });
 		let remoteCalls = 0;
 		const remote: AssetSourceProvider = {
 			...fakeProvider("unsplash", [B]),
@@ -193,10 +224,13 @@ describe("federatedSearch — cursors & sort", () => {
 
 		const first = await federatedSearch({
 			providers: [local, remote],
-			filter: {},
+			filter: {
+				limit: 2,
+				sort: { field: "name", direction: "asc" },
+			},
 		});
 		expect(decodeCompositeCursor(first.nextCursor)).toEqual({
-			local: "L2",
+			local: undefined,
 			unsplash: "R2",
 		});
 
@@ -205,7 +239,11 @@ describe("federatedSearch — cursors & sort", () => {
 		// repeat earlier results).
 		const second = await federatedSearch({
 			providers: [local, remote],
-			filter: { cursor: first.nextCursor },
+			filter: {
+				cursor: first.nextCursor,
+				limit: 2,
+				sort: { field: "name", direction: "asc" },
+			},
 		});
 		expect(remote.search).toHaveBeenLastCalledWith(
 			expect.anything(),
@@ -213,10 +251,9 @@ describe("federatedSearch — cursors & sort", () => {
 			undefined,
 		);
 		expect(decodeCompositeCursor(second.nextCursor)).toEqual({
-			local: "L2",
 			unsplash: "R2",
 		});
-		expect(second.items.map((i) => i.id)).toEqual(["a"]); // only the survivor
+		expect(second.items.map((i) => i.id)).toEqual(["c"]); // buffered survivor
 	});
 
 	it("k-way merges comparable sorts (name) across providers", async () => {
@@ -227,6 +264,77 @@ describe("federatedSearch — cursors & sort", () => {
 			filter: { sort: { field: "name", direction: "asc" } },
 		});
 		expect(page.items.map((i) => i.name)).toEqual(["Apple", "Banana"]);
+	});
+
+	it("enforces one global limit while preserving k-way order across continuations", async () => {
+		const alpha: UploadResult = {
+			id: "alpha",
+			url: "https://x/a",
+			name: "Alpha",
+		};
+		const bravo: UploadResult = {
+			id: "bravo",
+			url: "https://x/b",
+			name: "Bravo",
+		};
+		const charlie: UploadResult = {
+			id: "charlie",
+			url: "https://x/c",
+			name: "Charlie",
+		};
+		const delta: UploadResult = {
+			id: "delta",
+			url: "https://x/d",
+			name: "Delta",
+		};
+		const echo: UploadResult = { id: "echo", url: "https://x/e", name: "Echo" };
+		const foxtrot: UploadResult = {
+			id: "foxtrot",
+			url: "https://x/f",
+			name: "Foxtrot",
+		};
+		const local: AssetSourceProvider = {
+			...fakeProvider("local", [], { folders: true }),
+			search: vi.fn(async (_filter, cursor) =>
+				cursor === "L2"
+					? { items: [echo], total: 3 }
+					: { items: [alpha, delta], total: 3, nextCursor: "L2" },
+			),
+		};
+		const remote: AssetSourceProvider = {
+			...fakeProvider("unsplash", []),
+			search: vi.fn(async (_filter, cursor) =>
+				cursor === "R2"
+					? { items: [foxtrot], total: 3 }
+					: { items: [bravo, charlie], total: 3, nextCursor: "R2" },
+			),
+		};
+		const baseFilter = {
+			limit: 2,
+			sort: { field: "name", direction: "asc" } as const,
+		};
+
+		const first = await federatedSearch({
+			providers: [local, remote],
+			filter: baseFilter,
+		});
+		const second = await federatedSearch({
+			providers: [local, remote],
+			filter: { ...baseFilter, cursor: first.nextCursor },
+		});
+		const third = await federatedSearch({
+			providers: [local, remote],
+			filter: { ...baseFilter, cursor: second.nextCursor },
+		});
+
+		expect(first.items.map((item) => item.id)).toEqual(["alpha", "bravo"]);
+		expect(second.items.map((item) => item.id)).toEqual(["charlie", "delta"]);
+		expect(third.items.map((item) => item.id)).toEqual(["echo", "foxtrot"]);
+		expect([first, second, third].every((page) => page.items.length <= 2)).toBe(
+			true,
+		);
+		expect([first.total, second.total, third.total]).toEqual([6, 6, 6]);
+		expect(third.nextCursor).toBeUndefined();
 	});
 });
 

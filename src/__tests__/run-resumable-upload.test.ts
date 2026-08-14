@@ -210,11 +210,17 @@ describe("runResumableUpload", () => {
 	it("persists a fresh session before part one and retains it if part one fails", async () => {
 		const events: string[] = [];
 		let persisted: PersistedUploadSession | undefined;
+		let finishSave: (() => void) | undefined;
+		const saveBarrier = new Promise<void>((resolve) => {
+			finishSave = resolve;
+		});
 		const store = {
 			load: () => persisted,
-			save: (_file: File, session: PersistedUploadSession) => {
-				events.push("save");
+			save: async (_file: File, session: PersistedUploadSession) => {
+				events.push("save-start");
+				await saveBarrier;
 				persisted = session;
+				events.push("save-complete");
 			},
 			clear: () => {
 				persisted = undefined;
@@ -228,14 +234,17 @@ describe("runResumableUpload", () => {
 		});
 		const file = makeFile(30);
 
-		await expect(
-			runResumableUpload(spy.adapter, file, {
-				partSize: 10,
-				sessionStore: store,
-			}),
-		).rejects.toThrow("part one failed");
+		const upload = runResumableUpload(spy.adapter, file, {
+			partSize: 10,
+			sessionStore: store,
+		});
+		await vi.waitFor(() => expect(events).toEqual(["save-start"]));
+		expect(spy.partCalls).toEqual([]);
+		finishSave?.();
 
-		expect(events).toEqual(["save", "upload-part-1"]);
+		await expect(upload).rejects.toThrow("part one failed");
+
+		expect(events).toEqual(["save-start", "save-complete", "upload-part-1"]);
 		expect(persisted).toEqual({
 			uploadId: "mpu",
 			partSize: 10,
