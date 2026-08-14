@@ -210,6 +210,39 @@ describe("createUnsplashProvider — pickResult", () => {
 		).toBe(true);
 	});
 
+	it("reports a failed download trigger without blocking the pick", async () => {
+		const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+		const fetchMock = vi.fn(async (url: unknown) => {
+			if (String(url).includes("/download")) return makeResponse(503, {});
+			return makeResponse(200, { total: 1, results: [photo] });
+		});
+		const provider = createUnsplashProvider({
+			appName: "demo",
+			proxyEndpoint: "/api/unsplash",
+			fetch: fetchMock,
+		});
+		await provider.search({ query: "mountains" }, undefined);
+
+		await expect(
+			provider.pickResult({
+				id: "unsplash:p1",
+				kind: "image",
+				name: "A mountain",
+				url: "asset://unsplash:p1",
+			}),
+		).resolves.toMatchObject({ id: "unsplash:p1" });
+		await vi.waitFor(() => {
+			expect(warn).toHaveBeenCalledWith(
+				"asset-manager: Unsplash download tracking failed.",
+				expect.objectContaining({
+					code: "PROVIDER_BAD_RESPONSE",
+					status: 503,
+				}),
+			);
+		});
+		warn.mockRestore();
+	});
+
 	it("exposes Unsplash capabilities (read-only, themed, attribution-required)", () => {
 		const provider = createUnsplashProvider({ appName: "d", accessKey: "K" });
 		expect(provider.capabilities).toMatchObject({

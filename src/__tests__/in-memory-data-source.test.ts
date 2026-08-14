@@ -114,6 +114,21 @@ describe("asset mutations", () => {
 		expect(result.url).toBe("blob:shot.png");
 	});
 
+	it("replace rejects an unknown target before ingesting a fresh asset", async () => {
+		const ingest = vi.fn(upload);
+		const source = createInMemoryDataSource({
+			registry,
+			upload: ingest,
+			folderStore: folders,
+		});
+
+		await expect(
+			source.replace("ghost", new File(["data"], "shot.png")),
+		).rejects.toMatchObject({ code: "ASSET_MUTATION_REJECTED" });
+		expect(ingest).not.toHaveBeenCalled();
+		expect(registry.list().map((asset) => asset.id)).toEqual(["a1"]);
+	});
+
 	it("replace re-checks the abort signal AFTER upload and never mutates the registry", async () => {
 		// Disposal safety (PRD 0002 §6): a replace cancelled while the upload is
 		// in flight must throw AbortError before touching the registry.

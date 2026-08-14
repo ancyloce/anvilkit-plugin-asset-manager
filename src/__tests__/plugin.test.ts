@@ -3,7 +3,10 @@ import {
 	createFakeStudioContext,
 	registerPlugin,
 } from "@anvilkit/core/testing";
-import type { StudioPluginContext } from "@anvilkit/core/types";
+import type {
+	StudioAssetSource,
+	StudioPluginContext,
+} from "@anvilkit/core/types";
 import { puckDataToIR } from "@anvilkit/ir";
 import type { Config, Data } from "@puckeditor/core";
 import { describe, expect, it } from "vitest";
@@ -55,6 +58,94 @@ describe("createAssetManagerPlugin", () => {
 
 		await harness.runDestroy();
 		expect(getAssetRegistry(ctx)).toBeUndefined();
+	});
+
+	it("replaces through ingest without registering or dispatching the adapter's fresh id", async () => {
+		let source: StudioAssetSource | undefined;
+		const base = createFakeStudioContext();
+		const ctx = {
+			...base,
+			registerAssetSource(next: StudioAssetSource) {
+				source = next;
+				return () => undefined;
+			},
+		} as StudioPluginContext;
+		const plugin = createAssetManagerPlugin({
+			folders: false,
+			uploader: async (file) => ({
+				id: "fresh-adapter-id",
+				url: `https://cdn.example.com/${file.name}`,
+			}),
+		});
+		const harness = await registerPlugin(plugin, { ctx });
+		await harness.runInit();
+		const registry = getAssetRegistry(ctx);
+		registry?.register({
+			id: "asset-old",
+			url: "https://cdn.example.com/old.png",
+		});
+		let mutationCount = 0;
+		registry?.subscribe(() => {
+			mutationCount += 1;
+		});
+
+		const replaced = await source?.replace?.(
+			"asset-old",
+			new File(["new"], "new.png", { type: "image/png" }),
+		);
+
+		expect(replaced?.id).toBe("asset-old");
+		expect(registry?.list().map((asset) => asset.id)).toEqual(["asset-old"]);
+		expect(registry?.get("fresh-adapter-id")).toBeUndefined();
+		expect(mutationCount).toBe(1);
+		expect(base._mocks.dispatchCalls).toHaveLength(0);
+		expect(base._mocks.emitCalls).toHaveLength(0);
+	});
+
+	it("isolates runtime state when one plugin object is mounted in two Studios", async () => {
+		let uploadCount = 0;
+		const plugin = createAssetManagerPlugin({
+			folders: false,
+			uploader: async () => {
+				uploadCount += 1;
+				return {
+					id: `asset-${uploadCount}`,
+					url: `https://cdn.example.com/asset-${uploadCount}.png`,
+				};
+			},
+		});
+		const ctxA = createFakeStudioContext();
+		const ctxB = createFakeStudioContext();
+		const harnessA = await registerPlugin(plugin, { ctx: ctxA });
+		const harnessB = await registerPlugin(plugin, { ctx: ctxB });
+
+		await Promise.all([harnessA.runInit(), harnessB.runInit()]);
+
+		const registryA = getAssetRegistry(ctxA);
+		const registryB = getAssetRegistry(ctxB);
+		expect(registryA).toBeDefined();
+		expect(registryB).toBeDefined();
+		expect(registryA).not.toBe(registryB);
+
+		await uploadAsset(
+			ctxA,
+			new File(["first"], "first.png", { type: "image/png" }),
+		);
+		expect(registryA?.list().map((asset) => asset.id)).toEqual(["asset-1"]);
+		expect(registryB?.list()).toEqual([]);
+
+		await harnessA.runDestroy();
+		expect(getAssetRegistry(ctxA)).toBeUndefined();
+		expect(getAssetRegistry(ctxB)).toBe(registryB);
+
+		await uploadAsset(
+			ctxB,
+			new File(["second"], "second.png", { type: "image/png" }),
+		);
+		expect(registryB?.list().map((asset) => asset.id)).toEqual(["asset-2"]);
+
+		await harnessB.runDestroy();
+		expect(getAssetRegistry(ctxB)).toBeUndefined();
 	});
 
 	it("persists successful uploads into Puck data that puckDataToIR preserves", async () => {

@@ -130,7 +130,7 @@ describe("createUnsplashClient — error mapping", () => {
 });
 
 describe("createUnsplashClient — trackDownload", () => {
-	it("fires the download trigger and never throws", async () => {
+	it("fires the authenticated download trigger directly", async () => {
 		const fetchMock = vi.fn(async () => makeResponse(200, {}));
 		const client = createUnsplashClient({ accessKey: "K", fetch: fetchMock });
 		await expect(
@@ -138,15 +138,62 @@ describe("createUnsplashClient — trackDownload", () => {
 		).resolves.toBeUndefined();
 		expect(fetchMock).toHaveBeenCalledWith(
 			"https://api.unsplash.com/photos/p1/download",
-			expect.anything(),
+			expect.objectContaining({
+				headers: { Authorization: "Client-ID K" },
+			}),
 		);
 	});
 
-	it("swallows download-trigger failures", async () => {
+	it("routes download tracking through a relative proxy base", async () => {
+		const fetchMock = vi.fn(async () => makeResponse(200, {}));
+		const client = createUnsplashClient({
+			proxyEndpoint: "/api/unsplash",
+			fetch: fetchMock,
+		});
+		await client.trackDownload(
+			"https://api.unsplash.com/photos/p1/download?ixid=abc",
+		);
+		expect(fetchMock).toHaveBeenCalledWith(
+			"/api/unsplash/photos/p1/download?ixid=abc",
+			expect.objectContaining({ headers: {} }),
+		);
+	});
+
+	it("routes download tracking through an absolute proxy base", async () => {
+		const fetchMock = vi.fn(async () => makeResponse(200, {}));
+		const client = createUnsplashClient({
+			proxyEndpoint: new URL("https://proxy.example/api/unsplash/"),
+			fetch: fetchMock,
+		});
+		await client.trackDownload("https://api.unsplash.com/photos/p1/download");
+		expect(fetchMock).toHaveBeenCalledWith(
+			"https://proxy.example/api/unsplash/photos/p1/download",
+			expect.objectContaining({ headers: {} }),
+		);
+	});
+
+	it("maps a rejected download trigger to PROVIDER_NETWORK", async () => {
 		const fetchMock = vi.fn(async () => {
 			throw new Error("boom");
 		});
 		const client = createUnsplashClient({ accessKey: "K", fetch: fetchMock });
-		await expect(client.trackDownload("https://x/d")).resolves.toBeUndefined();
+		await expect(client.trackDownload("https://x/d")).rejects.toMatchObject({
+			code: "PROVIDER_NETWORK",
+			retryable: true,
+		});
+	});
+
+	it("maps a non-2xx download trigger instead of silently succeeding", async () => {
+		const fetchMock = vi.fn(async () => makeResponse(401, {}));
+		const client = createUnsplashClient({
+			proxyEndpoint: "/api/unsplash",
+			fetch: fetchMock,
+		});
+		await expect(
+			client.trackDownload("https://api.unsplash.com/photos/p1/download"),
+		).rejects.toMatchObject({
+			code: "PROVIDER_UNAUTHORIZED",
+			status: 401,
+		});
 	});
 });

@@ -34,7 +34,11 @@ export interface UnsplashThemeConfig {
 
 /** Options for enabling and configuring the Unsplash source provider. */
 export interface UnsplashSourceOptions {
-	/** RECOMMENDED — proxy injects the `Client-ID` server-side. */
+	/**
+	 * RECOMMENDED — API base that injects the `Client-ID` server-side. Unsplash
+	 * paths are appended to this base for search, photo lookup, and mandatory
+	 * download tracking (for example `/api/unsplash/photos/:id/download`).
+	 */
 	readonly proxyEndpoint?: string | URL;
 	/** DEV ONLY — ships the key to the browser; ignored when `proxyEndpoint` is set. */
 	readonly accessKey?: string;

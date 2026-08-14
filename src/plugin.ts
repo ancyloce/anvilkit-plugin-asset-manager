@@ -24,13 +24,14 @@ import type {
 	UploadResult,
 } from "./types/types.js";
 import { createAssetReference } from "./utils/asset-reference.js";
-import type { UploadFn } from "./utils/data-source.js";
+import type { IngestFn } from "./utils/data-source.js";
 import { AssetValidationError } from "./utils/errors.js";
 import { uploadAssetAction } from "./utils/header-action.js";
 import { inferAssetKind } from "./utils/infer-kind.js";
 import { createAssetRegistry } from "./utils/registry.js";
 import { createIRAssetResolver } from "./utils/resolver.js";
 import { createStudioAssetSource } from "./utils/studio-asset-source.js";
+import { validateSelectedFile } from "./utils/validate-selected-file.js";
 import { validateUploadResult } from "./utils/validate-upload-result.js";
 import { ASSET_MANAGER_VERSION } from "./version.js";
 
@@ -106,21 +107,25 @@ const tokenByContext = new WeakMap<object, object>();
 export function createAssetManagerPlugin<
 	UserConfig extends PuckConfig = PuckConfig,
 >(options: AssetManagerOptions = {}): StudioPlugin<UserConfig> {
-	const token = {};
-	const registry = createAssetRegistry();
 	const normalizedOptions = normalizeOptions(options);
-	const assetResolver = createIRAssetResolver({
-		registry,
-		dataUrlAllowlistOptIn: normalizedOptions.dataUrlAllowlistOptIn,
-		allowMixedScriptHostnames: normalizedOptions.allowMixedScriptHostnames,
-		...(normalizedOptions.transformResolver
-			? { transformResolver: normalizedOptions.transformResolver }
-			: {}),
-	});
 
 	return {
 		meta: META,
 		register(ctx) {
+			// A plugin object may be reused across multiple Studio mounts. Keep all
+			// mutable runtime resources inside this registration closure so sibling
+			// mounts cannot share a registry or tear down each other's state.
+			const token = {};
+			const registry = createAssetRegistry();
+			const assetResolver = createIRAssetResolver({
+				registry,
+				dataUrlAllowlistOptIn: normalizedOptions.dataUrlAllowlistOptIn,
+				allowMixedScriptHostnames: normalizedOptions.allowMixedScriptHostnames,
+				...(normalizedOptions.transformResolver
+					? { transformResolver: normalizedOptions.transformResolver }
+					: {}),
+			});
+
 			// Contribute the `assetManager.*` message catalog so the in-chrome
 			// surfaces (header action, sidebar sources) localize via `useMsg`.
 			ctx.registerMessages(ASSET_MANAGER_ENTRY);
@@ -138,8 +143,10 @@ export function createAssetManagerPlugin<
 						tokenByContext.set(initCtx, token);
 						initCtx.registerAssetResolver(assetResolver);
 
-						const upload: UploadFn = (file, opts) =>
+						const upload: IngestFn = (file, opts) =>
 							uploadAsset(initCtx, file, opts?.signal);
+						const ingest: IngestFn = (file, opts) =>
+							ingestAsset(initCtx, file, opts?.signal);
 						const onDelete = createAssetDeletedHandler(
 							normalizedOptions,
 							!hostOwnsAssetPlane(normalizedOptions),
@@ -150,6 +157,7 @@ export function createAssetManagerPlugin<
 						const studioAssetSource = createStudioAssetSource({
 							registry,
 							upload,
+							ingest,
 							onDelete,
 							...(normalizedOptions.getThumbnail
 								? { getThumbnail: normalizedOptions.getThumbnail }
@@ -167,7 +175,13 @@ export function createAssetManagerPlugin<
 							cleanups.push(() => {
 								disposed = true;
 							});
-							void loadRichSource(initCtx, registry, upload, normalizedOptions)
+							void loadRichSource(
+								initCtx,
+								registry,
+								upload,
+								ingest,
+								normalizedOptions,
+							)
 								.then((composite) => {
 									if (disposed) return;
 									unregisterAssetSource?.();
@@ -234,6 +248,24 @@ export async function uploadAsset<UserConfig extends PuckConfig = PuckConfig>(
 	file: File,
 	signal?: AbortSignal,
 ): Promise<UploadResult> {
+	return processAsset(ctx, file, signal, true);
+}
+
+/** Upload validation/adapter pipeline without catalog or document side effects. */
+async function ingestAsset<UserConfig extends PuckConfig = PuckConfig>(
+	ctx: StudioPluginContext<UserConfig>,
+	file: File,
+	signal?: AbortSignal,
+): Promise<UploadResult> {
+	return processAsset(ctx, file, signal, false);
+}
+
+async function processAsset<UserConfig extends PuckConfig = PuckConfig>(
+	ctx: StudioPluginContext<UserConfig>,
+	file: File,
+	signal: AbortSignal | undefined,
+	commit: boolean,
+): Promise<UploadResult> {
 	const state = getRuntimeState(ctx);
 	const { options, registry } = state;
 
@@ -260,11 +292,13 @@ export async function uploadAsset<UserConfig extends PuckConfig = PuckConfig>(
 					.list()
 					.find((entry) => entry.meta?.hash === contentHash);
 				if (existing !== undefined) {
-					dispatchAssetReference(ctx, existing);
-					ctx.emit(ASSET_MANAGER_UPLOADED_EVENT, {
-						asset: existing,
-						reference: createAssetReference(existing.id),
-					});
+					if (commit) {
+						dispatchAssetReference(ctx, existing);
+						ctx.emit(ASSET_MANAGER_UPLOADED_EVENT, {
+							asset: existing,
+							reference: createAssetReference(existing.id),
+						});
+					}
 					return existing;
 				}
 			}
@@ -296,13 +330,15 @@ export async function uploadAsset<UserConfig extends PuckConfig = PuckConfig>(
 					}
 				: validated;
 		const tagged = withDerivedTags(hashed, file);
-		const stored = registry.register(tagged);
-		dispatchAssetReference(ctx, stored);
-		const payload: AssetManagerUploadedEvent = {
-			asset: stored,
-			reference: createAssetReference(stored.id),
-		};
-		ctx.emit(ASSET_MANAGER_UPLOADED_EVENT, payload);
+		const stored = commit ? registry.register(tagged) : tagged;
+		if (commit) {
+			dispatchAssetReference(ctx, stored);
+			const payload: AssetManagerUploadedEvent = {
+				asset: stored,
+				reference: createAssetReference(stored.id),
+			};
+			ctx.emit(ASSET_MANAGER_UPLOADED_EVENT, payload);
+		}
 
 		return stored;
 	} catch (error) {
@@ -496,55 +532,6 @@ function normalizeMime(mime: string): string {
 	return lower === "image/jpg" ? "image/jpeg" : lower;
 }
 
-export function validateSelectedFile(
-	file: File,
-	options: Pick<
-		AssetManagerOptions,
-		"acceptedFileExtensions" | "acceptedMimeTypes" | "maxFileSize"
-	>,
-): void {
-	if (options.maxFileSize !== undefined && file.size > options.maxFileSize) {
-		throw new AssetValidationError(
-			"FILE_TOO_LARGE",
-			`File size ${file.size} bytes exceeds the configured maxFileSize of ${options.maxFileSize} bytes.`,
-		);
-	}
-
-	const acceptedMimeTypes = options.acceptedMimeTypes ?? [];
-	const acceptedFileExtensions = options.acceptedFileExtensions ?? [];
-	const hasMimeAllowlist = acceptedMimeTypes.length > 0;
-	const hasExtensionAllowlist = acceptedFileExtensions.length > 0;
-
-	if (
-		hasMimeAllowlist &&
-		file.type !== "" &&
-		!mimeTypeMatches(file.type, acceptedMimeTypes)
-	) {
-		throw new AssetValidationError(
-			"UNSUPPORTED_MIME_TYPE",
-			`File MIME type "${file.type}" is not in acceptedMimeTypes.`,
-		);
-	}
-	if (hasMimeAllowlist && file.type === "" && !hasExtensionAllowlist) {
-		throw new AssetValidationError(
-			"UNSUPPORTED_MIME_TYPE",
-			'File MIME type "unknown" is not in acceptedMimeTypes.',
-		);
-	}
-	if (
-		hasExtensionAllowlist &&
-		!fileExtensionMatches(file.name, acceptedFileExtensions)
-	) {
-		const extension = file.name.includes(".")
-			? file.name.slice(file.name.lastIndexOf(".")).toLowerCase()
-			: "unknown";
-		throw new AssetValidationError(
-			"UNSUPPORTED_FILE_EXTENSION",
-			`File extension "${extension}" is not in acceptedFileExtensions.`,
-		);
-	}
-}
-
 function getRuntimeState<UserConfig extends PuckConfig = PuckConfig>(
 	ctx: StudioPluginContext<UserConfig>,
 ): AssetManagerRuntimeState {
@@ -583,7 +570,8 @@ function needsRichSource(options: NormalizedAssetManagerOptions): boolean {
 async function loadRichSource<UserConfig extends PuckConfig = PuckConfig>(
 	ctx: StudioPluginContext<UserConfig>,
 	registry: AssetRegistry,
-	upload: UploadFn,
+	upload: IngestFn,
+	ingest: IngestFn,
 	options: NormalizedAssetManagerOptions,
 ): Promise<CompositeAssetSource> {
 	const [{ resolveDataSource }, { createCompositeAssetSource }] =
@@ -597,7 +585,7 @@ async function loadRichSource<UserConfig extends PuckConfig = PuckConfig>(
 		typeof options.folders === "object" ? options.folders.allowMove : undefined;
 	const resolved = resolveDataSource({
 		registry,
-		upload,
+		upload: ingest,
 		onDelete: createAssetDeletedHandler(options, !hostOwnsAssetPlane(options)),
 		...(options.dataSource ? { hostDataSource: options.dataSource } : {}),
 		...(maxDepth !== undefined ? { maxDepth } : {}),
@@ -629,6 +617,7 @@ async function loadRichSource<UserConfig extends PuckConfig = PuckConfig>(
 		source: resolved,
 		registry,
 		upload,
+		ingest,
 		...(providers.length > 0 ? { providers } : {}),
 		...(options.getThumbnail ? { getThumbnail: options.getThumbnail } : {}),
 	});
@@ -714,43 +703,6 @@ function mergeUploadMeta(result: UploadResult, file: File): UploadResult {
 		...(result.name === undefined && file.name ? { name: file.name } : {}),
 		meta,
 	};
-}
-
-function mimeTypeMatches(
-	input: string,
-	acceptedMimeTypes: readonly string[],
-): boolean {
-	if (input === "") {
-		return false;
-	}
-
-	return acceptedMimeTypes.some((accepted) => {
-		if (accepted.endsWith("/*")) {
-			const prefix = accepted.slice(0, accepted.length - 1);
-			return input.startsWith(prefix);
-		}
-
-		return input === accepted;
-	});
-}
-
-function fileExtensionMatches(
-	name: string,
-	acceptedFileExtensions: readonly string[],
-): boolean {
-	const lowerName = name.toLowerCase();
-	if (lowerName === "") {
-		return false;
-	}
-
-	return acceptedFileExtensions.some((accepted) => {
-		const trimmed = accepted.trim().toLowerCase();
-		if (trimmed === "") {
-			return false;
-		}
-		const extension = trimmed.startsWith(".") ? trimmed : `.${trimmed}`;
-		return lowerName.endsWith(extension);
-	});
 }
 
 function dispatchAssetReference<UserConfig extends PuckConfig = PuckConfig>(
