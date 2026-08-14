@@ -234,7 +234,7 @@ interface CreateStudioAssetSourceOptions {
     options?: UploadAdapterOptions,
   ) => Promise<UploadResult>;
   readonly getThumbnail?: (entry: UploadResult) => string | undefined;
-  readonly maxConcurrentUploads?: number; // default 3
+  readonly maxConcurrentUploads?: number; // positive integer, default 3
 }
 ```
 
@@ -509,7 +509,7 @@ Rationale: every scheme allowed at the boundary needs its own CSP / sanitization
 
 ### Batch upload behavior
 
-`StudioAssetSource.upload(files)` runs up to `maxConcurrentUploads` (default 3) uploads in parallel. Per-file failures surface via the listener as `error` envelopes; the returned promise resolves with the successful subset and **does not throw**. Hosts that need fail-fast semantics can pass `maxConcurrentUploads: 1`. `AbortError`s from the adapter abort the whole batch — pending files are not scheduled.
+`StudioAssetSource.upload(files)` runs up to `maxConcurrentUploads` (default 3) uploads in parallel. The value must be a positive integer; `NaN`, infinities, zero, negatives, and fractions throw a `RangeError` when the source is created. Per-file failures surface via the listener as `error` envelopes; the returned promise resolves with the successful subset and **does not throw**. Hosts that need fail-fast semantics can pass `maxConcurrentUploads: 1`. `AbortError`s from the adapter abort the whole batch — pending files are not scheduled.
 
 ### Persistence is host-owned
 
