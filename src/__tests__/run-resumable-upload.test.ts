@@ -207,6 +207,43 @@ describe("runResumableUpload", () => {
 		expect(persisted?.partSize).toBe(10);
 	});
 
+	it("persists a fresh session before part one and retains it if part one fails", async () => {
+		const events: string[] = [];
+		let persisted: PersistedUploadSession | undefined;
+		const store = {
+			load: () => persisted,
+			save: (_file: File, session: PersistedUploadSession) => {
+				events.push("save");
+				persisted = session;
+			},
+			clear: () => {
+				persisted = undefined;
+			},
+		};
+		const spy = spyAdapter({
+			uploadPart: () => {
+				events.push("upload-part-1");
+				return Promise.reject(new Error("part one failed"));
+			},
+		});
+		const file = makeFile(30);
+
+		await expect(
+			runResumableUpload(spy.adapter, file, {
+				partSize: 10,
+				sessionStore: store,
+			}),
+		).rejects.toThrow("part one failed");
+
+		expect(events).toEqual(["save", "upload-part-1"]);
+		expect(persisted).toEqual({
+			uploadId: "mpu",
+			partSize: 10,
+			parts: [],
+		});
+		expect(spy.state.abortCalls).toBe(0);
+	});
+
 	it("reports monotonic progress ending at 100%", async () => {
 		const onProgress = vi.fn<(p: ResumableUploadProgress) => void>();
 		const file = makeFile(25); // 10 + 10 + 5

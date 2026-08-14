@@ -381,6 +381,14 @@ export function createFolderStore(
 			// Reparent children (folders + assets) to the removed folder's parent.
 			const newParent = rec.parentId;
 			const childIds = [...(childrenByParent.get(id) ?? [])];
+			// Validate every destination name before mutating anything. The removed
+			// folder itself is excluded because it will no longer be a sibling after
+			// this operation succeeds. Keeping this as a separate pass makes a
+			// conflict atomic even when an earlier child would otherwise be movable.
+			for (const childId of childIds) {
+				const child = records.get(childId);
+				if (child !== undefined) assertNameFree(newParent, child.name, id);
+			}
 			for (const childId of childIds) {
 				const child = records.get(childId);
 				if (child === undefined) continue;

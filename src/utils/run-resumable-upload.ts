@@ -135,9 +135,16 @@ export async function runResumableUpload(
 		});
 	};
 
-	emitProgress();
-
 	try {
+		// Persist the reconciled handle before any part starts. A fresh `begin`
+		// creates backend state that must remain resumable even when part one
+		// exhausts its retries (or the page disappears while it is in flight).
+		await sessionStore.save(
+			file,
+			toPersisted(session, effectivePartSize, completed),
+		);
+		emitProgress();
+
 		for (const part of plan) {
 			throwIfAborted(signal);
 			if (completed.has(part.partNumber)) continue; // resumed — skip

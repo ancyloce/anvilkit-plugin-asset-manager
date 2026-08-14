@@ -119,6 +119,36 @@ describe("removeFolder", () => {
 		expect(store.listChildren(null).some((f) => f.name === "B")).toBe(true);
 	});
 
+	it("atomically rejects reparenting children with conflicting sibling names", () => {
+		store.createFolder(null, "Dup");
+		const parent = store.createFolder(null, "Parent");
+		const movable = store.createFolder(parent.id, "Movable");
+		const conflicting = store.createFolder(parent.id, "dUP");
+		store.moveAsset("asset-1", parent.id);
+		const parentBefore = store.get(parent.id);
+		const movableBefore = store.get(movable.id);
+		let notifications = 0;
+		store.subscribe(() => {
+			notifications += 1;
+		});
+
+		expect(() => store.removeFolder(parent.id)).toThrowError(
+			/FOLDER_NAME_CONFLICT|already exists/i,
+		);
+
+		// The conflict is detected before the earlier movable child, assets, or
+		// the folder being removed are changed.
+		expect(store.get(parent.id)).toEqual(parentBefore);
+		expect(store.get(movable.id)).toEqual(movableBefore);
+		expect(store.get(conflicting.id)?.parentId).toBe(parent.id);
+		expect(store.folderOf("asset-1")).toBe(parent.id);
+		expect(store.listChildren(null).map((folder) => folder.name)).toEqual([
+			"Dup",
+			"Parent",
+		]);
+		expect(notifications).toBe(0);
+	});
+
 	it("cascade returns every descendant asset id and drops the subtree", () => {
 		const a = store.createFolder(null, "A");
 		const b = store.createFolder(a.id, "B");
