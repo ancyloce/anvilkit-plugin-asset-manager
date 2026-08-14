@@ -22,8 +22,8 @@ import type { AssetFolder, FolderId } from "../types/folders.js";
 import type { AssetRegistry, UploadResult } from "../types/types.js";
 import { createAssetReference } from "../utils/asset-reference.js";
 import type {
+	IngestFn,
 	ResolvedAssetDataSource,
-	UploadFn,
 } from "../utils/data-source.js";
 import {
 	createStudioAssetSource,
@@ -35,7 +35,8 @@ import type { AssetSourceProvider } from "./provider.js";
 export interface CreateCompositeAssetSourceOptions {
 	readonly source: ResolvedAssetDataSource;
 	readonly registry: AssetRegistry;
-	readonly upload: UploadFn;
+	readonly upload: IngestFn;
+	readonly ingest?: IngestFn;
 	readonly getThumbnail?: (entry: UploadResult) => string | undefined;
 	/** External read-only sources (e.g. Unsplash) federated alongside the local library. */
 	readonly providers?: readonly AssetSourceProvider[];
@@ -68,6 +69,7 @@ export function createCompositeAssetSource(
 	const base = createStudioAssetSource({
 		registry,
 		upload,
+		ingest: options.ingest ?? upload,
 		...(getThumbnail ? { getThumbnail } : {}),
 	});
 

@@ -83,6 +83,15 @@ export function createUnsplashProvider(
 		options.cacheTtlMs ?? 300_000,
 		BYID_MAX_ENTRIES,
 	);
+	const trackDownload = (
+		downloadLocation: string,
+		signal?: AbortSignal,
+	): void => {
+		void client.trackDownload(downloadLocation, signal).catch((error) => {
+			if (signal?.aborted) return;
+			console.warn("asset-manager: Unsplash download tracking failed.", error);
+		});
+	};
 
 	const toUploadResult = (photo: UnsplashPhoto): UploadResult =>
 		Object.freeze({
@@ -186,10 +195,7 @@ export function createUnsplashProvider(
 		const cached = byId.get(asset.id, Date.now());
 		if (cached?.meta?.attribution !== undefined) {
 			// Mandatory trigger, fire-and-forget so it never blocks insert.
-			void client.trackDownload(
-				cached.meta.attribution.downloadLocation,
-				signal,
-			);
+			trackDownload(cached.meta.attribution.downloadLocation, signal);
 			return cached;
 		}
 		// Cache miss (e.g. the provider was recreated since the search). The photo
@@ -202,10 +208,7 @@ export function createUnsplashProvider(
 			const result = toUploadResult(await client.getPhoto(photoId, signal));
 			byId.set(result.id, result, Date.now());
 			if (result.meta?.attribution !== undefined) {
-				void client.trackDownload(
-					result.meta.attribution.downloadLocation,
-					signal,
-				);
+				trackDownload(result.meta.attribution.downloadLocation, signal);
 			}
 			return result;
 		} catch {

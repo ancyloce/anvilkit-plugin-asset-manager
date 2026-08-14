@@ -5,7 +5,9 @@
  * headless entry chunk.
  *
  * Base URL is the host's server-side proxy when supplied (which injects the
- * `Client-ID`), else `https://api.unsplash.com` with a `Client-ID` header.
+ * `Client-ID`), else `https://api.unsplash.com` with a `Client-ID` header. The
+ * proxy base is used for every API call, including the mandatory download
+ * trigger returned by Unsplash.
  */
 
 import { AssetSourceError } from "../../utils/errors.js";
@@ -25,10 +27,8 @@ export interface UnsplashClientOptions {
 	 */
 	readonly timeoutMs?: number;
 	/**
-	 * Ceiling for the best-effort, fire-and-forget download trigger (ms). It
-	 * pings the absolute `download_location` URL DIRECTLY (never through the
-	 * host proxy), so without a bound a stalled connection would leak a hanging
-	 * request per insert. Default 6000.
+	 * Ceiling for the fire-and-forget download trigger (ms). Without a bound, a
+	 * stalled connection would leak a hanging request per insert. Default 6000.
 	 */
 	readonly trackDownloadTimeoutMs?: number;
 }
@@ -129,7 +129,7 @@ export interface UnsplashClient {
 	listTopics(signal?: AbortSignal): Promise<readonly UnsplashTopicSummary[]>;
 	/** Fetch a single photo by id — used to recover `download_location` on a cache miss. */
 	getPhoto(id: string, signal?: AbortSignal): Promise<UnsplashPhoto>;
-	/** Fires the MANDATORY download trigger. Non-throwing — best-effort. */
+	/** Fires the MANDATORY download trigger and rejects when it does not succeed. */
 	trackDownload(downloadLocation: string, signal?: AbortSignal): Promise<void>;
 }
 
@@ -200,6 +200,19 @@ export function createUnsplashClient(
 		!usingProxy && options.accessKey
 			? { Authorization: `Client-ID ${options.accessKey}` }
 			: {};
+
+	const downloadTriggerUrl = (downloadLocation: string): string => {
+		if (!usingProxy) return downloadLocation;
+		try {
+			const upstream = new URL(downloadLocation);
+			return `${base}${upstream.pathname}${upstream.search}`;
+		} catch {
+			const path = downloadLocation.startsWith("/")
+				? downloadLocation
+				: `/${downloadLocation}`;
+			return `${base}${path}`;
+		}
+	};
 
 	const readJson = async <T>(response: Response): Promise<T> => {
 		try {
@@ -316,17 +329,34 @@ export function createUnsplashClient(
 		},
 
 		async trackDownload(downloadLocation, signal) {
-			// Mandatory on insert, but never blocks it: swallow all failures and
-			// bound the ping so a stalled tunnel can't leak a hanging request
-			// (this fires the absolute URL directly — never via the host proxy).
+			// The provider invokes this without blocking insert, but the client still
+			// rejects failures so the provider can report compliance problems. Proxy
+			// mode sends the upstream path through the same credential-injecting base
+			// as search/topic/photo requests.
 			const timed = createTimedSignal(trackDownloadTimeoutMs, signal);
 			try {
-				await doFetch(downloadLocation, {
-					headers: authHeaders(),
-					signal: timed.signal,
-				});
-			} catch {
-				/* best-effort download trigger */
+				let response: Response;
+				try {
+					response = await doFetch(downloadTriggerUrl(downloadLocation), {
+						headers: authHeaders(),
+						signal: timed.signal,
+					});
+				} catch (cause) {
+					if (timed.timedOut()) {
+						throw new AssetSourceError(
+							"PROVIDER_NETWORK",
+							`Unsplash download tracking timed out after ${trackDownloadTimeoutMs} ms.`,
+							{ retryable: true, cause },
+						);
+					}
+					if (isAbortError(cause)) throw cause;
+					throw new AssetSourceError(
+						"PROVIDER_NETWORK",
+						"Network error tracking the Unsplash download.",
+						{ retryable: true, cause },
+					);
+				}
+				if (!response.ok) throw mapHttpError(response);
 			} finally {
 				timed.dispose();
 			}
